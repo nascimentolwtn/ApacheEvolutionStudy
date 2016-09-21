@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="main" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss} %5p %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="file" class="org.apache.log4j.FileAppender">
+        <param name="file" value="study/apache-evolution-${logfilename}.log" />
+        <param name="append" value="false" />
+        <param name="threshold" value="debug" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss} %5p %m%n"/>
+        </layout>
+    </appender>
+
+	<appender name="roll" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="study/apache-evolution-${logfilename}.log" />
+	    <param name="DatePattern" value="'.'yyyy-MM-dd" /> <!-- deveria funcionar o log incremental! -->
+        <param name="append" value="false" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss} %5p %m%n"/>
+        </layout>
+	</appender>
+    
+  	<category name="br.com.metricminer2">
+        <priority value="INFO"/>
+        <appender-ref ref="main"/>
+        <appender-ref ref="roll"/>
+    </category>
+
+    <category name="/">
+        <priority value="INFO"/>
+        <appender-ref ref="main"/>
+        <appender-ref ref="roll"/>
+    </category>
+
+</log4j:configuration>
