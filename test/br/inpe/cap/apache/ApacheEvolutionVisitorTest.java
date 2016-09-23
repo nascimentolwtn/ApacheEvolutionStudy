@@ -40,14 +40,36 @@ public class ApacheEvolutionVisitorTest {
 		sb.append("\n");
 		sb.append("		<dependency>\n");
 		sb.append("			<groupId>org.apache.commons</groupId>\n");
-		sb.append("			artifactId>commons-lang3</artifactId>\n");
-		sb.append("			<version>3.3.2</version>\n");
+		sb.append("			<artifactId>commons-lang3</artifactId>\n");
+//		sb.append("			<version>3.3.2</version>\n");
+		sb.append("		</dependency>\n");
+		sb.append("\n");
+		sb.append("		<dependency>\n");
+		sb.append("			<groupId>org.apache.velocity</groupId>\n");
+		sb.append("			<artifactId>velocity-tools</artifactId>\n");
+		sb.append("			<scope>provided</scope>\n");
+		sb.append("			<optional>true</optional>\n");
 		sb.append("		</dependency>\n");
 		sb.append("\n");
 		sb.append("	</dependencies>\n");
 		sb.append("\n");
+		sb.append("	<build>\n");
+		sb.append("		<plugins>\n");
+		sb.append("			<plugin>\n");
+		sb.append("				<groupId>org.apache.felix</groupId>\n");
+		sb.append("				<artifactId>maven-bundle-plugin</artifactId>\n");
+		sb.append("			</plugin>\n");
+		sb.append("\n");
+		sb.append("			<plugin>\n");
+		sb.append("				<groupId>org.apache.felix</groupId>\n");
+		sb.append("				<artifactId>maven-bundle-plugin</artifactId>\n");
+//		sb.append("				<version>2.10.1</version>\n");
+		sb.append("			</plugin>\n");
+		sb.append("		</plugins>\n");
+		sb.append("	</build>\n");
+		sb.append("\n");
 		sb.append("</project>\n");
-		
+                
 		pom = sb.toString();
 	}
 	
@@ -61,6 +83,12 @@ public class ApacheEvolutionVisitorTest {
 	public void testExtractLibVersion() {
 		ApacheEvolutionVisitor visitor = new ApacheEvolutionVisitor();
 		assertEquals("3.3.2", visitor.extractApacheLibVersion(pom));
+	}
+	
+	@Test
+	public void testExtractLibWithoutVersion() {
+		ApacheEvolutionVisitor visitor = new ApacheEvolutionVisitor();
+		assertEquals("no version", visitor.extractApacheLibVersion(pom));
 	}
 	
 	@Test

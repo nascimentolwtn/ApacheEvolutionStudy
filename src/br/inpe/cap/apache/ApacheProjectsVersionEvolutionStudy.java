@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
 import br.com.metricminer2.MetricMiner2;
 import br.com.metricminer2.RepositoryMining;
@@ -20,18 +21,22 @@ import br.com.metricminer2.scm.commitrange.Commits;
 
 public class ApacheProjectsVersionEvolutionStudy implements Study {
 
-	private static final File GITHUB_DONE_FILE = new File("github_evolution-HOME.txt");
-	private static File EXCEPTION_FILE = new File("exceptions-evolution-HOME.log");
+	private static Logger log = Logger.getLogger(RepositoryMining.class);
 
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study";
+	private static final int THREADS_FOR_REPOSITORIES = 10;
+	private static final File GITHUB_DONE_FILE = new File("done-github_evolution-HOME_eval.txt");
+	private static File EXCEPTION_FILE = new File("exceptions-evolution-HOME_eval.log");
+
+	private static final String STUDY_LOG_PATH = "." + File.separator + "study_eval";
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
 	
 	private static final String APACHE_FILE_PREFIX = "apache_evolution-HOME";
 	private static final String APACHE_EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + APACHE_FILE_PREFIX	+ ".csv"; 
 
 	public static void main(String[] args) throws IOException {
-		System.setProperty("logfilename", APACHE_FILE_PREFIX + "_run01");
-		checkLogFilesAndDirectories();
+		System.setProperty("logfilename", APACHE_FILE_PREFIX + "_eval02");
+		ApacheEvolutionVisitor.setLogger(log);
+		checkRequiredLogFilesAndDirectories();
 		new MetricMiner2().start(new ApacheProjectsVersionEvolutionStudy());
 		System.out.println("Finish!");
 	}
@@ -42,7 +47,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 			String rootApacheStudiesPath = "E:\\metricminer2_studies\\";
 			List<String> gitRepoDirs = getRepositoryExceptDoneDirs(rootApacheStudiesPath);
 
-			ExecutorService execRepos = Executors.newFixedThreadPool(5);
+			ExecutorService execRepos = Executors.newFixedThreadPool(THREADS_FOR_REPOSITORIES);
 			for(String repo : gitRepoDirs) {
 				execRepos.submit(() -> 
 					doMining(repo));
@@ -108,7 +113,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 		}
 	}
 		
-	private static void checkLogFilesAndDirectories() throws IOException {
+	private static void checkRequiredLogFilesAndDirectories() throws IOException {
 		if(!GITHUB_DONE_FILE.exists()) {
 			GITHUB_DONE_FILE.createNewFile();
 		}

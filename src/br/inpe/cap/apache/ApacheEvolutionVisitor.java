@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+
 import br.com.metricminer2.domain.ChangeSet;
 import br.com.metricminer2.domain.Commit;
 import br.com.metricminer2.domain.Modification;
@@ -12,8 +14,10 @@ import br.com.metricminer2.scm.CommitVisitor;
 import br.com.metricminer2.scm.SCMRepository;
 
 public class ApacheEvolutionVisitor implements CommitVisitor {
+	
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
-	private static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	private static Logger logger;
 
 	private String repositoryName;
 	private List<String> hashes;
@@ -27,9 +31,10 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 		}
 		
 		if(commit.isMerge() || !commit.isInMasterBranch()) {
-			System.err.println("SKIPPING Commit " + commit.getHash() + " - " +
-							   "isMerge: " + commit.isMerge() +
-							   " isInMasterBranch: " + commit.isInMasterBranch());
+			String message = "SKIPPED Commit " + commit.getHash() + " by " + this.name() + " - " +
+							   "isMerge=" + commit.isMerge() +
+							   "/isInMasterBranch=" + commit.isInMasterBranch();
+			logger.info(message);
 			return;
 		}
 		
@@ -60,7 +65,9 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 								apacheLibVersion,
 								commit.getMsg().replace("\n", "").replace(",","")
 						);
-						System.err.println("FOUND: " + repositoryName + " - " + apacheLib + " at version " + apacheLibVersion);
+						String foundMessage = "FOUND: " + repositoryName + " - " + apacheLib + " at version " + apacheLibVersion;
+						System.err.println(foundMessage);
+						logger.info(foundMessage);
 						System.gc();
 					}
 				}
@@ -90,6 +97,9 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 		int indexOfGroupIdEndTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
 
 		int firstIndexOfVersionAfterApacheGroupId = sourceCode.indexOf("<version>", indexOfGroupIdEndTag);
+		if(firstIndexOfVersionAfterApacheGroupId == -1) {
+			return "no version";
+		}
 		int indexOfVersionEndTag = sourceCode.indexOf("</version>", firstIndexOfVersionAfterApacheGroupId);
 		int lengthVersion = 9; // "<version>".length();
 		String apacheLibVersion = sourceCode.substring(firstIndexOfVersionAfterApacheGroupId+lengthVersion, indexOfVersionEndTag);
@@ -99,6 +109,10 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 	@Override
 	public String name() {
 		return "apache-evolution_" + this.repositoryName;
+	}
+
+	public static void setLogger(Logger logger) {
+		ApacheEvolutionVisitor.logger = logger;
 	}
 
 }
