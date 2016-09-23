@@ -26,18 +26,17 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 			hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
 		}
 		
+		if(commit.isMerge() || !commit.isInMasterBranch()) {
+			System.err.println("SKIPPING Commit " + commit.getHash() + " - " +
+							   "isMerge: " + commit.isMerge() +
+							   " isInMasterBranch: " + commit.isInMasterBranch());
+			return;
+		}
+		
 		int currentHashPosition = hashes.indexOf(commit.getHash()) + 1;
 		int totalCommits = hashes.size();
 		
 		float percent = 100 - ((currentHashPosition*100)/(float)totalCommits);
-		String percentMessage = repositoryName
-				+ " progress: commit #"
-				+ currentHashPosition
-				+ "/"
-				+ totalCommits
-				+ " - "
-				+ percent
-				+ "%";
 		
 		List<Modification> modifications = commit.getModifications();
 		modifications.parallelStream()
@@ -67,11 +66,18 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 				}
 		);
 	
+		String percentMessage = repositoryName
+				+ " progress: commit #"
+				+ currentHashPosition
+				+ "/"
+				+ totalCommits
+				+ " - "
+				+ percent
+				+ "%";
 		System.err.println(percentMessage);
-
 	}
 
-	String extractApacheLib(String sourceCode) {
+	public String extractApacheLib(String sourceCode) {
 		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
 		int indexOfEndGroupIdTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
 		int lengthGroupId = 9; // "<groupId>".length();
@@ -79,7 +85,7 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 		return apacheLib;
 	}
 	
-	String extractApacheLibVersion(String sourceCode) {
+	public String extractApacheLibVersion(String sourceCode) {
 		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
 		int indexOfGroupIdEndTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
 
