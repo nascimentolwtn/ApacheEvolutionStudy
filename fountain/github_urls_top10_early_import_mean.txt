@@ -1,0 +1,10 @@
+https://github.com/ops4j/org.ops4j.pax.cdi
+https://github.com/scriptella/scriptella-etl
+https://github.com/erickok/transdroid
+https://github.com/hontvari/mireka
+https://github.com/qubole/quark
+https://github.com/jhorstmann/i18n
+https://github.com/svanderburg/disnix-stafftracker-java-example
+https://github.com/codebling/VFSJFileChooser2
+https://github.com/fulcrumapp/sanselan-android
+https://github.com/jpenninkhof/odata-boilerplate
