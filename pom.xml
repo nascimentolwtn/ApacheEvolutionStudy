@@ -34,7 +34,7 @@
 		<dependency>
 		    <groupId>br.usp</groupId>
 		    <artifactId>metricminer</artifactId>
-		    <version>2.4.2-SNAPSHOT</version>
+		    <version>2.5.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
