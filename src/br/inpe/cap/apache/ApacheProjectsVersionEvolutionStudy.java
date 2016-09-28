@@ -70,8 +70,10 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 	}
 
 	private void doMining(String gitUrl) {
+		GitRepository gitRepository = new GitRepository(gitUrl);
+		gitRepository.setMaxNumberFilesInACommit(2000);
 		new RepositoryMining()
-			.in(GitRepository.singleProject(gitUrl))
+			.in(gitRepository.info())
 			.startingFromTheBeginning()
 			.through(Commits.all())
 //			.withThreads(3)
