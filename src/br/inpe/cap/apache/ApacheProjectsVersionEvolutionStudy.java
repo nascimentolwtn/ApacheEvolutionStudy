@@ -70,20 +70,24 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 	}
 
 	private void doMining(String gitUrl) {
-		new RepositoryMining()
-			.in(GitRepository.singleProject(gitUrl))
-			.startingFromTheBeginning()
-			.through(Commits.all())
+		try {
+			new RepositoryMining()
+				.in(GitRepository.singleProject(gitUrl, 2000))
+				.startingFromTheBeginning()
+				.through(Commits.all())
 //			.withThreads(3)
-			.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(
-					new CSVFile(APACHE_EVOLUTION_SUMMARY_CSV)
-					,
-					new CSVFile(EVOLUTION_LOG_PATH
-						+ File.separator
-						+ "apache-evolution-'"
-						+ gitUrl.substring(gitUrl.lastIndexOf(File.separator)+1, gitUrl.length())
-						+ "'.csv")))
-			.mine();
+				.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(
+						new CSVFile(APACHE_EVOLUTION_SUMMARY_CSV)
+						,
+						new CSVFile(EVOLUTION_LOG_PATH
+							+ File.separator
+							+ "apache-evolution-'"
+							+ gitUrl.substring(gitUrl.lastIndexOf(File.separator)+1, gitUrl.length())
+							+ "'.csv")))
+				.mine();
+		} catch (RuntimeException re) {
+			log.error(re.getMessage());
+		}
 		markDone(gitUrl);
 		System.gc();
 	}

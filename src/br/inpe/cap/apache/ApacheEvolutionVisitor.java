@@ -30,10 +30,10 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 			hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
 		}
 		
-		if(commit.isMerge() || !commit.isInMasterBranch()) {
+		if(commit.isMerge() || !commit.isInMainBranch()) {
 			String message = "SKIPPED Commit " + commit.getHash() + " by " + this.name() + " - " +
 							   "isMerge=" + commit.isMerge() +
-							   "/isInMasterBranch=" + commit.isInMasterBranch();
+							   "/isInMainBranch=" + commit.isInMainBranch();
 			logger.info(message);
 			return;
 		}
