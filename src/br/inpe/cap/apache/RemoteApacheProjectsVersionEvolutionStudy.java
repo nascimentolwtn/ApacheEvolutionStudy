@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.log4j.Logger;
 
 import br.com.metricminer2.MetricMiner2;
@@ -21,33 +23,33 @@ import br.com.metricminer2.scm.commitrange.Commits;
 
 public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 
-	private static Logger log = Logger.getLogger(RepositoryMining.class);
-
 	private static final int THREADS_FOR_REPOSITORIES = 10;
 	private static final String STUDY_TEMP_PATH = "E:\\metricminer-apache-evolution";
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study";
+	private static final String APACHE_FILE_PREFIX = "apache_evolution-REMOTE";
+	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + APACHE_FILE_PREFIX;
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
+	private static final String APACHE_EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + APACHE_FILE_PREFIX	+ ".csv"; 
 	
 	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-REMOTE.txt");
 	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"github_urls_top10_early_import_mean.TXT");
 	private static final File EXCEPTION_FILE = new File(FOUNTAIN_PATH+"exceptions-evolution-REMOTE.log");
-
-	private static final String APACHE_FILE_PREFIX = "apache_evolution-REMOTE";
-	private static final String APACHE_EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + APACHE_FILE_PREFIX	+ ".csv"; 
+	
+	private static Logger log;
 
 	public static void main(String[] args) throws IOException {
 		System.setProperty("logfilename", APACHE_FILE_PREFIX + "_checkout01");
+		log = Logger.getLogger(RepositoryMining.class);
 		ApacheEvolutionVisitor.setLogger(log);
+		
 		checkRequiredLogFilesAndDirectories();
+		
 		new MetricMiner2().start(new RemoteApacheProjectsVersionEvolutionStudy());
 		System.out.println("Finish!");
-		
 	}
 	
 	public void execute() {
 		try {
-			
 			List<String> gitRepoUrl = getRepositoryExceptDoneUrls();
 
 			ExecutorService execRepos = Executors.newFixedThreadPool(THREADS_FOR_REPOSITORIES);
@@ -58,7 +60,9 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 		
 			execRepos.shutdown();
 			execRepos.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-			
+
+			joinSummaryCSV(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + ".csv"));
+
 		} catch (Exception e) {
 			try {
 				String causeMessage = "";
@@ -73,20 +77,30 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 	}
 
 	private void doMining(String gitUrl, String tempDir) {
-		new RepositoryMining()
-			.in(GitRemoteRepository.singleProject(gitUrl, tempDir, true))
-			.startingFromTheBeginning()
-			.through(Commits.all())
+		try {
+			new RepositoryMining()
+				.in(GitRemoteRepository
+						.hostedOn(gitUrl)
+						.inTempDir(tempDir)
+						.asBareRepos()
+						.withMaxNumberOfFilesInACommit(2000)
+						.buildAsSCMRepository())
+				.startingFromTheBeginning()
+				.through(Commits.all())
 //			.withThreads(3)
-			.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(
-					new CSVFile(APACHE_EVOLUTION_SUMMARY_CSV)
-					,
-					new CSVFile(EVOLUTION_LOG_PATH
-						+ File.separator
-						+ "apache-evolution-'"
-						+ gitUrl.substring(gitUrl.lastIndexOf("/")+1, gitUrl.length())
-						+ "'.csv")))
-			.mine();
+				.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(
+						new CSVFile(APACHE_EVOLUTION_SUMMARY_CSV, true)
+						,
+						new CSVFile(EVOLUTION_LOG_PATH
+							+ File.separator
+							+ "apache-evolution-'"
+							+ gitUrl.substring(gitUrl.lastIndexOf("/")+1, gitUrl.length())
+							+ "'.csv")
+						))
+				.mine();
+		} catch (RuntimeException re) {
+			log.error(re.getMessage());
+		}
 		markDone(gitUrl);
 		System.gc();
 	}
@@ -130,6 +144,21 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 		if(!evolutionPathDir.exists()) {
 			evolutionPathDir.mkdir();
 		}
+	}
+
+	private static void joinSummaryCSV(String evolutionLogPath, File output) throws Exception {
+		
+		File evolutions = new File(evolutionLogPath);
+		Iterator<File> iterateFiles = FileUtils.iterateFiles(evolutions, FileFileFilter.FILE, null);
+		
+		iterateFiles.forEachRemaining(
+				(f) -> {
+					try {
+						FileUtils.writeStringToFile(output, FileUtils.readFileToString(f), true);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
 	}
 
 }
