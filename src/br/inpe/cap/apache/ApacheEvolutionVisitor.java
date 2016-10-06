@@ -12,6 +12,7 @@ import br.com.metricminer2.domain.Modification;
 import br.com.metricminer2.persistence.PersistenceMechanism;
 import br.com.metricminer2.scm.CommitVisitor;
 import br.com.metricminer2.scm.SCMRepository;
+import br.inpe.cap.apache.parser.StringMavenParser;
 
 public class ApacheEvolutionVisitor implements CommitVisitor {
 	
@@ -21,6 +22,8 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 
 	private String repositoryName;
 	private List<String> hashes;
+	
+	public StringMavenParser parser = new StringMavenParser();
 
 	@Override
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
@@ -51,8 +54,8 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 				(m) ->	{
 					String sourceCode = m.getSourceCode();
 					if(sourceCode.contains("<groupId>org.apache")) {
-						String apacheLib = extractApacheLib(sourceCode);
-						String apacheLibVersion = extractApacheLibVersion(sourceCode);
+						String apacheLib = parser.extractApacheLib(sourceCode);
+						String apacheLibVersion = parser.extractApacheLibVersion(sourceCode);
 						writer.write(
 								commit.getHash(),
 								DATE_FORMAT.format(commit.getDate().getTime()),
@@ -82,28 +85,6 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 				+ percent
 				+ "%";
 		System.err.println(percentMessage);
-	}
-
-	public String extractApacheLib(String sourceCode) {
-		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
-		int indexOfEndGroupIdTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
-		int lengthGroupId = 9; // "<groupId>".length();
-		String apacheLib = sourceCode.substring(firstIndexOfApacheGroupId+lengthGroupId, indexOfEndGroupIdTag);
-		return apacheLib;
-	}
-	
-	public String extractApacheLibVersion(String sourceCode) {
-		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
-		int indexOfGroupIdEndTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
-
-		int firstIndexOfVersionAfterApacheGroupId = sourceCode.indexOf("<version>", indexOfGroupIdEndTag);
-		if(firstIndexOfVersionAfterApacheGroupId == -1) {
-			return "no version";
-		}
-		int indexOfVersionEndTag = sourceCode.indexOf("</version>", firstIndexOfVersionAfterApacheGroupId);
-		int lengthVersion = 9; // "<version>".length();
-		String apacheLibVersion = sourceCode.substring(firstIndexOfVersionAfterApacheGroupId+lengthVersion, indexOfVersionEndTag);
-		return apacheLibVersion;
 	}
 
 	@Override

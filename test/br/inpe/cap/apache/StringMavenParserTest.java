@@ -3,16 +3,20 @@ package br.inpe.cap.apache;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class ApacheEvolutionVisitorTest {
+import br.inpe.cap.apache.parser.StringMavenParser;
+
+public class StringMavenParserTest {
 	
 	private static String pom;
+	private static StringMavenParser parser;
 
 	@BeforeClass
-	public static void setUp() {
+	public static void buildPOM() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n");
 		sb.append("	<modelVersion>4.0.0</modelVersion>\n");
@@ -73,22 +77,24 @@ public class ApacheEvolutionVisitorTest {
 		pom = sb.toString();
 	}
 	
+	@Before
+	public void setUp() {
+		parser = new StringMavenParser();
+	}
+	
 	@Test
 	public void testExtractLib() {
-		ApacheEvolutionVisitor visitor = new ApacheEvolutionVisitor();
-		assertEquals("org.apache.commons", visitor.extractApacheLib(pom));
+		assertEquals("org.apache.commons", parser.extractApacheLib(pom));
 	}
 	
 	@Test
 	public void testExtractLibVersion() {
-		ApacheEvolutionVisitor visitor = new ApacheEvolutionVisitor();
-		assertEquals("3.3.2", visitor.extractApacheLibVersion(pom));
+		assertEquals("3.3.2", parser.extractApacheLibVersion(pom));
 	}
 	
 	@Test
 	public void testExtractLibWithoutVersion() {
-		ApacheEvolutionVisitor visitor = new ApacheEvolutionVisitor();
-		assertEquals("no version", visitor.extractApacheLibVersion(pom));
+		assertEquals("no version", parser.extractApacheLibVersion(pom));
 	}
 	
 	@Test
