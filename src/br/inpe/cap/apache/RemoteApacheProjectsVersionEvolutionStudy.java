@@ -4,14 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.log4j.Logger;
 
 import br.com.metricminer2.MetricMiner2;
@@ -60,8 +58,6 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 		
 			execRepos.shutdown();
 			execRepos.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-
-			joinSummaryCSV(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + ".csv"));
 
 		} catch (Exception e) {
 			try {
@@ -144,21 +140,6 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 		if(!evolutionPathDir.exists()) {
 			evolutionPathDir.mkdir();
 		}
-	}
-
-	private static void joinSummaryCSV(String evolutionLogPath, File output) throws Exception {
-		
-		File evolutions = new File(evolutionLogPath);
-		Iterator<File> iterateFiles = FileUtils.iterateFiles(evolutions, FileFileFilter.FILE, null);
-		
-		iterateFiles.forEachRemaining(
-				(f) -> {
-					try {
-						FileUtils.writeStringToFile(output, FileUtils.readFileToString(f), true);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				});
 	}
 
 }
