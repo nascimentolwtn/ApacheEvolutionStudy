@@ -9,9 +9,9 @@ import org.apache.commons.io.filefilter.FileFileFilter;
 
 public class JoinSummaryCSV {
 	
-	private static final String APACHE_FILE_PREFIX = "apache_evolution-REMOTE_03";
+	private static final String APACHE_FILE_PREFIX = "modifications-threadpool";
 	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + APACHE_FILE_PREFIX;
-	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
+	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "modifications";
 	private static final File OUTPUT = new File(EVOLUTION_LOG_PATH + ".csv");
 
 	public static void main(String[] args) throws Exception {
