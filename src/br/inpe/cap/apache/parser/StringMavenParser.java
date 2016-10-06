@@ -1,7 +1,8 @@
 package br.inpe.cap.apache.parser;
 
-public class StringMavenParser {
+public class StringMavenParser implements MavenParser {
 
+	@Override
 	public String extractApacheLibVersion(String sourceCode) {
 		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
 		int indexOfGroupIdEndTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
@@ -16,6 +17,7 @@ public class StringMavenParser {
 		return apacheLibVersion;
 	}
 
+	@Override
 	public String extractApacheLib(String sourceCode) {
 		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
 		int indexOfEndGroupIdTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
