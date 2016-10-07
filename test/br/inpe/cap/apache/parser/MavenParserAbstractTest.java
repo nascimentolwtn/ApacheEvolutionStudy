@@ -32,7 +32,7 @@ public abstract class MavenParserAbstractTest {
 		sb.append("		<dependency>\n");
 		sb.append("			<groupId>org.apache.commons</groupId>\n");
 		sb.append("			<artifactId>commons-lang3</artifactId>\n");
-//		sb.append("			<version>3.3.2</version>\n");
+		sb.append("			<version>3.3.2</version>\n");
 		sb.append("		</dependency>\n");
 		sb.append("\n");
 		sb.append("		<dependency>\n");
