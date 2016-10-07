@@ -12,8 +12,7 @@ import br.com.metricminer2.domain.Modification;
 import br.com.metricminer2.persistence.PersistenceMechanism;
 import br.com.metricminer2.scm.CommitVisitor;
 import br.com.metricminer2.scm.SCMRepository;
-import br.inpe.cap.apache.parser.MavenParser;
-import br.inpe.cap.apache.parser.XmlMavenParser;
+import br.inpe.cap.apache.parser.StringMavenParser;
 
 public class ApacheEvolutionVisitor implements CommitVisitor {
 	
@@ -24,7 +23,7 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 	private String repositoryName;
 	private List<String> hashes;
 	
-	public MavenParser parser = new XmlMavenParser();
+	public StringMavenParser parser = new StringMavenParser();
 
 	@Override
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {

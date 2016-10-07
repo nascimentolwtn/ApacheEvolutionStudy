@@ -6,18 +6,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import br.inpe.cap.apache.domain.MavenDependency;
 
-public class XmlMavenParserTest extends MavenParserTest {
+public class XmlMavenParserTest extends MavenParserAbstractTest {
 
-	@Before
-	public void setUp() {
-		parser = new XmlMavenParser();
-	}
-	
+	private XmlMavenParser parser = new XmlMavenParser();
+
 	@Test
 	public void readListaDependenciasMaven() {
 		MavenDependency dependency = parser.readPOM(pom).getDependencies().get(0);

@@ -1,12 +1,7 @@
 package br.inpe.cap.apache.parser;
 
-import org.apache.commons.lang3.NotImplementedException;
+public class StringMavenParser {
 
-import br.inpe.cap.apache.domain.MavenProject;
-
-public class StringMavenParser implements MavenParser {
-
-	@Override
 	public String extractApacheLibVersion(String sourceCode) {
 		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
 		int indexOfGroupIdEndTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
@@ -21,7 +16,6 @@ public class StringMavenParser implements MavenParser {
 		return apacheLibVersion;
 	}
 
-	@Override
 	public String extractApacheLib(String sourceCode) {
 		int firstIndexOfApacheGroupId = sourceCode.indexOf("<groupId>org.apache");
 		int indexOfEndGroupIdTag = sourceCode.indexOf("</groupId>", firstIndexOfApacheGroupId);
@@ -30,8 +24,4 @@ public class StringMavenParser implements MavenParser {
 		return apacheLib;
 	}
 	
-	@Override
-	public MavenProject readPOM(String pom) {
-		throw new NotImplementedException(pom);
-	}
 }

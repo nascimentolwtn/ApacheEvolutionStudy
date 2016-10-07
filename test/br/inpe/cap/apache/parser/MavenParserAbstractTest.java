@@ -1,14 +1,10 @@
 package br.inpe.cap.apache.parser;
 
-import org.junit.BeforeClass;
+public abstract class MavenParserAbstractTest {
 
-public class MavenParserTest {
-
-	protected static String pom;
-	protected static MavenParser parser;
-
-	@BeforeClass
-	public static void buildPOM() {
+	protected String pom;
+	
+	public MavenParserAbstractTest() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n");
 		sb.append("	<modelVersion>4.0.0</modelVersion>\n");
@@ -58,7 +54,7 @@ public class MavenParserTest {
 		sb.append("			<plugin>\n");
 		sb.append("				<groupId>org.apache.felix</groupId>\n");
 		sb.append("				<artifactId>maven-bundle-plugin</artifactId>\n");
-//		sb.append("				<version>2.10.1</version>\n");
+		sb.append("				<version>2.10.1</version>\n");
 		sb.append("			</plugin>\n");
 		sb.append("		</plugins>\n");
 		sb.append("	</build>\n");

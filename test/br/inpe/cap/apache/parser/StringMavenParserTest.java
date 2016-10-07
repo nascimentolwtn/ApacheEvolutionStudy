@@ -3,18 +3,12 @@ package br.inpe.cap.apache.parser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import br.inpe.cap.apache.parser.StringMavenParser;
-
-public class StringMavenParserTest extends MavenParserTest {
+public class StringMavenParserTest extends MavenParserAbstractTest {
 	
-	@Before
-	public void setUp() {
-		parser = new StringMavenParser();
-	}
+	private StringMavenParser parser = new StringMavenParser();
 	
 	@Test
 	public void testExtractLib() {

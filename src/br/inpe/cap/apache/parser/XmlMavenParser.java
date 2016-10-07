@@ -5,7 +5,7 @@ import com.thoughtworks.xstream.XStream;
 import br.inpe.cap.apache.domain.MavenDependency;
 import br.inpe.cap.apache.domain.MavenProject;
 
-public class XmlMavenParser implements MavenParser {
+public class XmlMavenParser {
 
 	private XStream xstream;
 
@@ -15,17 +15,6 @@ public class XmlMavenParser implements MavenParser {
 		xstream.processAnnotations(new Class[] {MavenProject.class, MavenDependency.class});
 	}
 
-	@Override
-	public String extractApacheLib(String sourceCode) {
-		return null;
-	}
-	
-	@Override
-	public String extractApacheLibVersion(String sourceCode) {
-		return null;
-	}
-	
-	@Override
 	public MavenProject readPOM(String pom) {
 		MavenProject fromXML = (MavenProject) xstream.fromXML(pom);
 		return fromXML;
