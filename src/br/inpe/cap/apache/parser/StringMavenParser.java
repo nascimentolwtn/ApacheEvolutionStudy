@@ -1,5 +1,9 @@
 package br.inpe.cap.apache.parser;
 
+import org.apache.commons.lang3.NotImplementedException;
+
+import br.inpe.cap.apache.domain.MavenProject;
+
 public class StringMavenParser implements MavenParser {
 
 	@Override
@@ -25,5 +29,9 @@ public class StringMavenParser implements MavenParser {
 		String apacheLib = sourceCode.substring(firstIndexOfApacheGroupId+lengthGroupId, indexOfEndGroupIdTag);
 		return apacheLib;
 	}
-
+	
+	@Override
+	public MavenProject readPOM(String pom) {
+		throw new NotImplementedException(pom);
+	}
 }

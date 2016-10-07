@@ -2,8 +2,6 @@ package br.inpe.cap.apache.parser;
 
 import org.junit.BeforeClass;
 
-import br.inpe.cap.apache.parser.MavenParser;
-
 public class MavenParserTest {
 
 	protected static String pom;
@@ -29,7 +27,6 @@ public class MavenParserTest {
 		sb.append("			<version>3.10.0.v20140604-1726</version>\n");
 		sb.append("		</dependency>\n");
 		sb.append("\n");
-		sb.append("	<dependencies>\n");
 		sb.append("		<dependency>\n");
 		sb.append("			<groupId>org.eclipse.tycho</groupId>\n");
 		sb.append("			<artifactId>org.eclipse.jdt.core</artifactId>\n");
