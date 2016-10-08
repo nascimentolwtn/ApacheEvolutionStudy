@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import br.inpe.cap.apache.domain.MavenDependency;
 import br.inpe.cap.apache.domain.MavenProject;
+import br.inpe.cap.apache.domain.MavenProjectProperty;
 
 public class XmlMavenParserTest extends MavenParserAbstractTest {
 
@@ -25,7 +26,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertTrue(Collection.class.isAssignableFrom(dependencies.getClass()));
 		assertNotNull(dependencies);
 		assertTrue(dependencies.size() > 0);
-		assertTrue(dependencies.size() == 4);
+		assertEquals(5, dependencies.size());
 	}
 	
 	@Test
@@ -52,6 +53,26 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertEquals("org.apache.velocity", dependency.getGroupId());
 		assertEquals("velocity-tools", dependency.getArtifactId());
 		assertNull(dependency.getVersion());
+	}
+	
+	@Test
+	public void lerVariaveisDefinidasNoPOMdoMaven() {
+		List<MavenProjectProperty> properties = projectFromPOM.getProperties();
+
+		MavenProjectProperty property1 = properties.get(0);
+		assertEquals("neo4j.version", property1.getName());
+		assertEquals("3.0.4", property1.getValue());
+
+		MavenProjectProperty property2 = properties.get(1);
+		assertEquals("project.build.sourceEncoding", property2.getName());
+		assertEquals("UTF-8", property2.getValue());
+	}
+	
+	@Test
+	public void versaoDaDepenciaPorVariavel() {
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		MavenDependency dependency = dependencies.get(4);
+		assertEquals("3.0.4", dependency.getVersion());
 	}
 	
 }

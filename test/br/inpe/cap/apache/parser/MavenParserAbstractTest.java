@@ -16,6 +16,11 @@ public abstract class MavenParserAbstractTest {
 		sb.append("	<url>http://www.metricminer.org.br</url>\n");
 		sb.append("	<description>Framework for researchers in MSR</description>\n");
 		sb.append("\n");
+		sb.append("	<properties>\n");
+		sb.append("		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>\n");
+		sb.append("		<neo4j.version>3.0.4</neo4j.version>\n");
+		sb.append("	</properties>\n");
+		sb.append("\n");
 		sb.append("	<dependencies>\n");
 		sb.append("		<dependency>\n");
 		sb.append("			<groupId>org.eclipse.tycho</groupId>\n");
@@ -39,6 +44,13 @@ public abstract class MavenParserAbstractTest {
 		sb.append("			<groupId>org.apache.velocity</groupId>\n");
 		sb.append("			<artifactId>velocity-tools</artifactId>\n");
 		sb.append("			<scope>provided</scope>\n");
+		sb.append("			<optional>true</optional>\n");
+		sb.append("		</dependency>\n");
+		sb.append("\n");
+		sb.append("		<dependency>\n");
+		sb.append("			<groupId>org.neo4j</groupId>\n");
+		sb.append("			<artifactId>neo4j-kernel</artifactId>\n");
+		sb.append("			<version>${neo4j.version}</version>\n");
 		sb.append("			<optional>true</optional>\n");
 		sb.append("		</dependency>\n");
 		sb.append("\n");

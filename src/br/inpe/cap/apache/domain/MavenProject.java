@@ -18,5 +18,9 @@ public class MavenProject {
 	public List<MavenDependency> getDependencies() {
 		return dependencies;
 	}
+
+	public List<MavenProjectProperty> getProperties() {
+		return null;
+	}
 	
 }
