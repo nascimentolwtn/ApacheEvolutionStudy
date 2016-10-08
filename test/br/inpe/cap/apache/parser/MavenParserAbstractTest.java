@@ -1,10 +1,13 @@
 package br.inpe.cap.apache.parser;
 
+import org.junit.BeforeClass;
+
 public abstract class MavenParserAbstractTest {
 
-	protected String pom;
+	protected static String pom;
 	
-	public MavenParserAbstractTest() {
+	@BeforeClass
+	public static void createPOM() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n");
 		sb.append("	<modelVersion>4.0.0</modelVersion>\n");

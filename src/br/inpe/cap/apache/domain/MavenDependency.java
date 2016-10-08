@@ -32,6 +32,10 @@ public class MavenDependency {
 		return this.version;
 	}
 	
+	public void setVersion(String version) {
+		this.version = version;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

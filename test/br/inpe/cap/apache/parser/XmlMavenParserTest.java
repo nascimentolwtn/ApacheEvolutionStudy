@@ -17,8 +17,8 @@ import br.inpe.cap.apache.domain.MavenProjectProperty;
 
 public class XmlMavenParserTest extends MavenParserAbstractTest {
 
-	private XmlMavenParser parser = new XmlMavenParser();
-	private MavenProject projectFromPOM = parser.readPOM(pom);
+	private static XmlMavenParser parser = new XmlMavenParser();
+	private static MavenProject projectFromPOM = parser.readPOM(pom);
 	
 	@Test
 	public void leituraDasDependenciasDoMaven() {
