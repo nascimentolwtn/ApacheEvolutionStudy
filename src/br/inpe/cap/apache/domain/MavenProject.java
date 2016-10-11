@@ -16,7 +16,7 @@ public class MavenProject {
 
 	@XStreamAlias("properties")
 	@XStreamConverter(MavenProjectPropertyConverter.class)
-	private List<MavenProjectProperty> properties;
+	private List<MavenProjectProperty> properties = new ArrayList<>();
 	
 	public void setDependencies(List<MavenDependency> dependencies) {
 		this.dependencies = dependencies;
@@ -54,16 +54,19 @@ public class MavenProject {
 		
 	}
 
+	/**
+	 * @param version Reference of dependency version variable
+	 * @return Variable value. If not defined, will return original reference
+	 */
 	private String lookupVersionValue(String version) {
 		String versionVariable = version.substring(version.indexOf(MAVEN_VARIABLE_MARK)+2, version.length()-1);
-		String versionValue = null;
 		for (MavenProjectProperty mavenProjectProperty : properties) {
 			if(mavenProjectProperty.getName().equals(versionVariable)) {
-				versionValue = mavenProjectProperty.getValue();
-				break;
+				return mavenProjectProperty.getValue();
 			}
 		}
-		return versionValue;
+		
+		return version;
 	}
 	
 }
