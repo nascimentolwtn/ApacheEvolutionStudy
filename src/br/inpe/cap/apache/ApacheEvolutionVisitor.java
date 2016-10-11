@@ -12,7 +12,7 @@ import br.com.metricminer2.domain.Modification;
 import br.com.metricminer2.persistence.PersistenceMechanism;
 import br.com.metricminer2.scm.CommitVisitor;
 import br.com.metricminer2.scm.SCMRepository;
-import br.inpe.cap.apache.parser.StringMavenParser;
+import br.inpe.cap.evolution.parser.StringMavenParser;
 
 public class ApacheEvolutionVisitor implements CommitVisitor {
 	

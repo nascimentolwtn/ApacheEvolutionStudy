@@ -1,4 +1,4 @@
-package br.inpe.cap.apache.parser;
+package br.inpe.cap.evolution.parser;
 
 public class StringMavenParser {
 

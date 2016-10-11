@@ -18,6 +18,7 @@ import br.com.metricminer2.Study;
 import br.com.metricminer2.persistence.csv.CSVFile;
 import br.com.metricminer2.scm.GitRepository;
 import br.com.metricminer2.scm.commitrange.Commits;
+import br.inpe.cap.auxiliar.MultipleCSVFile;
 
 public class ApacheProjectsVersionEvolutionStudy implements Study {
 
