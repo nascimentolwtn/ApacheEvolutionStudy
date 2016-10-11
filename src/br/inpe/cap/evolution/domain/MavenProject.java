@@ -1,4 +1,4 @@
-package br.inpe.cap.apache.domain;
+package br.inpe.cap.evolution.domain;
 
 import java.util.ArrayList;
 import java.util.List;

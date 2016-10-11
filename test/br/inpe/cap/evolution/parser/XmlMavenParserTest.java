@@ -1,4 +1,4 @@
-package br.inpe.cap.apache.parser;
+package br.inpe.cap.evolution.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -11,9 +11,10 @@ import java.util.List;
 
 import org.junit.Test;
 
-import br.inpe.cap.apache.domain.MavenDependency;
-import br.inpe.cap.apache.domain.MavenProject;
-import br.inpe.cap.apache.domain.MavenProjectProperty;
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.domain.MavenProjectProperty;
+
 
 public class XmlMavenParserTest extends MavenParserAbstractTest {
 
@@ -69,10 +70,18 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	}
 	
 	@Test
-	public void versaoDaDepenciaPorVariavel() {
+	public void versaoDeDepenciaPorVariavel() {
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency = dependencies.get(4);
 		assertEquals("3.0.4", dependency.getVersion());
+	}
+	
+	@Test
+	public void versaoDeDepenciaSemDefinicaoDeVariavel() {
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		MavenDependency dependency = dependencies.get(4);
+		assertEquals("${no.version}", dependency.getVersion());
+		// FIXME criar pom's específicos para simular testes diferentes
 	}
 	
 }

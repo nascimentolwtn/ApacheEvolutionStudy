@@ -1,10 +1,11 @@
-package br.inpe.cap.apache.parser;
+package br.inpe.cap.evolution.parser;
 
 import com.thoughtworks.xstream.XStream;
 
-import br.inpe.cap.apache.domain.MavenDependency;
-import br.inpe.cap.apache.domain.MavenProject;
-import br.inpe.cap.apache.domain.MavenProjectProperty;
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.domain.MavenProjectProperty;
+
 
 public class XmlMavenParser {
 

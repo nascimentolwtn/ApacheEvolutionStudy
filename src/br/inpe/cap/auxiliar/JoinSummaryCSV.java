@@ -1,4 +1,4 @@
-package br.inpe.cap.apache.auxiliar;
+package br.inpe.cap.auxiliar;
 
 import java.io.File;
 import java.io.IOException;

@@ -10,7 +10,7 @@
     </appender>
 
     <appender name="file" class="org.apache.log4j.FileAppender">
-        <param name="file" value="study/apache-evolution-${logfilename}.log" />
+        <param name="file" value="study/dependency-evolution-${logfilename}.log" />
         <param name="append" value="false" />
         <param name="threshold" value="debug" />
         <layout class="org.apache.log4j.PatternLayout">
@@ -19,7 +19,7 @@
     </appender>
 
 	<appender name="roll" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="File" value="study/apache-evolution-${logfilename}.log" />
+		<param name="File" value="study/dependency-evolution-${logfilename}.log" />
 	    <param name="DatePattern" value="'.'yyyy-MM-dd" /> <!-- deveria funcionar o log incremental! -->
         <param name="append" value="false" />
         <layout class="org.apache.log4j.PatternLayout">

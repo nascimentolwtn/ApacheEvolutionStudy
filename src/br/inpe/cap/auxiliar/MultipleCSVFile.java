@@ -1,4 +1,4 @@
-package br.inpe.cap.apache;
+package br.inpe.cap.auxiliar;
 
 import br.com.metricminer2.persistence.PersistenceMechanism;
 import br.com.metricminer2.persistence.csv.CSVFile;
