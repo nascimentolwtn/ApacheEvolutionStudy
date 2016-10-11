@@ -66,7 +66,7 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 								percent,
 								apacheLib,
 								apacheLibVersion,
-								commit.getMsg().replace("\n", "").replace(",","")
+								commit.getMsg().replace("\n", "").replace(",","").replace("\r", "")
 						);
 						String foundMessage = "FOUND: " + repositoryName + " - " + apacheLib + " at version " + apacheLibVersion;
 						System.err.println(foundMessage);

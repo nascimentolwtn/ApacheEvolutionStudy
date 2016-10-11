@@ -12,7 +12,7 @@ public class MultipleCSVFile implements PersistenceMechanism {
 	}
 	
 	@Override
-	public void write(Object... line) {
+	public synchronized void write(Object... line) {
 		for (CSVFile csvFile : this.csvFiles) {
 			csvFile.write(line);
 		}

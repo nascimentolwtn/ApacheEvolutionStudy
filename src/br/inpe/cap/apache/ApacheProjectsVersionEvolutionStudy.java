@@ -21,8 +21,6 @@ import br.com.metricminer2.scm.commitrange.Commits;
 
 public class ApacheProjectsVersionEvolutionStudy implements Study {
 
-	private static Logger log = Logger.getLogger(RepositoryMining.class);
-
 	private static final int THREADS_FOR_REPOSITORIES = 10;
 	private static final File GITHUB_DONE_FILE = new File("done-github_evolution-HOME.txt");
 	private static File EXCEPTION_FILE = new File("exceptions-evolution-HOME.log");
@@ -32,11 +30,16 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 	
 	private static final String APACHE_FILE_PREFIX = "apache_evolution-HOME";
 	private static final String APACHE_EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + APACHE_FILE_PREFIX	+ ".csv"; 
-
+	
+	private static Logger log;
+	
 	public static void main(String[] args) throws IOException {
 		System.setProperty("logfilename", APACHE_FILE_PREFIX + "_run01");
+		log = Logger.getLogger(RepositoryMining.class);
 		ApacheEvolutionVisitor.setLogger(log);
+		
 		checkRequiredLogFilesAndDirectories();
+		
 		new MetricMiner2().start(new ApacheProjectsVersionEvolutionStudy());
 		System.out.println("Finish!");
 	}
@@ -61,7 +64,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 				String causeMessage = "";
 				if(e.getCause() != null)
 					causeMessage = e.getCause().getMessage();
-				FileUtils.writeStringToFile(EXCEPTION_FILE, e.getMessage() + "Cause: " + causeMessage, true);
+				FileUtils.writeStringToFile(EXCEPTION_FILE, e.getMessage() + ". Cause: " + causeMessage +"\n", true);
 				System.gc();
 			} catch (IOException e1) {
 				e1.printStackTrace();
@@ -77,7 +80,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 				.through(Commits.all())
 //			.withThreads(3)
 				.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(
-						new CSVFile(APACHE_EVOLUTION_SUMMARY_CSV)
+						new CSVFile(APACHE_EVOLUTION_SUMMARY_CSV, true)
 						,
 						new CSVFile(EVOLUTION_LOG_PATH
 							+ File.separator
