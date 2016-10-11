@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.List;
@@ -76,12 +77,27 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertEquals("3.0.4", dependency.getVersion());
 	}
 	
+	// FIXME criar pom's específicos para simular testes diferentes abaixo
+	@Test
+	public void pomSemNenhumaDependencia() {
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		assertEquals(0,dependencies.size());
+		fail("fazer esse teste com pom específico!");
+	}
+	
+	@Test
+	public void versaoDeDepenciaPorVariavelSemDefinicaoDeProperties() {
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		MavenDependency dependency = dependencies.get(4);
+		assertEquals("${no.version}", dependency.getVersion());
+		fail("fazer esse teste com pom específico!");
+	}
+	
 	@Test
 	public void versaoDeDepenciaSemDefinicaoDeVariavel() {
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency = dependencies.get(4);
 		assertEquals("${no.version}", dependency.getVersion());
-		// FIXME criar pom's específicos para simular testes diferentes
 	}
 	
 }

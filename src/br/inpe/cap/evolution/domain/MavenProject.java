@@ -12,17 +12,21 @@ public class MavenProject {
 	private static final String MAVEN_VARIABLE_MARK = "${";
 
 	@XStreamAlias("dependencies")
-	private List<MavenDependency> dependencies = new ArrayList<>();
+	private List<MavenDependency> dependencies;
 
 	@XStreamAlias("properties")
 	@XStreamConverter(MavenProjectPropertyConverter.class)
-	private List<MavenProjectProperty> properties = new ArrayList<>();
+	private List<MavenProjectProperty> properties;
 	
 	public void setDependencies(List<MavenDependency> dependencies) {
 		this.dependencies = dependencies;
 	}
 	
 	public List<MavenDependency> getDependencies() {
+		// Initialization here because class is constructed by XStream by reflaction 
+		if(dependencies == null) {
+			dependencies = new ArrayList<>();
+		}
 		return dependencies;
 	}
 	
@@ -34,11 +38,15 @@ public class MavenProject {
 	 * @return Returns an alphabetic sorted {@link ArrayList} of project properties.
 	 */
 	public List<MavenProjectProperty> getProperties() {
+		// Initialization here because class is constructed by XStream by reflaction 
+		if(properties == null) {
+			properties = new ArrayList<>();
+		}
 		return properties;
 	}
 
 	public void replaceDependencyVariableVersions() {
-		dependencies.stream()
+		getDependencies().stream()
 			.filter(
 				(dependency) -> {
 					String version = dependency.getVersion();
@@ -60,7 +68,7 @@ public class MavenProject {
 	 */
 	private String lookupVersionValue(String version) {
 		String versionVariable = version.substring(version.indexOf(MAVEN_VARIABLE_MARK)+2, version.length()-1);
-		for (MavenProjectProperty mavenProjectProperty : properties) {
+		for (MavenProjectProperty mavenProjectProperty : getProperties()) {
 			if(mavenProjectProperty.getName().equals(versionVariable)) {
 				return mavenProjectProperty.getValue();
 			}
