@@ -23,7 +23,7 @@ public class MavenProject {
 	}
 	
 	public List<MavenDependency> getDependencies() {
-		// Initialization here because class is constructed by XStream by reflaction 
+		// Initialization here because class is constructed by XStream by reflection 
 		if(dependencies == null) {
 			dependencies = new ArrayList<>();
 		}
@@ -38,7 +38,7 @@ public class MavenProject {
 	 * @return Returns an alphabetic sorted {@link ArrayList} of project properties.
 	 */
 	public List<MavenProjectProperty> getProperties() {
-		// Initialization here because class is constructed by XStream by reflaction 
+		// Initialization here because class is constructed by XStream by reflection 
 		if(properties == null) {
 			properties = new ArrayList<>();
 		}
