@@ -76,5 +76,9 @@ public class MavenProject {
 		
 		return version;
 	}
+
+	public void replaceDependencyLineFeedCarriageReturn() {
+		getDependencies().forEach((dependency) -> dependency.replaceLineFeedCarriageReturnAndTrim());
+	}
 	
 }

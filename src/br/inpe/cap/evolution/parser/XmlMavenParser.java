@@ -24,6 +24,7 @@ public class XmlMavenParser {
 
 	public MavenProject readPOM(String pom) {
 		MavenProject mavenProjectfromXML = (MavenProject) xstream.fromXML(pom);
+		mavenProjectfromXML.replaceDependencyLineFeedCarriageReturn();
 		mavenProjectfromXML.replaceDependencyVariableVersions();
 		return mavenProjectfromXML;
 	}

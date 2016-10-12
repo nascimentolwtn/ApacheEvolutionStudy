@@ -78,4 +78,13 @@ public class MavenDependency {
 		return "MavenDependency [groupId=" + groupId + ", artifactId=" + artifactId + ", version=" + version + "]";
 	}
 
+	public void replaceLineFeedCarriageReturnAndTrim() {
+		if(this.groupId != null)
+			this.groupId = this.groupId.replace("\n", "").replace("\r", "").trim();
+		if(this.artifactId != null)
+			this.artifactId = this.artifactId.replace("\n", "").replace("\r", "").trim();
+		if(this.version != null)
+			this.version = this.version.replace("\n", "").replace("\r", "").trim();
+	}
+
 }
