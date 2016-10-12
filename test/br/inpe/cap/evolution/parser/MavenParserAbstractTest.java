@@ -57,6 +57,18 @@ public abstract class MavenParserAbstractTest {
 		sb.append("			<optional>true</optional>\n");
 		sb.append("		</dependency>\n");
 		sb.append("\n");
+		sb.append("		<dependency>\n\r");
+		sb.append("			<groupId>\n\r");
+		sb.append("				de.tudarmstadt.ukp.dkpro.core\n\r");
+		sb.append("			</groupId>\n\r");
+		sb.append("			<artifactId>\n\r");
+		sb.append("				de.tudarmstadt.ukp.dkpro.core.opennlp-model-tagger-en-maxent\n\r");
+		sb.append("			</artifactId>\n\r");
+		sb.append("			<version>\n\r");
+		sb.append("				20120616.0\n\r");
+		sb.append("			</version>\n\r");
+		sb.append("		</dependency>\n\r");
+		sb.append("\n");
 		sb.append("	</dependencies>\n");
 		sb.append("\n");
 		sb.append("	<build>\n");
@@ -75,7 +87,7 @@ public abstract class MavenParserAbstractTest {
 		sb.append("	</build>\n");
 		sb.append("\n");
 		sb.append("</project>\n");
-                
+		
 		pom = sb.toString();
 	}
 

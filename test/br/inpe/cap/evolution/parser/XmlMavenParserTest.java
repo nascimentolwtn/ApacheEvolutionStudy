@@ -28,7 +28,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertTrue(Collection.class.isAssignableFrom(dependencies.getClass()));
 		assertNotNull(dependencies);
 		assertTrue(dependencies.size() > 0);
-		assertEquals(5, dependencies.size());
+		assertEquals(6, dependencies.size());
 	}
 	
 	@Test
@@ -75,6 +75,15 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency = dependencies.get(4);
 		assertEquals("3.0.4", dependency.getVersion());
+	}
+	
+	@Test
+	public void retirandoLineFeedCarriageReturnDasDependencias() {
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		MavenDependency dependency = dependencies.get(5);
+		assertEquals("de.tudarmstadt.ukp.dkpro.core", dependency.getGroupId());
+		assertEquals("de.tudarmstadt.ukp.dkpro.core.opennlp-model-tagger-en-maxent", dependency.getArtifactId());
+		assertEquals("20120616.0", dependency.getVersion());
 	}
 	
 	// FIXME criar pom's específicos para simular testes diferentes abaixo
