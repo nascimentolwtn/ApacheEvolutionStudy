@@ -105,12 +105,12 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 
 	private boolean isntProcessableCommit(Commit commit) {
 		boolean isntProcessableCommit = (commit.isMerge() || !commit.isInMainBranch());
-		if(isntProcessableCommit) {
-			String message = "SKIPPED Commit " + commit.getHash() + " by " + this.name() + " - " +
-					   "isMerge=" + commit.isMerge() +
-					   "/isInMainBranch=" + commit.isInMainBranch();
-			logger.info(message);
-		}
+//		if(isntProcessableCommit) {
+//			String message = "SKIPPED Commit " + commit.getHash() + " by " + this.name() + " - " +
+//					   "isMerge=" + commit.isMerge() +
+//					   "/isInMainBranch=" + commit.isInMainBranch();
+//			logger.info(message);
+//		}
 		return isntProcessableCommit;
 	}
 
