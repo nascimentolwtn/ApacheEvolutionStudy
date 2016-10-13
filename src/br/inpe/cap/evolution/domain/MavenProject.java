@@ -73,7 +73,11 @@ public class MavenProject extends MavenVersionedEntity {
 			return;
 		}
 		if(oldGroupId.startsWith(MAVEN_PROJECT_GROUPID_VARIABLE)) {
-			dependency.setGroupId(this.groupId);
+			if(this.groupId != null) {
+				dependency.setGroupId(this.groupId);
+			} else if(this.parent != null) {
+				dependency.setGroupId(this.parent.getGroupId());
+			}
 		} else {
 			String variableGroupIdValue = lookupVariableValue(oldGroupId);
 			dependency.setGroupId(variableGroupIdValue);
@@ -86,7 +90,11 @@ public class MavenProject extends MavenVersionedEntity {
 			return;
 		}
 		if(oldArtifactId.startsWith(MAVEN_PROJECT_ARTIFACTID_VARIABLE)) {
-			dependency.setArtifactId(this.artifactId);
+			if(this.artifactId != null) {
+				dependency.setArtifactId(this.artifactId);
+			} else if(this.parent != null) {
+				dependency.setArtifactId(this.parent.getArtifactId());
+			}
 		} else {
 			String variableArtifactIdValue = lookupVariableValue(oldArtifactId);
 			dependency.setArtifactId(variableArtifactIdValue);
@@ -99,7 +107,11 @@ public class MavenProject extends MavenVersionedEntity {
 			return;
 		}
 		if(oldVersion.startsWith(MAVEN_PROJECT_VERSION_VARIABLE)) {
-			dependency.setVersion(this.version);
+			if(this.version != null) {
+				dependency.setVersion(this.version);
+			} else if(this.parent != null) {
+				dependency.setVersion(this.parent.getVersion());
+			}
 		} else {
 			String variableVersionValue = lookupVariableValue(oldVersion);
 			dependency.setVersion(variableVersionValue);
@@ -111,18 +123,17 @@ public class MavenProject extends MavenVersionedEntity {
 	}
 
 	/**
-	 * @param version Reference of dependency version variable
+	 * @param variable Reference of dependency version variable
 	 * @return Variable value. If not defined, will return original reference
 	 */
-	private String lookupVariableValue(String version) {
-		String versionVariable = version.substring(version.indexOf(MAVEN_VARIABLE_MARK)+2, version.length()-1);
+	private String lookupVariableValue(String variable) {
+		String variableValue = variable.substring(variable.indexOf(MAVEN_VARIABLE_MARK)+2, variable.length()-1);
 		for (MavenProjectProperty mavenProjectProperty : getProperties()) {
-			if(mavenProjectProperty.getName().equals(versionVariable)) {
+			if(mavenProjectProperty.getName().equals(variableValue)) {
 				return mavenProjectProperty.getValue();
 			}
 		}
-		
-		return version;
+		return variable;
 	}
 
 	public void replaceDependencyLineFeedCarriageReturn() {

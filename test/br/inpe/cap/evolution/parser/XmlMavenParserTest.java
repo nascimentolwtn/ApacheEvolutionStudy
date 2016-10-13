@@ -134,4 +134,14 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertEquals("3.0-SNAPSHOT", dependency.getVersion());
 	}
 	
+	@Test
+	public void invalidPOMvariaveisProjectNaoDefinidasNoParent() {
+		MavenProject projectFromPOM = parser.readPOM(pomProjectParentInvalidVariables);
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		MavenDependency dependency = dependencies.get(0);
+		assertEquals("${project.groupId}", dependency.getGroupId());
+		assertEquals("${project.artifactId}", dependency.getArtifactId());
+		assertEquals("${project.version}", dependency.getVersion());
+	}
+	
 }
