@@ -18,6 +18,7 @@ import br.com.metricminer2.Study;
 import br.com.metricminer2.filter.range.Commits;
 import br.com.metricminer2.persistence.csv.CSVFile;
 import br.com.metricminer2.scm.GitRepository;
+import br.inpe.cap.auxiliar.JoinSummaryCSV;
 import br.inpe.cap.auxiliar.MultipleCSVFile;
 
 public class MavenDependencyVersionEvolutionStudy implements Study {
@@ -25,18 +26,18 @@ public class MavenDependencyVersionEvolutionStudy implements Study {
 	private static final int THREADS_FOR_REPOSITORIES = 10;
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
 
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "dependency_eval";
+	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "dependency_eval_02";
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
 	
 	private static final String FILE_PREFIX = "dependency_evolution-HOME";
-	private static final String EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + FILE_PREFIX	+ ".csv"; 
+	private static final String EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + FILE_PREFIX + ".csv"; 
 	
 	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-HOME.txt");
 	private static File EXCEPTION_FILE = new File(FOUNTAIN_PATH+"exceptions-evolution-HOME.log");
 	
 	private static Logger log;
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		System.setProperty("logfilename", FILE_PREFIX + "_run01");
 		log = Logger.getLogger(RepositoryMining.class);
 		DependencyEvolutionVisitor.setLogger(log);
@@ -44,6 +45,9 @@ public class MavenDependencyVersionEvolutionStudy implements Study {
 		checkRequiredLogFilesAndDirectories();
 		
 		new MetricMiner2().start(new MavenDependencyVersionEvolutionStudy());
+		
+		JoinSummaryCSV.joinSummaryCSV(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + "_joined.csv"));
+		
 		System.out.println("Finish!");
 	}
 	
