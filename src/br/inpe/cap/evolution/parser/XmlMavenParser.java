@@ -4,8 +4,8 @@ import com.thoughtworks.xstream.XStream;
 
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.domain.MavenProjectParent;
 import br.inpe.cap.evolution.domain.MavenProjectProperty;
-
 
 public class XmlMavenParser {
 
@@ -18,6 +18,7 @@ public class XmlMavenParser {
 				new Class[] {
 					MavenProject.class, 
 					MavenDependency.class, 
+					MavenProjectParent.class, 
 					MavenProjectProperty.class
 				});
 	}
@@ -25,7 +26,7 @@ public class XmlMavenParser {
 	public MavenProject readPOM(String pom) {
 		MavenProject mavenProjectfromXML = (MavenProject) xstream.fromXML(pom);
 		mavenProjectfromXML.replaceDependencyLineFeedCarriageReturn();
-		mavenProjectfromXML.replaceDependencyVariableVersions();
+		mavenProjectfromXML.replaceVariables();
 		return mavenProjectfromXML;
 	}
 

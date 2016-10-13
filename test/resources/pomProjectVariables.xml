@@ -26,6 +26,7 @@
     </parent>
     <groupId>org.apache.river</groupId>
     <artifactId>river-lib</artifactId>
+    <version>3.0-SNAPSHOT</version>
     <url>http://river.apache.org</url>
     <name>Module :: River Service Library</name>
     <description>This artifact contains the River utility APIs that are not tied
@@ -35,7 +36,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>river-dl</artifactId>
+            <artifactId>${project.artifactId}</artifactId>
             <version>${project.version}</version>
         </dependency>
 

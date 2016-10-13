@@ -120,7 +120,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency = dependencies.get(0);
 		assertEquals("org.apache.river", dependency.getGroupId());
-		assertEquals("river-dl", dependency.getArtifactId());
+		assertEquals("river-lib", dependency.getArtifactId());
 		assertEquals("3.0-SNAPSHOT", dependency.getVersion());
 	}
 	
