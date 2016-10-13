@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>br.usp</groupId>
+	<artifactId>metricminer</artifactId>
+	<packaging>jar</packaging>
+	<version>2.4.2-SNAPSHOT</version>
+	<name>metricminer2</name>
+	<url>http://www.metricminer.org.br</url>
+	<description>Framework for researchers in MSR</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<neo4j.version>3.0.4</neo4j.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.tycho</groupId>
+			<artifactId>org.eclipse.jdt.core</artifactId>
+			<version>3.10.0.v20140604-1726</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.tycho</groupId>
+			<artifactId>org.eclipse.jdt.core</artifactId>
+			<version>3.10.0.v20140604-1726</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.velocity</groupId>
+			<artifactId>velocity-tools</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>${neo4j.version}</version>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>
+				de.tudarmstadt.ukp.dkpro.core
+			</groupId>
+			<artifactId>
+				de.tudarmstadt.ukp.dkpro.core.opennlp-model-tagger-en-maxent
+			</artifactId>
+			<version>
+				20120616.0
+
+			</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.10.1</version>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

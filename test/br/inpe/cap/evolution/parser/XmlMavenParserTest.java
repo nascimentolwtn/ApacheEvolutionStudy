@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,10 +19,10 @@ import br.inpe.cap.evolution.domain.MavenProjectProperty;
 public class XmlMavenParserTest extends MavenParserAbstractTest {
 
 	private static XmlMavenParser parser = new XmlMavenParser();
-	private static MavenProject projectFromPOM = parser.readPOM(pom);
 	
 	@Test
 	public void leituraDasDependenciasDoMaven() {
+		MavenProject projectFromPOM = parser.readPOM(pom);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		assertTrue(Collection.class.isAssignableFrom(dependencies.getClass()));
 		assertNotNull(dependencies);
@@ -33,6 +32,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	
 	@Test
 	public void lerPrimeiraDependenciaDoMaven() {
+		MavenProject projectFromPOM = parser.readPOM(pom);
 		MavenDependency dependency = projectFromPOM.getDependencies().get(0);
 		assertEquals("org.eclipse.tycho", dependency.getGroupId());
 		assertEquals("org.eclipse.jdt.core", dependency.getArtifactId());
@@ -41,6 +41,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	
 	@Test
 	public void dependenciasIguais() {
+		MavenProject projectFromPOM = parser.readPOM(pom);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency1 = dependencies.get(0);
 		MavenDependency dependency2 = dependencies.get(1);
@@ -50,6 +51,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	
 	@Test
 	public void dependenciaSemVersao() {
+		MavenProject projectFromPOM = parser.readPOM(pom);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency = dependencies.get(3);
 		assertEquals("org.apache.velocity", dependency.getGroupId());
@@ -59,6 +61,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	
 	@Test
 	public void lerVariaveisDefinidasNoPOMdoMaven() {
+		MavenProject projectFromPOM = parser.readPOM(pom);
 		List<MavenProjectProperty> properties = projectFromPOM.getProperties();
 
 		MavenProjectProperty property1 = properties.get(0);
@@ -72,6 +75,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	
 	@Test
 	public void versaoDeDepenciaPorVariavel() {
+		MavenProject projectFromPOM = parser.readPOM(pom);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency = dependencies.get(4);
 		assertEquals("3.0.4", dependency.getVersion());
@@ -79,6 +83,7 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	
 	@Test
 	public void retirandoLineFeedCarriageReturnDasDependencias() {
+		MavenProject projectFromPOM = parser.readPOM(pom);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
 		MavenDependency dependency = dependencies.get(5);
 		assertEquals("de.tudarmstadt.ukp.dkpro.core", dependency.getGroupId());
@@ -86,27 +91,27 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertEquals("20120616.0", dependency.getVersion());
 	}
 	
-	// FIXME criar pom's específicos para simular testes diferentes abaixo
 	@Test
 	public void pomSemNenhumaDependencia() {
+		MavenProject projectFromPOM = parser.readPOM(pomNoDependencies);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
-		assertEquals(0,dependencies.size());
-		fail("fazer esse teste com pom específico!");
+		assertEquals(0, dependencies.size());
 	}
 	
 	@Test
 	public void versaoDeDepenciaPorVariavelSemDefinicaoDeProperties() {
+		MavenProject projectFromPOM = parser.readPOM(pomNoPropertiesDefined);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
-		MavenDependency dependency = dependencies.get(4);
-		assertEquals("${no.version}", dependency.getVersion());
-		fail("fazer esse teste com pom específico!");
+		MavenDependency dependency = dependencies.get(0);
+		assertEquals("${neo4j.version}", dependency.getVersion());
 	}
 	
 	@Test
 	public void versaoDeDepenciaSemDefinicaoDeVariavel() {
+		MavenProject projectFromPOM = parser.readPOM(pomNoVersionDefined);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
-		MavenDependency dependency = dependencies.get(4);
-		assertEquals("${no.version}", dependency.getVersion());
+		MavenDependency dependency = dependencies.get(0);
+		assertNull(dependency.getVersion());
 	}
 	
 }
