@@ -2,6 +2,7 @@ package br.inpe.cap.evolution;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +22,8 @@ import br.inpe.cap.evolution.parser.XmlMavenParser;
 public class DependencyEvolutionVisitor implements CommitVisitor {
 	
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-
+	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.00000");
+	
 	private static Logger logger;
 
 	private String repositoryName;
@@ -89,7 +91,7 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 				fileName,
 				currentHashPosition,
 				totalCommits,
-				percent,
+				PERCENT_FORMAT.format(percent),
 				mavenDependency.getGroupId(),
 				mavenDependency.getArtifactId(),
 				mavenDependency.getVersion(),
@@ -98,7 +100,7 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 	}
 
 	private String replaceLineFeedAndComma(String commitMessage) {
-		return commitMessage.replace("\n", "").replace("\r", "").replace(";","");
+		return commitMessage.replaceAll("[\\r\\n;]+", "");
 	}
 
 	private boolean isntProcessableCommit(Commit commit) {

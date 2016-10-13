@@ -65,7 +65,7 @@ public abstract class MavenParserAbstractTest {
 		sb.append("				de.tudarmstadt.ukp.dkpro.core.opennlp-model-tagger-en-maxent\n\r");
 		sb.append("			</artifactId>\n\r");
 		sb.append("			<version>\n\r");
-		sb.append("				20120616.0\n\r");
+		sb.append("				20120616.0\r\n\r\n");
 		sb.append("			</version>\n\r");
 		sb.append("		</dependency>\n\r");
 		sb.append("\n");

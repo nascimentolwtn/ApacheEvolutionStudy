@@ -36,6 +36,10 @@ public class MavenDependency {
 		this.version = version;
 	}
 	
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -80,11 +84,11 @@ public class MavenDependency {
 
 	public void replaceLineFeedCarriageReturnAndTrim() {
 		if(this.groupId != null)
-			this.groupId = this.groupId.replace("\n", "").replace("\r", "").trim();
+			this.groupId = this.groupId.replaceAll("[\\r\\n]+", "").trim();
 		if(this.artifactId != null)
-			this.artifactId = this.artifactId.replace("\n", "").replace("\r", "").trim();
+			this.artifactId = this.artifactId.replaceAll("[\\r\\n]+", "").trim();
 		if(this.version != null)
-			this.version = this.version.replace("\n", "").replace("\r", "").trim();
+			this.version = this.version.replaceAll("[\\r\\n]+", "").trim();
 	}
 
 }
