@@ -15,9 +15,11 @@ public abstract class MavenParserAbstractTest {
 	protected static String pomNoDependencies;
 	protected static String pomNoVersionDefined;
 	protected static String pomNoPropertiesDefined;
+	protected static String pomProjectVariables;
+	protected static String pomProjectParentVariables;
 	
 	@BeforeClass
-	public static void readPOMs() throws URISyntaxException, IOException {
+	public static void carregarPOMs() throws URISyntaxException, IOException {
 		String pomFile = "pomBasicTest.xml";
 		pom = FileUtils.readFileToString(new File(Resources.getResource(pomFile).toURI()));
 		
@@ -29,7 +31,12 @@ public abstract class MavenParserAbstractTest {
 		
 		pomFile = "pomNoPropertiesDefined.xml";
 		pomNoPropertiesDefined = FileUtils.readFileToString(new File(Resources.getResource(pomFile).toURI()));
+		
+		pomFile = "pomProjectVariables.xml";
+		pomProjectVariables = FileUtils.readFileToString(new File(Resources.getResource(pomFile).toURI()));
+		
+		pomFile = "pomProjectParentVariables.xml";
+		pomProjectParentVariables = FileUtils.readFileToString(new File(Resources.getResource(pomFile).toURI()));
 	}
-
 
 }
