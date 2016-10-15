@@ -27,20 +27,20 @@ public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements St
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
 	private static final String STUDY_TEMP_PATH = "E:\\metricminer-evolution-stars-NOBARE";
 
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "filter_stars_02";
+	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "filter_stars_03";
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
 	
 	private static final String FILE_PREFIX = "dependency_filter-HOME";
 	private static final String EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + FILE_PREFIX + ".csv"; 
 
-	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"java-stars.url");
+	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"java-stars.urls");
 	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_filter-stars_HOME.txt");
 	private static final File EXCEPTION_FILE = new File(FOUNTAIN_PATH+"exceptions-filter-stars_HOME.log");
 	
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
-		System.setProperty("logfilename", FILE_PREFIX + "_filter02");
+		System.setProperty("logfilename", FILE_PREFIX + "_filter03");
 		log = Logger.getLogger(RepositoryMining.class);
 		
 		checkRequiredLogFilesAndDirectories();
