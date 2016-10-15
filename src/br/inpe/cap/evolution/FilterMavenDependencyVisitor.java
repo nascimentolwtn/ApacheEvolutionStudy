@@ -46,6 +46,8 @@ public class FilterMavenDependencyVisitor implements CommitVisitor {
 						);
 
 					try {
+						FileUtils.writeStringToFile(new File("fountain" + File.separator + "stars-maven.urls"), repo.getOrigin() + "\n", true);
+						
 						String pomFileName = pomDir.getAbsolutePath() + File.separator + file.getFile().getName();
 						FileUtils.writeStringToFile(new File(pomFileName), sourceCode);
 					} catch (IOException e) {
