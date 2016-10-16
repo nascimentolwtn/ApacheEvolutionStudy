@@ -82,7 +82,7 @@ public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements St
 	private void doMining(String gitUrl, String tempDir) {
 		try {
 			String gitReposLogSubDir = gitUrl.substring(gitUrl.lastIndexOf("/")+1, gitUrl.length());
-			Thread.currentThread().setName(gitReposLogSubDir);
+			Thread.currentThread().setName("Checkout " + gitReposLogSubDir);
 			GitRemoteRepository gitRemoteRepository = GitRemoteRepository
 					.hostedOn(gitUrl)
 					.inTempDir(tempDir)
