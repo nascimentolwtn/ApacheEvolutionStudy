@@ -27,7 +27,7 @@ public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements St
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
 	private static final String STUDY_TEMP_PATH = "E:\\metricminer-evolution-stars-NOBARE";
 
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "filter_stars_03";
+	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "filter_stars_06";
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
 	
 	private static final String FILE_PREFIX = "dependency_filter-HOME";
@@ -40,7 +40,7 @@ public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements St
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
-		System.setProperty("logfilename", FILE_PREFIX + "_filter03");
+		System.setProperty("logfilename", FILE_PREFIX + "_filter06");
 		log = Logger.getLogger(RepositoryMining.class);
 		
 		checkRequiredLogFilesAndDirectories();
@@ -82,6 +82,7 @@ public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements St
 	private void doMining(String gitUrl, String tempDir) {
 		try {
 			String gitReposLogSubDir = gitUrl.substring(gitUrl.lastIndexOf("/")+1, gitUrl.length());
+			Thread.currentThread().setName(gitReposLogSubDir);
 			GitRemoteRepository gitRemoteRepository = GitRemoteRepository
 					.hostedOn(gitUrl)
 					.inTempDir(tempDir)

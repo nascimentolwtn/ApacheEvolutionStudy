@@ -33,7 +33,7 @@ public class RemoteStarsMavenDependencyVersionEvolutionStudy implements Study {
 	private static final String FILE_PREFIX = "dependency_evolution-HOME";
 	private static final String EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + FILE_PREFIX + ".csv"; 
 
-	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"java-stars_random20.urls");
+	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven.urls");
 	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-stars_HOME.txt");
 	private static final File EXCEPTION_FILE = new File(FOUNTAIN_PATH+"exceptions-evolution-stars_HOME.log");
 	
@@ -83,6 +83,7 @@ public class RemoteStarsMavenDependencyVersionEvolutionStudy implements Study {
 	private void doMining(String gitUrl, String tempDir) {
 		try {
 			String gitReposLogSubDir = gitUrl.substring(gitUrl.lastIndexOf("/")+1, gitUrl.length());
+			Thread.currentThread().setName(gitReposLogSubDir);
 			new RepositoryMining()
 				.in(GitRemoteRepository
 						.hostedOn(gitUrl)
