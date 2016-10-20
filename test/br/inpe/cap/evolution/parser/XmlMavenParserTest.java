@@ -144,4 +144,14 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertEquals("${project.version}", dependency.getVersion());
 	}
 	
+	@Test
+	public void invalidPOMRetirarCaracteresIndesejadosProCSVDoMeioDosValores() {
+		MavenProject projectFromPOM = parser.readPOM(pomProjectParentInvalidVariables);
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		MavenDependency dependency = dependencies.get(1);
+		assertEquals("LineFeedIsValid but undesirable for CSV", dependency.getGroupId());
+		assertEquals("Comma is not expected here but it'd scramble CSV also!", dependency.getArtifactId());
+		assertEquals("10.0", dependency.getVersion());
+	}
+	
 }

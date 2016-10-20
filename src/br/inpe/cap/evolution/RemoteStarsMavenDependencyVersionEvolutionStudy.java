@@ -25,7 +25,7 @@ public class RemoteStarsMavenDependencyVersionEvolutionStudy implements Study {
 
 	private static final int THREADS_FOR_REPOSITORIES = 10;
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
-	private static final String STUDY_TEMP_PATH = "E:\\metricminer-evolution-stars";
+	private static final String STUDY_TEMP_PATH = "E:\\metricminer-evolution-stars"; // System.getenv("STUDY_TEMP_PATH");
 
 	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "dependency_stars_01";
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";

@@ -24,6 +24,16 @@
             <artifactId>${project.artifactId}</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>
+LineFeed
+Is
+Valid, but undesirable for CSV
+			</groupId>
+            <artifactId>Comma is not expected here, but it'd scramble CSV also!
+			</artifactId>
+            <version>1,0.0</version>
+        </dependency>
     </dependencies>
 
 </project>

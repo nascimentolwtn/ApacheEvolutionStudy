@@ -22,6 +22,10 @@ import br.inpe.cap.evolution.parser.XmlMavenParser;
 public class DependencyEvolutionVisitor implements CommitVisitor {
 	
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	
+	/**
+	 * Formato da porcentagem com "." para não confundir com a "," do CSV
+	 */
 	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.00000");
 	
 	private static Logger logger;
@@ -33,6 +37,7 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 	public XmlMavenParser parser = new XmlMavenParser();
 
 	public DependencyEvolutionVisitor(String evolutionLogPath, String gitReposLogSubDir) {
+//		evolutionLogPath = "..\\..\\..\\..\\..\\" + evolutionLogPath; // comente esta linha para manter pom's dentro do diretório do estudo
 		this.pomDir = new File(evolutionLogPath + File.separator + gitReposLogSubDir);
 		this.pomDir.mkdir();
 	}
@@ -95,12 +100,8 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 				mavenDependency.getGroupId(),
 				mavenDependency.getArtifactId(),
 				mavenDependency.getVersion(),
-				replaceLineFeedAndComma(commit.getMsg())
+				XmlMavenParser.replaceLineFeedAndComma(commit.getMsg())
 		);
-	}
-
-	private String replaceLineFeedAndComma(String commitMessage) {
-		return commitMessage.replaceAll("[\\r\\n;]+", "");
 	}
 
 	private boolean isntProcessableCommit(Commit commit) {
@@ -119,6 +120,7 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 			repositoryName = repo.getLastDir();
 			List<ChangeSet> changeSets = repo.getScm().getChangeSets();
 			hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
+			Thread.currentThread().setName("Visitor " + this.repositoryName);
 		}
 	}
 

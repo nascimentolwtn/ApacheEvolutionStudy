@@ -2,6 +2,8 @@ package br.inpe.cap.evolution.domain;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
+import br.inpe.cap.evolution.parser.XmlMavenParser;
+
 public class MavenVersionedEntity {
 
 	@XStreamAlias("groupId")
@@ -82,11 +84,11 @@ public class MavenVersionedEntity {
 
 	public void replaceLineFeedCarriageReturnAndTrim() {
 		if(this.groupId != null)
-			this.groupId = this.groupId.replaceAll("[\\r\\n]+", "").trim();
+			this.groupId = XmlMavenParser.replaceLineFeedAndComma(this.groupId).trim();
 		if(this.artifactId != null)
-			this.artifactId = this.artifactId.replaceAll("[\\r\\n]+", "").trim();
+			this.artifactId = XmlMavenParser.replaceLineFeedAndComma(this.artifactId).trim();
 		if(this.version != null)
-			this.version = this.version.replaceAll("[\\r\\n]+", "").trim();
+			this.version = XmlMavenParser.replaceLineFeedAndComma(this.version).trim();
 	}
 
 }

@@ -26,7 +26,7 @@ public class FilterMavenDependencyVisitor implements CommitVisitor {
 
 	public FilterMavenDependencyVisitor(String evolutionLogPath, String gitReposLogSubDir) {
 		this.repositoryName = gitReposLogSubDir;
-		evolutionLogPath = "..\\..\\..\\..\\..\\" + evolutionLogPath; // comente esta linha para manter pom's dentro do diretório do estudo
+//		evolutionLogPath = "..\\..\\..\\..\\..\\" + evolutionLogPath; // comente esta linha para manter pom's dentro do diretório do estudo
 		this.pomDir = new File(evolutionLogPath + File.separator + gitReposLogSubDir);
 	}
 
@@ -67,12 +67,8 @@ public class FilterMavenDependencyVisitor implements CommitVisitor {
 				mavenDependency.getGroupId(),
 				mavenDependency.getArtifactId(),
 				mavenDependency.getVersion(),
-				replaceLineFeedAndComma(commit.getMsg())
+				XmlMavenParser.replaceLineFeedAndComma(commit.getMsg())
 		);
-	}
-
-	private String replaceLineFeedAndComma(String commitMessage) {
-		return commitMessage.replaceAll("[\\r\\n;]+", "");
 	}
 
 	@Override

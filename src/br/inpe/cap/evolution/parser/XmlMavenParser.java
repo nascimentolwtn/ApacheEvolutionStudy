@@ -9,6 +9,7 @@ import br.inpe.cap.evolution.domain.MavenProjectProperty;
 
 public class XmlMavenParser {
 
+	public static final String REGEX_LINEFEED_AND_COMMA = "[\\r\\n,]+";
 	private XStream xstream;
 
 	public XmlMavenParser() {
@@ -28,6 +29,10 @@ public class XmlMavenParser {
 		mavenProjectfromXML.replaceDependencyLineFeedCarriageReturn();
 		mavenProjectfromXML.replaceVariables();
 		return mavenProjectfromXML;
+	}
+
+	public static String replaceLineFeedAndComma(String commitMessage) {
+		return commitMessage.replaceAll(REGEX_LINEFEED_AND_COMMA, "");
 	}
 
 }
