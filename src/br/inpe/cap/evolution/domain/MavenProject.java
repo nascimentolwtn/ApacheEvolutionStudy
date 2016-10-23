@@ -74,16 +74,17 @@ public class MavenProject extends MavenVersionedEntity {
 	}
 
 	public void replaceVariables() {
-		this.replaceVariables(getDependencies());
+		this.replaceVariables(getDependencies(), false);
 	}
 
-	private void replaceVariables(List<MavenDependency> dependencies) {
+	private void replaceVariables(List<MavenDependency> dependencies, boolean isDependencyManaged) {
 		dependencies
 			.forEach(
 				(dependency) -> {
 					replaceGroupIdVariables(dependency);
 					replaceArtifactIdVariables(dependency);
 					replaceVersionVariables(dependency);
+					dependency.setDependencyManaged(isDependencyManaged);
 				}
 			);
 	}
@@ -163,12 +164,11 @@ public class MavenProject extends MavenVersionedEntity {
 	}
 
 	public void setupDependencyManagedDependencies() {
-		List<MavenDependency> dependencyManagedDependencies = getDependencyManagement().getDependencies();
-		this.replaceVariables(dependencyManagedDependencies);
-		dependencyManagedDependencies
-			.forEach(
-				(dependency) -> dependency.setDependencyManaged(true)
-			);
+		this.replaceVariables(getDependencyManagement().getDependencies(), true);
+	}
+
+	public List<MavenDependency> getAllDependencies() {
+		return null;
 	}
 
 }
