@@ -15,12 +15,6 @@ public class MavenVersionedEntity {
 	@XStreamAlias("version")
 	protected String version;
 
-	public MavenVersionedEntity(String groupId, String artifactId, String version) {
-		this.groupId = groupId;
-		this.artifactId = artifactId;
-		this.version = version;
-	}
-
 	public String getGroupId() {
 		return this.groupId;
 	}

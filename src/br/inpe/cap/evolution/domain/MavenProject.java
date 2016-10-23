@@ -27,6 +27,9 @@ public class MavenProject extends MavenVersionedEntity {
 	@XStreamConverter(MavenProjectPropertyConverter.class)
 	private List<MavenProjectProperty> properties;
 	
+	@XStreamAlias("dependencyManagement")
+	private MavenDependencyManagement dependencyManagement;
+	
 	public void setDependencies(List<MavenDependency> dependencies) {
 		this.dependencies = dependencies;
 	}
@@ -61,9 +64,21 @@ public class MavenProject extends MavenVersionedEntity {
 		}
 		return properties;
 	}
+	
+	public MavenDependencyManagement getDependencyManagement() {
+		// Initialization here because class is constructed by XStream by reflection 
+		if(dependencyManagement == null) {
+			dependencyManagement = new MavenDependencyManagement();
+		}
+		return dependencyManagement;
+	}
 
 	public void replaceVariables() {
-		getDependencies().stream()
+		this.replaceVariables(getDependencies());
+	}
+
+	private void replaceVariables(List<MavenDependency> dependencies) {
+		dependencies
 			.forEach(
 				(dependency) -> {
 					replaceGroupIdVariables(dependency);
@@ -71,7 +86,6 @@ public class MavenProject extends MavenVersionedEntity {
 					replaceVersionVariables(dependency);
 				}
 			);
-		
 	}
 
 	private void replaceGroupIdVariables(MavenDependency dependency) {
@@ -146,6 +160,15 @@ public class MavenProject extends MavenVersionedEntity {
 	public void replaceDependencyLineFeedCarriageReturn() {
 		super.replaceLineFeedCarriageReturnAndTrim();
 		getDependencies().forEach((dependency) -> dependency.replaceLineFeedCarriageReturnAndTrim());
+	}
+
+	public void setupDependencyManagedDependencies() {
+		List<MavenDependency> dependencyManagedDependencies = getDependencyManagement().getDependencies();
+		this.replaceVariables(dependencyManagedDependencies);
+		dependencyManagedDependencies
+			.forEach(
+				(dependency) -> dependency.setDependencyManaged(true)
+			);
 	}
 
 }

@@ -5,8 +5,14 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 @XStreamAlias("dependency")
 public class MavenDependency extends MavenVersionedEntity {
 	
-	public MavenDependency(String groupId, String artifactId, String version) {
-		super(groupId, artifactId, version);
+	private boolean dependencyManaged;
+	
+	public boolean isDependencyManaged() {
+		return dependencyManaged;
+	}
+
+	public void setDependencyManaged(boolean dependencyManaged) {
+		this.dependencyManaged = dependencyManaged;
 	}
 
 	@Override
