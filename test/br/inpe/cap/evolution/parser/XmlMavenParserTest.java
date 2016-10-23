@@ -1,6 +1,7 @@
 package br.inpe.cap.evolution.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -9,9 +10,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenDependencyManagement;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.domain.MavenProjectProperty;
 
@@ -136,14 +139,59 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	
 	@Test
 	public void lerModules() {
-		MavenProject projectFromPOM = parser.readPOM(pomDisconf);
+		MavenProject projectFromPOM = parser.readPOM(pom8290_startOfDependencyManagement);
 		List<String> modules = projectFromPOM.getModules();
 		assertTrue(Collection.class.isAssignableFrom(modules.getClass()));
 		assertNotNull(modules);
 		assertTrue(modules.size() > 0);
-		assertEquals(2, modules.size());
-		assertEquals("disconf-client", modules.get(0));
-		assertEquals("disconf-core", modules.get(1));
+		assertEquals(6, modules.size());
+		assertEquals("graylog2-plugin-interfaces", modules.get(0));
+		assertEquals("graylog2-shared", modules.get(1));
+		assertEquals("graylog2-server", modules.get(2));
+		assertEquals("graylog2-inputs", modules.get(3));
+		assertEquals("graylog2-radio", modules.get(4));
+		assertEquals("graylog2-rest-routes", modules.get(5));
+	}
+
+	
+	@Test
+	public void lerDependencyManagement() {
+		MavenProject projectFromPOM = parser.readPOM(pom8290_startOfDependencyManagement);
+		MavenDependencyManagement dependencyManagement = projectFromPOM.getDependencyManagement();
+		assertNotNull(dependencyManagement);
+		
+		List<MavenDependency> dependencies = dependencyManagement.getDependencies();
+		assertTrue(dependencies.size() > 0);
+		assertEquals(57, dependencies.size());
+
+		MavenDependency dependency = dependencies.get(0);
+		assertEquals("org.graylog2", dependency.getGroupId());
+		assertEquals("graylog2-plugin", dependency.getArtifactId());
+		assertEquals("0.21.0-SNAPSHOT", dependency.getVersion());
+		assertTrue(dependency.isDependencyManaged());
+	}
+	
+	@Test
+	@Ignore
+	public void lerTodasDependencias() {
+		MavenProject projectFromPOM = parser.readPOM(pom8290_startOfDependencyManagement);
+//		List<MavenDependency> dependencies = projectFromPOM.getAllDependencies();
+		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
+		assertNotNull(dependencies);
+		assertTrue(dependencies.size() > 0);
+		assertEquals(6, dependencies.size());
+
+		MavenDependency dependency = dependencies.get(0);
+		assertEquals("org.apache.river", dependency.getGroupId());
+		assertEquals("reggie", dependency.getArtifactId());
+		assertEquals("3.0-SNAPSHOT", dependency.getVersion());
+		assertFalse(dependency.isDependencyManaged());
+
+		dependency = dependencies.get(10);
+		assertEquals("org.apache.river", dependency.getGroupId());
+		assertEquals("reggie", dependency.getArtifactId());
+		assertEquals("3.0-SNAPSHOT", dependency.getVersion());
+		assertTrue(dependency.isDependencyManaged());
 	}
 	
 	@Test
