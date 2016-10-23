@@ -177,24 +177,24 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	}
 	
 	@Test
-	public void lerTodasDependencias() {
+	public void lerTodasDependenciasInclusiveDependencyManagement() {
 		MavenProject projectFromPOM = parser.readPOM(pom8290_startOfDependencyManagement);
 		List<MavenDependency> dependencies = projectFromPOM.getAllDependencies();
 		assertNotNull(dependencies);
 		assertTrue(dependencies.size() > 0);
-		assertEquals(6, dependencies.size());
+		assertEquals(62, dependencies.size());
 
 		MavenDependency dependency = dependencies.get(0);
-		assertEquals("org.apache.river", dependency.getGroupId());
-		assertEquals("reggie", dependency.getArtifactId());
-		assertEquals("3.0-SNAPSHOT", dependency.getVersion());
-		assertFalse(dependency.isDependencyManaged());
-
-		dependency = dependencies.get(10);
-		assertEquals("org.apache.river", dependency.getGroupId());
-		assertEquals("reggie", dependency.getArtifactId());
-		assertEquals("3.0-SNAPSHOT", dependency.getVersion());
+		assertEquals("org.graylog2", dependency.getGroupId());
+		assertEquals("graylog2-plugin", dependency.getArtifactId());
+		assertEquals("0.21.0-SNAPSHOT", dependency.getVersion());
 		assertTrue(dependency.isDependencyManaged());
+
+		dependency = dependencies.get(57);
+		assertEquals("org.slf4j", dependency.getGroupId());
+		assertEquals("slf4j-api", dependency.getArtifactId());
+		assertNull(dependency.getVersion());
+		assertFalse(dependency.isDependencyManaged());
 	}
 	
 	@Test

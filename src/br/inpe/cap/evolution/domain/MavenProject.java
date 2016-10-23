@@ -168,7 +168,9 @@ public class MavenProject extends MavenVersionedEntity {
 	}
 
 	public List<MavenDependency> getAllDependencies() {
-		return null;
+		List<MavenDependency> allDependencies = this.getDependencyManagement().getDependencies();
+		allDependencies.addAll(this.getDependencies());
+		return allDependencies;
 	}
 
 }
