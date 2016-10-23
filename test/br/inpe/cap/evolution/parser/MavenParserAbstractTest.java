@@ -18,6 +18,7 @@ public abstract class MavenParserAbstractTest {
 	protected static String pomProjectVariables;
 	protected static String pomProjectParentVariables;
 	protected static String pomProjectParentInvalidVariables;
+	protected static String pomDisconf;
 	
 	@BeforeClass
 	public static void carregarPOMs() throws URISyntaxException, IOException {
@@ -41,6 +42,9 @@ public abstract class MavenParserAbstractTest {
 		
 		pomFile = "pomProjectParentInvalidVariables.xml";
 		pomProjectParentInvalidVariables = FileUtils.readFileToString(new File(Resources.getResource(pomFile).toURI()));
+		
+		pomFile = "pomDisconf.xml";
+		pomDisconf = FileUtils.readFileToString(new File(Resources.getResource(pomFile).toURI()));
 	}
 
 }

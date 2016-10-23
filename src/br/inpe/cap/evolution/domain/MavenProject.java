@@ -20,13 +20,12 @@ public class MavenProject extends MavenVersionedEntity {
 	@XStreamAlias("dependencies")
 	private List<MavenDependency> dependencies;
 
+	@XStreamAlias("modules")
+	private MavenModule modulesList;
+
 	@XStreamAlias("properties")
 	@XStreamConverter(MavenProjectPropertyConverter.class)
 	private List<MavenProjectProperty> properties;
-	
-	public MavenProject(String groupId, String artifactId, String version) {
-		super(groupId, artifactId, version);
-	}
 	
 	public void setDependencies(List<MavenDependency> dependencies) {
 		this.dependencies = dependencies;
@@ -38,6 +37,14 @@ public class MavenProject extends MavenVersionedEntity {
 			dependencies = new ArrayList<>();
 		}
 		return dependencies;
+	}
+	
+	public List<String> getModules() {
+		// Initialization here because class is constructed by XStream by reflection 
+		if(modulesList == null) {
+			modulesList = new MavenModule();
+		}
+		return modulesList.getModules();
 	}
 	
 	public void setProperties(List<MavenProjectProperty> properties) {

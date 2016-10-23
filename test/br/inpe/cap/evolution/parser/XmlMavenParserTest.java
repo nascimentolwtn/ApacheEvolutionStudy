@@ -135,6 +135,18 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 	}
 	
 	@Test
+	public void lerModules() {
+		MavenProject projectFromPOM = parser.readPOM(pomDisconf);
+		List<String> modules = projectFromPOM.getModules();
+		assertTrue(Collection.class.isAssignableFrom(modules.getClass()));
+		assertNotNull(modules);
+		assertTrue(modules.size() > 0);
+		assertEquals(2, modules.size());
+		assertEquals("disconf-client", modules.get(0));
+		assertEquals("disconf-core", modules.get(1));
+	}
+	
+	@Test
 	public void invalidPOMvariaveisProjectNaoDefinidasNoParent() {
 		MavenProject projectFromPOM = parser.readPOM(pomProjectParentInvalidVariables);
 		List<MavenDependency> dependencies = projectFromPOM.getDependencies();
