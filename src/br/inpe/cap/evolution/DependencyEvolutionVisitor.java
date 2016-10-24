@@ -3,8 +3,10 @@ package br.inpe.cap.evolution;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -26,7 +28,7 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 	/**
 	 * Formato da porcentagem com "." para não confundir com a "," do CSV
 	 */
-	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.00000");
+	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.00000", DecimalFormatSymbols.getInstance(Locale.US));
 	
 	private static Logger logger;
 
@@ -50,10 +52,10 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 			return;
 		}
 		
-		int currentHashPosition = hashes.indexOf(commit.getHash()) + 1;
+		int currentHashPosition = hashes.indexOf(commit.getHash());
 		int totalCommits = hashes.size();
 		
-		float percent = 100 - ((currentHashPosition*100)/(float)totalCommits);
+		float percent = ((currentHashPosition*100)/(float)totalCommits);
 		
 		commit.getModifications().stream()
 			.filter(
