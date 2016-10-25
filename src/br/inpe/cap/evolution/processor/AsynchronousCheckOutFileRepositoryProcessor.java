@@ -13,20 +13,19 @@ import br.com.metricminer2.domain.Commit;
 import br.com.metricminer2.scm.RepositoryFile;
 import br.com.metricminer2.scm.SCMRepository;
 
-public abstract class SynchronizedCheckOutFileRepositoryProcessor {
+public abstract class AsynchronousCheckOutFileRepositoryProcessor {
 	
 	private final CheckoutObserver observer;
 	
-	public SynchronizedCheckOutFileRepositoryProcessor() {
+	public AsynchronousCheckOutFileRepositoryProcessor() {
 		this.observer = new CheckoutObserver() {};
 	}
 
-	public SynchronizedCheckOutFileRepositoryProcessor(final CheckoutObserver observer) {
+	public AsynchronousCheckOutFileRepositoryProcessor(final CheckoutObserver observer) {
 		this.observer = observer;
 	}
 
-	public void process(final SCMRepository repo, final Commit commit) throws IOException {
-		
+	public void processCommit(final SCMRepository repo, final Commit commit) throws IOException {
 		
 		Map<String, ByteArrayInputStream> files;
 		try {

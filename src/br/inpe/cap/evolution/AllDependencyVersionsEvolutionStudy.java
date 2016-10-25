@@ -101,7 +101,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 				.withCommits(new OnlyInMainBranch(
 							 new OnlyNoMerge(
 							 new OnlyModificationsWithFileTypes(fileExtensions))))
-				.process(new AllDependenciesEvolutionCachedVisitor(),
+				.process(new AllDependenciesEvolutionVisitor(),
 						new CSVFile(EVOLUTION_LOG_PATH
 								+ File.separator
 								+ "all-dependency-'"

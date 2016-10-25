@@ -21,7 +21,7 @@ import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.parser.XmlMavenParser;
 import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
-import br.inpe.cap.evolution.processor.SynchronizedCheckOutFileRepositoryProcessor;
+import br.inpe.cap.evolution.processor.AsynchronousCheckOutFileRepositoryProcessor;
 
 public class AllDependenciesEvolutionCachedVisitor implements CommitVisitor {
 	
@@ -50,7 +50,7 @@ public class AllDependenciesEvolutionCachedVisitor implements CommitVisitor {
 		
 		try {
 			
-			SynchronizedCheckOutFileRepositoryProcessor processor = new SynchronizedCheckOutFileRepositoryProcessor(
+			AsynchronousCheckOutFileRepositoryProcessor processor = new AsynchronousCheckOutFileRepositoryProcessor(
 				new LoggerCheckoutObserver(logger)
 			){
 			
@@ -79,7 +79,7 @@ public class AllDependenciesEvolutionCachedVisitor implements CommitVisitor {
 				return !fileName.endsWith("pom.xml");
 			}};
 		
-			processor.process(repo, commit);
+			processor.processCommit(repo, commit);
 			final String percentMessage = repositoryName
 					+ " progress: commit #"
 					+ currentHashPosition
