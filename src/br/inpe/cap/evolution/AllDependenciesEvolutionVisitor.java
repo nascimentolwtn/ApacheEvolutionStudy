@@ -40,7 +40,7 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 	private int totalCommits; 
 	
 	public XmlMavenParser parser = new XmlMavenParser();
-	private MavenEffectivePom mavenEffectivePom = new MavenEffectivePom();
+	private final MavenEffectivePom mavenEffectivePom = new MavenEffectivePom();
 	private EffectivePomSynchronousCheckoutProcessor effectivePomProcessor;
 
 	@Override
@@ -115,12 +115,12 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 	
 	private class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOutRepositoryProcessor {
 		
-		private PersistenceMechanism writer;
-		private int totalCommits;
+		private final PersistenceMechanism writer;
+		private final int totalCommits;
 		private int currentHashPosition;
 		private float percent;
 
-		public EffectivePomSynchronousCheckoutProcessor(final CheckoutObserver observer, final PersistenceMechanism writer, int totalCommits) {
+		public EffectivePomSynchronousCheckoutProcessor(final CheckoutObserver observer, final PersistenceMechanism writer, final int totalCommits) {
 			super(observer);
 			this.writer = writer;
 			this.totalCommits = totalCommits;
@@ -147,11 +147,11 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 			return !file.fileNameEndsWith("pom.xml");
 		}
 		
-		public void setCurrentHashPosition(int currentHashPosition) {
+		public void setCurrentHashPosition(final int currentHashPosition) {
 			this.currentHashPosition = currentHashPosition;
 		}
 		
-		public void setPercent(float percent) {
+		public void setPercent(final float percent) {
 			this.percent = percent;
 		}
 		

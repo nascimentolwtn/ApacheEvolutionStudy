@@ -36,7 +36,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static final String FILE_PREFIX = "all_dependency-HOME";
 
 	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_one.urls");
-	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-stars_maven_HOME.txt");
+	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-stars_maven_one_HOME.txt");
 	private static final File EXCEPTION_FILE = new File("study" + File.separator + "exceptions-all_dependency-HOME.log");
 	
 	private static Logger log;
@@ -44,7 +44,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	public static void main(String[] args) throws Exception {
 		System.setProperty("logfilename", FILE_PREFIX + "_run01");
 		log = Logger.getLogger(RepositoryMining.class);
-		AllDependenciesEvolutionCachedVisitor.setLogger(log);
+		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);
 		
 		checkRequiredLogFilesAndDirectories();
