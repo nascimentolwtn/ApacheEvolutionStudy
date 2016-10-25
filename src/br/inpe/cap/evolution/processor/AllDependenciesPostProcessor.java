@@ -1,4 +1,4 @@
-package br.inpe.cap.evolution;
+package br.inpe.cap.evolution.processor;
 
 import java.io.File;
 import java.io.IOException;
