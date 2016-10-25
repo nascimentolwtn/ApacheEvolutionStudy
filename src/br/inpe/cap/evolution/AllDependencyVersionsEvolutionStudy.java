@@ -35,7 +35,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	
 	private static final String FILE_PREFIX = "all_dependency-HOME";
 
-	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven.urls");
+	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_one.urls");
 	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-stars_maven_HOME.txt");
 	private static final File EXCEPTION_FILE = new File("study" + File.separator + "exceptions-all_dependency-HOME.log");
 	
@@ -93,7 +93,6 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 				.in(GitRemoteRepository
 						.hostedOn(gitUrl)
 						.inTempDir(tempDir)
-						.asBareRepos()
 						.withMaxNumberOfFilesInACommit(2000)
 						.buildAsSCMRepository())
 				.startingFromTheBeginning()
