@@ -25,19 +25,23 @@ public class MavenEffectivePom {
 
 	private SimpleCommandExecutor executor = new SimpleCommandExecutor();
 	
-	public String resolveEffectivePom(final File file) {
-		final String basePath = file.getAbsolutePath();
+	public String resolveEffectivePom(final File file) throws UnparsableEffectivePomException {
+		final String basePath = file.toPath().getParent().toString();
 		final String executeResult = this.executor.execute(MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND, basePath);
 		return this.extractPom(executeResult);
 	}
 	
-	private String extractPom(final String execultResult) {
-		return execultResult.substring(
-				   execultResult.indexOf(MAVEN_PROJECT_START_TOKEN),
-				   execultResult.indexOf(END_PROJECT_TAG)+END_PROJECT_TAG_LENGTH);
+	private String extractPom(final String execultResult) throws UnparsableEffectivePomException {
+		try {
+			return execultResult.substring(
+					   execultResult.indexOf(MAVEN_PROJECT_START_TOKEN),
+					   execultResult.indexOf(END_PROJECT_TAG)+END_PROJECT_TAG_LENGTH);
+		} catch (StringIndexOutOfBoundsException e) {
+			throw new UnparsableEffectivePomException(execultResult);
+		}
 	}
 	
-	public static void main(String[] args) throws IOException, URISyntaxException {
+	public static void main(String[] args) throws IOException, URISyntaxException, UnparsableEffectivePomException {
 		
 		MavenEffectivePom mep = new MavenEffectivePom();
 		

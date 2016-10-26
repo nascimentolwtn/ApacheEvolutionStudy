@@ -19,6 +19,7 @@ import br.com.metricminer2.scm.SCMRepository;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.maven.MavenEffectivePom;
+import br.inpe.cap.evolution.maven.UnparsableEffectivePomException;
 import br.inpe.cap.evolution.parser.XmlMavenParser;
 import br.inpe.cap.evolution.processor.CheckoutObserver;
 import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
@@ -39,7 +40,7 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 	private List<String> hashes;
 	private int totalCommits; 
 	
-	public XmlMavenParser parser = new XmlMavenParser();
+	private final XmlMavenParser parser = new XmlMavenParser();
 	private final MavenEffectivePom mavenEffectivePom = new MavenEffectivePom();
 	private EffectivePomSynchronousCheckoutProcessor effectivePomProcessor;
 
@@ -57,14 +58,15 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 			effectivePomProcessor.processCommit(repo, commit);
 			printPercentageMessage(currentHashPosition, percent);
 			
-		} catch (final IOException e) {
+		} catch (final IOException | InterruptedException e) {
 			logger.error(e.getMessage());
 		}
 		
 	}
 
-	private void writeCsvLine(final PersistenceMechanism writer, final Commit commit, final int currentHashPosition, final int totalCommits,
-			final float percent, final String fileName, final MavenDependency mavenDependency) {
+	private synchronized void writeCsvLine(final PersistenceMechanism writer, final Commit commit,
+			final int currentHashPosition, final int totalCommits, final float percent, final String fileName,
+			final MavenDependency mavenDependency) {
 		writer.write(
 				commit.getHash(),
 				DATE_FORMAT.format(commit.getDate().getTime()),
@@ -73,6 +75,7 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 				currentHashPosition,
 				totalCommits,
 				PERCENT_FORMAT.format(percent),
+				mavenDependency.isDependencyManaged(),
 				mavenDependency.getGroupId(),
 				mavenDependency.getArtifactId(),
 				mavenDependency.getVersion(),
@@ -135,12 +138,18 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 				return;
 			}
 			
-			final String effectivePom = mavenEffectivePom.resolveEffectivePom(file.getFile());
-			final MavenProject pom = parser.readPOM(effectivePom);
-			pom.getDependencies().forEach(
-				(dependency) -> 
-					writeCsvLine(this.writer, commit, this.currentHashPosition, this.totalCommits, this.percent, file.getFullName(), dependency)
-				);
+			try {
+				
+				final String effectivePom = mavenEffectivePom.resolveEffectivePom(file.getFile());
+				final MavenProject pom = parser.readPOM(effectivePom);
+				pom.getDependencies().forEach(
+					(dependency) -> 
+						writeCsvLine(this.writer, commit, this.currentHashPosition, this.totalCommits, this.percent, file.getFullName(), dependency)
+					);
+				
+			} catch (UnparsableEffectivePomException e) {
+				logger.error("Effective Pom from file " + file.getFullName() + " could not be extracted. See result:\n" + e.getMessage());
+			}
 		}
 
 		private boolean isntPOMFile(final RepositoryFile file) {
