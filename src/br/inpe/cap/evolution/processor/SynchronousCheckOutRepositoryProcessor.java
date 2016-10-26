@@ -1,6 +1,9 @@
 package br.inpe.cap.evolution.processor;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import br.com.metricminer2.domain.Commit;
@@ -19,7 +22,7 @@ public abstract class SynchronousCheckOutRepositoryProcessor {
 		this.observer = observer;
 	}
 
-	public void processCommit(final SCMRepository repo, final Commit commit) throws IOException {
+	public void processCommit(final SCMRepository repo, final Commit commit) throws IOException, InterruptedException {
 		
 		final ReentrantLock checkoutLock = new ReentrantLock();
 		checkoutLock.lock();
@@ -28,10 +31,15 @@ public abstract class SynchronousCheckOutRepositoryProcessor {
 			this.observer.beforeCheckout(repo, commit);
 			repo.getScm().checkout(commit.getHash());
 			
+			ExecutorService exec = Executors.newFixedThreadPool(5);
 			for (RepositoryFile repositoryFile : repo.getScm().files()) {
-				processFile(repo, commit, repositoryFile);
-				repositoryFile = null;
+				exec.submit(() -> {
+					processFile(repo, commit, repositoryFile);
+				});
 			}
+			
+			exec.shutdown();
+			exec.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
 
 		} finally {
 			repo.getScm().reset();
