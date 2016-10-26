@@ -1,5 +1,7 @@
 package br.inpe.cap.evolution.parser;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.thoughtworks.xstream.XStream;
 
 import br.inpe.cap.evolution.domain.MavenProject;
@@ -22,11 +24,15 @@ public class XmlMavenParser {
 	 * Factory Method
 	 */
 	public MavenProject readPOM(String pom) {
-		MavenProject mavenProjectfromXML = (MavenProject) xstream.fromXML(pom);
-		mavenProjectfromXML.replaceDependencyLineFeedCarriageReturn();
-		mavenProjectfromXML.replaceVariables();
-		mavenProjectfromXML.setupDependencyManagedDependencies();
-		return mavenProjectfromXML;
+		if(!StringUtils.isEmpty(pom)) {
+			MavenProject mavenProjectfromXML = (MavenProject) xstream.fromXML(pom);
+			mavenProjectfromXML.replaceDependencyLineFeedCarriageReturn();
+			mavenProjectfromXML.replaceVariables();
+			mavenProjectfromXML.setupDependencyManagedDependencies();
+			return mavenProjectfromXML;
+		} else {
+			return new MavenProject();
+		}
 	}
 
 	public static String replaceLineFeedAndComma(String commitMessage) {
