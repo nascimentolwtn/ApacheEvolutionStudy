@@ -217,4 +217,17 @@ public class XmlMavenParserTest extends MavenParserAbstractTest {
 		assertEquals("10.0", dependency.getVersion());
 	}
 	
+	@Test
+	public void invalidPOMstringNulaOuBranco() {
+		MavenProject projectFromPOM = parser.readPOM(null);
+		assertEquals(0, projectFromPOM.getModules().size());
+		assertEquals(0, projectFromPOM.getProperties().size());
+		assertEquals(0, projectFromPOM.getAllDependencies().size());
+
+		projectFromPOM = parser.readPOM("");
+		assertEquals(0, projectFromPOM.getModules().size());
+		assertEquals(0, projectFromPOM.getProperties().size());
+		assertEquals(0, projectFromPOM.getAllDependencies().size());
+	}
+	
 }
