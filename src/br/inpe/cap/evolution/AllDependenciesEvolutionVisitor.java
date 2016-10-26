@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import br.com.metricminer2.domain.ChangeSet;
@@ -138,18 +139,33 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 				return;
 			}
 			
+			final MavenProject mavenProject = parser.readPOM(getEffectiveOrOriginalPom(file));
+			mavenProject.getDependencies().forEach(
+				(dependency) -> 
+					writeCsvLine(this.writer, commit, this.currentHashPosition, this.totalCommits, this.percent, file.getFullName(), dependency)
+				);
+		}
+
+		private String getEffectiveOrOriginalPom(final RepositoryFile file) {
+			String effectivePom = "";
 			try {
-				
-				final String effectivePom = mavenEffectivePom.resolveEffectivePom(file.getFile());
-				final MavenProject pom = parser.readPOM(effectivePom);
-				pom.getDependencies().forEach(
-					(dependency) -> 
-						writeCsvLine(this.writer, commit, this.currentHashPosition, this.totalCommits, this.percent, file.getFullName(), dependency)
-					);
-				
+				effectivePom = mavenEffectivePom.resolveEffectivePom(file.getFile());
 			} catch (UnparsableEffectivePomException e) {
-				logger.error("Effective Pom from file " + file.getFullName() + " could not be extracted. See result:\n" + e.getMessage());
+				logger.error("Effective POM from file " + file.getFullName()
+							+ " could not be extracted. Proceeding with original POM. See result:\n"
+							+ e.getMessage());
+				effectivePom = getOriginalPom(file, effectivePom);
 			}
+			return effectivePom;
+		}
+
+		private String getOriginalPom(final RepositoryFile file, String effectivePom) {
+			try {
+				effectivePom = FileUtils.readFileToString(file.getFile());
+			} catch (IOException ioe) {
+				logger.error("Error reading POM from file " + file.getFullName());
+			}
+			return effectivePom;
 		}
 
 		private boolean isntPOMFile(final RepositoryFile file) {
