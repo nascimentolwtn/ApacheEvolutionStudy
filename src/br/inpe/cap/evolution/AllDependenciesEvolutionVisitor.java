@@ -100,11 +100,11 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 	private void initVisitor(final SCMRepository repo, final PersistenceMechanism writer) {
 		if(this.hashes == null) {
 			this.repositoryName = repo.getLastDir();
+			Thread.currentThread().setName("Visitor " + this.repositoryName);
 			final List<ChangeSet> changeSets = repo.getScm().getChangeSets();
 			this.hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
 			this.totalCommits = hashes.size();
 			this.effectivePomProcessor = new EffectivePomSynchronousCheckoutProcessor(new LoggerCheckoutObserver(logger), writer, totalCommits);
-			Thread.currentThread().setName("Visitor " + this.repositoryName);
 		}
 	}
 

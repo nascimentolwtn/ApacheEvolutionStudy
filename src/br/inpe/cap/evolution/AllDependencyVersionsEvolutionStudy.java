@@ -33,16 +33,16 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "all_dependency";
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
 	
-	private static final String FILE_PREFIX = "all_dependency-HOME";
+	private static final String FILE_PREFIX = "all_dependency_first35-HOME";
 
-	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_one.urls");
-	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-stars_maven_one_HOME.txt");
+	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_first35.urls");
+	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-stars_maven_first35_HOME.txt");
 	private static final File EXCEPTION_FILE = new File("study" + File.separator + "exceptions-all_dependency-HOME.log");
 	
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
-		System.setProperty("logfilename", FILE_PREFIX + "_run01");
+		System.setProperty("logfilename", FILE_PREFIX + "_run02");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);
@@ -51,7 +51,9 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 		
 		new MetricMiner2().start(new AllDependencyVersionsEvolutionStudy());
 		
-		JoinSummaryCSV.joinSummaryCSV(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + "_joined.csv"));
+		String joinCSV = "_joined.csv";
+		JoinSummaryCSV.joinSummaryCSV(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + joinCSV));
+		log.info("CSV joined: " + EVOLUTION_LOG_PATH + joinCSV);
 
 		System.out.println("Finish!");
 	}

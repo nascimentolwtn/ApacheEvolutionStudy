@@ -31,7 +31,7 @@ public abstract class SynchronousCheckOutRepositoryProcessor {
 			this.observer.beforeCheckout(repo, commit);
 			repo.getScm().checkout(commit.getHash());
 			
-			ExecutorService exec = Executors.newFixedThreadPool(5);
+			ExecutorService exec = Executors.newFixedThreadPool(10);
 			for (RepositoryFile repositoryFile : repo.getScm().files()) {
 				exec.submit(() -> {
 					processFile(repo, commit, repositoryFile);
