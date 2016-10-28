@@ -76,7 +76,7 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 				currentHashPosition,
 				totalCommits,
 				PERCENT_FORMAT.format(percent),
-				mavenDependency.isDependencyManaged(),
+//				mavenDependency.isDependencyManaged(),
 				mavenDependency.getGroupId(),
 				mavenDependency.getArtifactId(),
 				mavenDependency.getVersion(),
@@ -105,9 +105,27 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 			this.hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
 			this.totalCommits = hashes.size();
 			this.effectivePomProcessor = new EffectivePomSynchronousCheckoutProcessor(new LoggerCheckoutObserver(logger), writer, totalCommits);
+			this.writeCsvHeader(writer);
 		}
 	}
 
+	private void writeCsvHeader(PersistenceMechanism writer) {
+		writer.write(
+				"HASH",
+				"DATE",
+				"REPOSITORY",
+				"FILE",
+				"COMMIT_POSISTION",
+				"TOTAL_COMMITS",
+				"%_PROJECT",
+//				"IS_DependencyManeged",
+				"GROUP_ID",
+				"ARTIFACT_ID",
+				"VERSION",
+				"MESSAGE"
+		);
+	}
+	
 	@Override
 	public String name() {
 		return "all-dependency_" + this.repositoryName;
