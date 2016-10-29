@@ -65,10 +65,58 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
 		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
-		assertEquals(9, outputLines.size());
+		
+		String firstHash = CommitLine.parseOutputCommitLine(outputLines.get(0)).getHash();
+		int firstCommitCount = 0;
 		for (String line : outputLines) {
 			CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(line);
-			assertEquals(CommitLine.INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
+			if(parsedOutputCommitLine.getHash().equals(firstHash)) {
+				assertEquals(CommitLine.INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
+				firstCommitCount++;
+			}
+		}
+		assertEquals(9, firstCommitCount);
+
+	}
+	
+	@Test
+	public void contagemDeTodosCommitsESubmodulosDoTerceiroCommit() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		assertEquals(35727, outputLines.size());
+		
+		String thirdHash = CommitLine.parseOutputCommitLine(outputLines.get(19)).getHash();
+		int thirdCommitCount = 0;
+		int submodulesCount = 0;
+		int[] submodulesDependencyCount = {0,0,0};
+		int submoduleIndex = 0;
+		String lastModule = null;
+		for (String line : outputLines) {
+			CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(line);
+			if(parsedOutputCommitLine.getHash().equals(thirdHash)) {
+				assertEquals(CommitLine.INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
+				thirdCommitCount++;
+
+				String currentModule = parsedOutputCommitLine.getFile();
+				if(lastModule == null) {
+					lastModule = currentModule;
+					submodulesCount++;
+				}
+				if(currentModule.equals(lastModule)) {
+					submodulesDependencyCount[submoduleIndex]++;
+				} else {
+					lastModule = currentModule;
+					submodulesCount++;
+					submoduleIndex++;
+					submodulesDependencyCount[submoduleIndex]++;
+				}
+			}
+		}
+		assertEquals(27, thirdCommitCount);
+		assertEquals(3, submodulesCount);
+		for (int submoduleCount : submodulesDependencyCount) {
+			assertEquals(9, submoduleCount);
 		}
 	}
 	

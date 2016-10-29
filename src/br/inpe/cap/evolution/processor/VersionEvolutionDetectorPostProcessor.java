@@ -40,22 +40,13 @@ public class VersionEvolutionDetectorPostProcessor {
 
 	private void processLine(String line, PersistenceMechanism writer) {
 		CommitLine currentCommit = CommitLine.parseInputCommitLine(line);
-		if(previousCommit == null) {
-			this.previousCommit = currentCommit;
-			this.previousProject = new MavenProject();
-		}
-		
-		MavenProject currentProject = this.previousProject;
-		if(currentCommit.getHash().equals(this.previousCommit.getHash())) {
-			currentProject = this.previousProject;
-			MavenDependency dependency = getMavenDependencyFromCSVLine(currentCommit);
-			currentProject.getDependencies().add(dependency);
-			
-			CommitLine outputLine = currentCommit;
-			outputLine.setMavenDependencyValues(dependency);
-			writeCsvLine(writer, outputLine);
-		}
+		MavenProject currentProject = startProject(currentCommit);
 
+		MavenDependency dependency = getMavenDependencyFromCSVLine(currentCommit);
+		currentCommit.setMavenDependencyValues(dependency);
+		currentProject.getDependencies().add(dependency);
+		writeCsvLine(writer, currentCommit);
+		
 		/*
 		currentProject.getDependencies().forEach(
 			(dependency) -> {
@@ -65,6 +56,19 @@ public class VersionEvolutionDetectorPostProcessor {
 			});
 		*/
 		
+	}
+
+	private MavenProject startProject(CommitLine currentCommit) {
+		if(previousCommit == null || !currentCommit.getHash().equals(this.previousCommit.getHash())) {
+			startNewProject(currentCommit);
+		}
+		MavenProject currentProject = this.previousProject;
+		return currentProject;
+	}
+
+	private void startNewProject(CommitLine currentCommit) {
+		this.previousCommit = currentCommit;
+		this.previousProject = new MavenProject();
 	}
 
 	private void writeCsvHeader(PersistenceMechanism writer) {
