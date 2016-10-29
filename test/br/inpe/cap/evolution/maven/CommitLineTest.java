@@ -14,7 +14,7 @@ public class CommitLineTest {
 	
 	@Test
 	public void regularParseCommitLine() {
-		CommitLine parsedCommitLine = CommitLine.parseCommitLine(line);
+		CommitLine parsedCommitLine = CommitLine.parseInputCommitLine(line);
 		assertEquals("0e60b7d9888217be8499fe8b13c7b55e707f269c", parsedCommitLine.getHash());
 		assertEquals("10/05/2011 22:35:21", parsedCommitLine.getDate());
 		assertEquals("druid", parsedCommitLine.getRepository());
@@ -32,7 +32,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidLine() {
 		try {
-			CommitLine.parseCommitLine(invalidTokenLine);
+			CommitLine.parseInputCommitLine(invalidTokenLine);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());
@@ -43,7 +43,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidEmptyLine() {
 		try {
-			CommitLine.parseCommitLine("");
+			CommitLine.parseInputCommitLine("");
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());
@@ -54,7 +54,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidNullLine() {
 		try {
-			CommitLine.parseCommitLine(null);
+			CommitLine.parseInputCommitLine(null);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());
@@ -65,7 +65,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidParseHeader() {
 		try {
-			CommitLine.parseCommitLine(header);
+			CommitLine.parseInputCommitLine(header);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());

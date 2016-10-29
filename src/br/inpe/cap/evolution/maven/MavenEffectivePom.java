@@ -10,8 +10,8 @@ import br.com.metricminer2.util.SimpleCommandExecutor;
 
 public class MavenEffectivePom {
 
-	// Poderia ser customizado, ou utilizado plugin hierarchy maven plugin.
-	// Mas da forma 'hard-coded' dessa classe, procuro garantir maior perfomance na execução multi-thread. 
+	// Poderia ser parametrizado, ou utilizado plugin hierarchy maven plugin.
+	// Mas com a forma 'hard-coded' dessa classe, procuro garantir maior perfomance na execução multi-thread. 
 	
 	// Trocar esta linha de comando para cada máquina
 	private static final String MAVEN_PATH = "C:\\Progra~2\\apache-maven-3.3.9\\bin\\mvn.cmd";

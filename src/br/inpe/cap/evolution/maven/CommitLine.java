@@ -2,9 +2,12 @@ package br.inpe.cap.evolution.maven;
 
 import org.apache.commons.lang3.StringUtils;
 
+import br.inpe.cap.evolution.domain.MavenDependency;
+
 public class CommitLine {
 
 	public static final String HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,MESSAGE";
+	public static final String INITIAL_VERSION = "initial_version";
 
 	private String hash;
 	private String date;
@@ -26,7 +29,7 @@ public class CommitLine {
 	 */
 	private CommitLine() {}
 
-	public static CommitLine parseCommitLine(String line) {
+	public static CommitLine parseInputCommitLine(String line) {
 		String[] tokens = validateAndTokenizeLine(line);
 		CommitLine commitLine = new CommitLine();
 		commitLine.setHash(tokens[0]);
@@ -44,6 +47,25 @@ public class CommitLine {
 		return commitLine;
 	}
 
+	public static CommitLine parseOutputCommitLine(String line) {
+		String[] tokens = validateAndTokenizeLine(line);
+		CommitLine commitLine = new CommitLine();
+		commitLine.setHash(tokens[0]);
+		commitLine.setDate(tokens[1]);
+		commitLine.setRepository(tokens[2]);
+		commitLine.setFile(tokens[3]);
+		commitLine.setCommitPosition(Integer.parseInt(tokens[4]));
+		commitLine.setTotalCommits(Integer.parseInt(tokens[5]));
+		commitLine.setPercent(Float.parseFloat(tokens[6]));
+		commitLine.setGroupId(tokens[7]);
+		commitLine.setArtifactId(tokens[8]);
+		commitLine.setVersion(tokens[9]);
+		commitLine.setPreviousVersion(tokens[10]);
+		commitLine.setVersionChanged(Boolean.parseBoolean(tokens[11]));
+		commitLine.setMessage(tokens[12]);
+		return commitLine;
+	}
+
 	private static String[] validateAndTokenizeLine(String line) {
 		if(HEADER.equals(line)) {
 			throw new RuntimeException("Should not parse the CSV header.");
@@ -52,8 +74,10 @@ public class CommitLine {
 			throw new RuntimeException("CSV line is empty or null.");
 		}
 		String[] tokens = line.split(",");
-		if(tokens.length != 12) {
-			throw new RuntimeException("Line cannot be parsed.");
+		boolean isInputTokens = tokens.length == 12;
+		boolean isOutputTokens = tokens.length == 13;
+		if(!(isInputTokens || isOutputTokens)) {
+			throw new RuntimeException("Line cannot be parsed. Tokens="+tokens.length);
 		}
 		return tokens;
 	}
@@ -154,7 +178,7 @@ public class CommitLine {
 		this.previousVersion = previousVersion;
 	}
 
-	public boolean isVersionChanged() {
+	public boolean versionHasChanged() {
 		return versionChanged;
 	}
 
@@ -168,6 +192,12 @@ public class CommitLine {
 
 	public void setDependencyManaged(boolean dependencyManaged) {
 		this.dependencyManaged = dependencyManaged;
+	}
+
+	public void setMavenDependencyValues(MavenDependency dependency) {
+		this.setGroupId(dependency.getGroupId());
+		this.setArtifactId(dependency.getArtifactId());
+		this.setVersion(dependency.getVersion());
 	}
 	
 }
