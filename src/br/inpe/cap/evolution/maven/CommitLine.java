@@ -20,7 +20,7 @@ public class CommitLine {
 	private String groupId;
 	private String artifactId;
 	private String version;
-	private String previousVersion;
+	private String previousVersion = INITIAL_VERSION;
 	private boolean versionChanged;
 	private String message;
 	

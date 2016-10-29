@@ -10,7 +10,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.io.Resources;
@@ -62,11 +61,15 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	}
 	
 	@Test
-	@Ignore
 	public void leituraDoPrimeiroCommit() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		assertEquals(10, outputLines.size());
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		assertEquals(9, outputLines.size());
+		for (String line : outputLines) {
+			CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(line);
+			assertEquals(CommitLine.INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
+		}
 	}
 	
 	@After

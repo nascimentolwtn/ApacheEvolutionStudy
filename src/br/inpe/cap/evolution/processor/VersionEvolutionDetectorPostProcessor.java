@@ -29,6 +29,9 @@ public class VersionEvolutionDetectorPostProcessor {
 		System.out.println("Finish!");
 	}
 
+	private CommitLine previousCommit;
+	private MavenProject previousProject;
+
 	public void processCsvLines(CSVFile csv, List<String> listCsvLines) {
 		writeCsvHeader(csv);
 		removeHeader(listCsvLines);
@@ -36,18 +39,31 @@ public class VersionEvolutionDetectorPostProcessor {
 	}
 
 	private void processLine(String line, PersistenceMechanism writer) {
-
 		CommitLine currentCommit = CommitLine.parseInputCommitLine(line);
-		currentCommit.setPreviousVersion(CommitLine.INITIAL_VERSION);
-		MavenProject pom = new MavenProject();
-		pom.getDependencies().add(getMavenDependencyFromCSVLine(currentCommit));
+		if(previousCommit == null) {
+			this.previousCommit = currentCommit;
+			this.previousProject = new MavenProject();
+		}
 		
-		pom.getDependencies().forEach(
+		MavenProject currentProject = this.previousProject;
+		if(currentCommit.getHash().equals(this.previousCommit.getHash())) {
+			currentProject = this.previousProject;
+			MavenDependency dependency = getMavenDependencyFromCSVLine(currentCommit);
+			currentProject.getDependencies().add(dependency);
+			
+			CommitLine outputLine = currentCommit;
+			outputLine.setMavenDependencyValues(dependency);
+			writeCsvLine(writer, outputLine);
+		}
+
+		/*
+		currentProject.getDependencies().forEach(
 			(dependency) -> {
 				CommitLine outputLine = currentCommit;
 				outputLine.setMavenDependencyValues(dependency);
 				writeCsvLine(writer, outputLine);
 			});
+		*/
 		
 	}
 
@@ -74,7 +90,7 @@ public class VersionEvolutionDetectorPostProcessor {
 		
 	}
 
-	private void removeHeader(List<String> listCsvLines) {
+	public static void removeHeader(List<String> listCsvLines) {
 		listCsvLines.remove(listCsvLines.get(0));
 	}
 
