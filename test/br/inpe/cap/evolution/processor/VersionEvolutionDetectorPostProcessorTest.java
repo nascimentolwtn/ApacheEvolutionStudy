@@ -1,6 +1,9 @@
 package br.inpe.cap.evolution.processor;
 
+import static br.inpe.cap.evolution.maven.CommitLine.INITIAL_VERSION;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +59,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		assertEquals(expectedDependency, actualDependency);
 		
 		boolean expectedVersionHasChanged = false;
-		assertEquals(CommitLine.INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
+		assertEquals(INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
 		assertEquals(expectedVersionHasChanged, parsedOutputCommitLine.versionHasChanged());
 	}
 	
@@ -71,7 +74,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		for (String line : outputLines) {
 			CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(line);
 			if(parsedOutputCommitLine.getHash().equals(firstHash)) {
-				assertEquals(CommitLine.INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
+				assertEquals(INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
 				firstCommitCount++;
 			}
 		}
@@ -95,7 +98,6 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		for (String line : outputLines) {
 			CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(line);
 			if(parsedOutputCommitLine.getHash().equals(thirdHash)) {
-				assertEquals(CommitLine.INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
 				thirdCommitCount++;
 
 				String currentModule = parsedOutputCommitLine.getFile();
@@ -120,10 +122,72 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		}
 	}
 	
+	@Test
+	public void dependenciasDosSubmodulosDoTerceiroCommit() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		
+		int thirdCommitIndex = 18;
+		int submoduleIndex = 0;
+		String lastModule = null;
+		
+		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex));
+		String thirdHash = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex)).getHash();
+		do {
+			String currentModule = parsedOutputCommitLine.getFile();
+			if(lastModule == null) {
+				lastModule = currentModule;
+			}
+			if(currentModule.equals(lastModule)) {
+				if(submoduleIndex == 0) {
+					assertFalse(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));
+				} else {
+					assertTrue(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));
+				}
+			} else {
+				lastModule = currentModule;
+				submoduleIndex++;
+			}
+			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++thirdCommitIndex));
+		} while (parsedOutputCommitLine.getHash().equals(thirdHash));
+	}
+	
+	@Test
+	public void dependenciasDosSubmodulosDoQuartoCommit() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		
+		int thirdCommitIndex = 45;
+		int submoduleIndex = 0;
+		String lastModule = null;
+		
+		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex));
+		String thirdHash = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex)).getHash();
+		do {
+			String currentModule = parsedOutputCommitLine.getFile();
+			if(lastModule == null) {
+				lastModule = currentModule;
+			}
+			if(currentModule.equals(lastModule)) {
+				if(submoduleIndex == 0 || submoduleIndex == 2) {
+					assertTrue(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));
+				} else {
+					assertFalse(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));
+				}
+			} else {
+				lastModule = currentModule;
+				submoduleIndex++;
+			}
+			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++thirdCommitIndex));
+		} while (parsedOutputCommitLine.getHash().equals(thirdHash));
+	}
+	
 	@After
 	public void clearTempFiles() throws IOException {
-		// Arquivo "temporário" deveria ser deletado
-		// Mas a independência dos testes é garantida com o argumento do csvOutput append = false 
+		// Arquivo "temporário" deveria ser deletado.
+		// Entretanto, a independência dos testes é garantida com o argumento do csvOutput append = false 
 		FileUtils.forceDeleteOnExit(fileOutput);
 	}
 	

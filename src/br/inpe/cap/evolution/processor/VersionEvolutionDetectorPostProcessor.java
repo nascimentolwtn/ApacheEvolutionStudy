@@ -2,7 +2,9 @@ package br.inpe.cap.evolution.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
@@ -30,11 +32,16 @@ public class VersionEvolutionDetectorPostProcessor {
 	}
 
 	private CommitLine previousCommit;
-	private MavenProject previousProject;
+	private MavenProject currentProject;
+	private Map<String, MavenProject> currentMavenProjects = new HashMap<>();
 
 	public void processCsvLines(CSVFile csv, List<String> listCsvLines) {
+		processCsvLines(csv, listCsvLines, true);
+	}
+
+	public void processCsvLines(CSVFile csv, List<String> listCsvLines, boolean removeHeader) {
 		writeCsvHeader(csv);
-		removeHeader(listCsvLines);
+		if(removeHeader) removeHeader(listCsvLines);
 		listCsvLines.forEach((line) -> processLine(line, csv));
 	}
 
@@ -44,6 +51,8 @@ public class VersionEvolutionDetectorPostProcessor {
 
 		MavenDependency dependency = getMavenDependencyFromCSVLine(currentCommit);
 		currentCommit.setMavenDependencyValues(dependency);
+		setCurrentCommitPreviousVersion(currentCommit);
+		
 		currentProject.getDependencies().add(dependency);
 		writeCsvLine(writer, currentCommit);
 		
@@ -58,17 +67,34 @@ public class VersionEvolutionDetectorPostProcessor {
 		
 	}
 
-	private MavenProject startProject(CommitLine currentCommit) {
-		if(previousCommit == null || !currentCommit.getHash().equals(this.previousCommit.getHash())) {
-			startNewProject(currentCommit);
+	private void setCurrentCommitPreviousVersion(CommitLine currentCommit) {
+		MavenProject mavenProject = this.currentMavenProjects.get(currentCommit.getFile());
+		MavenDependency dependency = mavenProject.getMavenDependencyByArtifactId(currentCommit.getArtifactId());
+		if(dependency != null) {
+			currentCommit.setPreviousVersion(dependency.getVersion());
 		}
-		MavenProject currentProject = this.previousProject;
-		return currentProject;
 	}
 
-	private void startNewProject(CommitLine currentCommit) {
+	private MavenProject startProject(CommitLine currentCommit) {
+		if(previousCommit == null || !currentCommit.getHash().equals(this.previousCommit.getHash())) {
+			startNewCommit(currentCommit);
+		}
+		return projectRegardCurrentCommit(currentCommit);
+	}
+
+	private void startNewCommit(CommitLine currentCommit) {
 		this.previousCommit = currentCommit;
-		this.previousProject = new MavenProject();
+	}
+
+	private MavenProject projectRegardCurrentCommit(CommitLine currentCommit) {
+		if(currentProject == null || this.currentMavenProjects.get(currentCommit.getFile()) == null) {
+			this.currentProject = new MavenProject();
+			this.currentProject.setPath(currentCommit.getFile());
+			this.currentMavenProjects.put(currentCommit.getFile(), this.currentProject);
+		} else {
+			this.currentProject = this.currentMavenProjects.get(currentCommit.getFile());
+		}
+		return this.currentProject;
 	}
 
 	private void writeCsvHeader(PersistenceMechanism writer) {
@@ -105,5 +131,5 @@ public class VersionEvolutionDetectorPostProcessor {
 		dependency.setVersion(parsedCommitLine.getVersion());
 		return dependency ;
 	}
-
+	
 }

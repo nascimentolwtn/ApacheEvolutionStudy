@@ -30,6 +30,8 @@ public class MavenProject extends MavenVersionedEntity {
 	@XStreamAlias("dependencyManagement")
 	private MavenDependencyManagement dependencyManagement;
 	
+	private String path;
+	
 	public void setDependencies(List<MavenDependency> dependencies) {
 		this.dependencies = dependencies;
 	}
@@ -173,4 +175,21 @@ public class MavenProject extends MavenVersionedEntity {
 		return allDependencies;
 	}
 
+	public void setPath(String path) {
+		this.path = path;		
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public MavenDependency getMavenDependencyByArtifactId(String artifactId) {
+		MavenDependency dependency = null;
+		for (MavenDependency mavenDependency : getDependencies()) {
+			if(mavenDependency.getArtifactId().equals(artifactId)) {
+				return mavenDependency;
+			}
+		}
+		return dependency;
+	}
 }
