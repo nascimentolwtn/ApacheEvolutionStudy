@@ -16,15 +16,15 @@ import br.inpe.cap.evolution.maven.CommitLine;
 
 public class VersionEvolutionDetectorPostProcessor {
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(final String[] args) throws IOException {
 		System.out.println("Starting...");
 
-		VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
+		final VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
 		
-		File csvInput = new File("study" + File.separator + "all_dependency" + File.separator + "evolutions" + File.separator + "all-dependency-'disconf'.csv");
-		CSVFile csvOutput = new CSVFile("study" + File.separator + "version-detector-'disconf'.csv");
+		final File csvInput = new File("study" + File.separator + "all_dependency" + File.separator + "evolutions" + File.separator + "all-dependency-'disconf'.csv");
+		final CSVFile csvOutput = new CSVFile("study" + File.separator + "version-detector-'disconf'.csv");
 		
-		List<String> listCsvLines = FileUtils.readLines(csvInput);
+		final List<String> listCsvLines = FileUtils.readLines(csvInput);
 
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		
@@ -33,29 +33,25 @@ public class VersionEvolutionDetectorPostProcessor {
 
 	private CommitLine previousCommit;
 	private MavenProject currentProject;
-	private Map<String, MavenProject> currentMavenProjects = new HashMap<>();
+	private final Map<String, MavenProject> currentMavenProjects = new HashMap<>();
 
-	public void processCsvLines(CSVFile csv, List<String> listCsvLines) {
+	public void processCsvLines(final CSVFile csv, final List<String> listCsvLines) {
 		processCsvLines(csv, listCsvLines, true);
 	}
 
-	public void processCsvLines(CSVFile csv, List<String> listCsvLines, boolean removeHeader) {
+	public void processCsvLines(final CSVFile csv, final List<String> listCsvLines, final boolean removeHeader) {
 		writeCsvHeader(csv);
 		if(removeHeader) removeHeader(listCsvLines);
 		listCsvLines.forEach((line) -> processLine(line, csv));
 	}
 
-	private void processLine(String line, PersistenceMechanism writer) {
-		CommitLine currentCommit = CommitLine.parseInputCommitLine(line);
-		MavenProject currentProject = startProject(currentCommit);
+	private void processLine(final String line, final PersistenceMechanism writer) {
+		final CommitLine currentCommit = CommitLine.parseInputCommitLine(line);
+		final MavenProject currentProject = startProject(currentCommit);
 
-		MavenDependency dependency = getMavenDependencyFromCSVLine(currentCommit);
-		currentCommit.setMavenDependencyValues(dependency);
-		findPreviousVersionsAndVersionChanges(currentCommit);
-		
-		MavenDependency mavenDependencyByArtifactId = currentProject.getMavenDependencyByArtifactId(dependency.getArtifactId());
+		final MavenDependency mavenDependencyByArtifactId = findPreviousVersionAndSetVersionChanged(currentCommit);
 		if(mavenDependencyByArtifactId == null) {
-			currentProject.getDependencies().add(dependency);
+			currentProject.getDependencies().add(getMavenDependencyFromCSVLine(currentCommit));
 		} else {
 			mavenDependencyByArtifactId.setVersion(currentCommit.getVersion());
 		}
@@ -63,29 +59,30 @@ public class VersionEvolutionDetectorPostProcessor {
 		writeCsvLine(writer, currentCommit);
 	}
 
-	private void findPreviousVersionsAndVersionChanges(CommitLine currentCommit) {
-		MavenProject mavenProject = this.currentMavenProjects.get(currentCommit.getFile());
-		MavenDependency dependency = mavenProject.getMavenDependencyByArtifactId(currentCommit.getArtifactId());
+	private MavenDependency findPreviousVersionAndSetVersionChanged(final CommitLine currentCommit) {
+		final MavenProject mavenProject = this.currentMavenProjects.get(currentCommit.getFile());
+		final MavenDependency dependency = mavenProject.getMavenDependencyByArtifactId(currentCommit.getArtifactId());
 		if(dependency != null) {
 			currentCommit.setPreviousVersion(dependency.getVersion());
 			if(!currentCommit.getVersion().equals(dependency.getVersion())) {
 				currentCommit.setVersionChanged(true);
 			}
 		}
+		return dependency;
 	}
 
-	private MavenProject startProject(CommitLine currentCommit) {
+	private MavenProject startProject(final CommitLine currentCommit) {
 		if(previousCommit == null || !currentCommit.getHash().equals(this.previousCommit.getHash())) {
 			startNewCommit(currentCommit);
 		}
 		return projectRegardCurrentCommit(currentCommit);
 	}
 
-	private void startNewCommit(CommitLine currentCommit) {
+	private void startNewCommit(final CommitLine currentCommit) {
 		this.previousCommit = currentCommit;
 	}
 
-	private MavenProject projectRegardCurrentCommit(CommitLine currentCommit) {
+	private MavenProject projectRegardCurrentCommit(final CommitLine currentCommit) {
 		if(currentProject == null || this.currentMavenProjects.get(currentCommit.getFile()) == null) {
 			this.currentProject = new MavenProject();
 			this.currentProject.setPath(currentCommit.getFile());
@@ -96,11 +93,11 @@ public class VersionEvolutionDetectorPostProcessor {
 		return this.currentProject;
 	}
 
-	private void writeCsvHeader(PersistenceMechanism writer) {
+	private void writeCsvHeader(final PersistenceMechanism writer) {
 		writer.write(CommitLine.HEADER);
 	}
 	
-	private void writeCsvLine(PersistenceMechanism writer, CommitLine commitLine) {
+	private void writeCsvLine(final PersistenceMechanism writer, final CommitLine commitLine) {
 		writer.write(
 			commitLine.getHash(),
 			commitLine.getDate(),
@@ -119,12 +116,12 @@ public class VersionEvolutionDetectorPostProcessor {
 		
 	}
 
-	public static void removeHeader(List<String> listCsvLines) {
+	public static void removeHeader(final List<String> listCsvLines) {
 		listCsvLines.remove(listCsvLines.get(0));
 	}
 
-	protected MavenDependency getMavenDependencyFromCSVLine(CommitLine parsedCommitLine) {
-		MavenDependency dependency = new MavenDependency();
+	protected MavenDependency getMavenDependencyFromCSVLine(final CommitLine parsedCommitLine) {
+		final MavenDependency dependency = new MavenDependency();
 		dependency.setGroupId(parsedCommitLine.getGroupId());
 		dependency.setArtifactId(parsedCommitLine.getArtifactId());
 		dependency.setVersion(parsedCommitLine.getVersion());

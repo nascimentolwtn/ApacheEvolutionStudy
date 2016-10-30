@@ -2,8 +2,6 @@ package br.inpe.cap.evolution.maven;
 
 import org.apache.commons.lang3.StringUtils;
 
-import br.inpe.cap.evolution.domain.MavenDependency;
-
 public class CommitLine {
 
 	public static final String HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,MESSAGE";
@@ -194,10 +192,4 @@ public class CommitLine {
 		this.dependencyManaged = dependencyManaged;
 	}
 
-	public void setMavenDependencyValues(MavenDependency dependency) {
-		this.setGroupId(dependency.getGroupId());
-		this.setArtifactId(dependency.getArtifactId());
-		this.setVersion(dependency.getVersion());
-	}
-	
 }
