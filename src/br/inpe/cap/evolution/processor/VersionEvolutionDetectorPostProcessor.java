@@ -51,27 +51,20 @@ public class VersionEvolutionDetectorPostProcessor {
 
 		MavenDependency dependency = getMavenDependencyFromCSVLine(currentCommit);
 		currentCommit.setMavenDependencyValues(dependency);
-		setCurrentCommitPreviousVersion(currentCommit);
+		findPreviousVersionsAndVersionChanges(currentCommit);
 		
 		currentProject.getDependencies().add(dependency);
 		writeCsvLine(writer, currentCommit);
-		
-		/*
-		currentProject.getDependencies().forEach(
-			(dependency) -> {
-				CommitLine outputLine = currentCommit;
-				outputLine.setMavenDependencyValues(dependency);
-				writeCsvLine(writer, outputLine);
-			});
-		*/
-		
 	}
 
-	private void setCurrentCommitPreviousVersion(CommitLine currentCommit) {
+	private void findPreviousVersionsAndVersionChanges(CommitLine currentCommit) {
 		MavenProject mavenProject = this.currentMavenProjects.get(currentCommit.getFile());
 		MavenDependency dependency = mavenProject.getMavenDependencyByArtifactId(currentCommit.getArtifactId());
 		if(dependency != null) {
 			currentCommit.setPreviousVersion(dependency.getVersion());
+			if(!currentCommit.getVersion().equals(dependency.getVersion())) {
+				currentCommit.setVersionChanged(true);
+			}
 		}
 	}
 

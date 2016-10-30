@@ -8,7 +8,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -159,12 +163,12 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		List<String> outputLines = FileUtils.readLines(fileOutput);
 		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
 		
-		int thirdCommitIndex = 45;
+		int forthCommitIndex = 45;
 		int submoduleIndex = 0;
 		String lastModule = null;
 		
-		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex));
-		String thirdHash = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex)).getHash();
+		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(forthCommitIndex));
+		String forthHash = CommitLine.parseOutputCommitLine(outputLines.get(forthCommitIndex)).getHash();
 		do {
 			String currentModule = parsedOutputCommitLine.getFile();
 			if(lastModule == null) {
@@ -180,8 +184,35 @@ public class VersionEvolutionDetectorPostProcessorTest {
 				lastModule = currentModule;
 				submoduleIndex++;
 			}
-			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++thirdCommitIndex));
-		} while (parsedOutputCommitLine.getHash().equals(thirdHash));
+			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++forthCommitIndex));
+		} while (parsedOutputCommitLine.getHash().equals(forthHash));
+	}
+	
+	@Test
+	public void deteccaoDeAlteracaoDeVersoes() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		
+		int commitIndex = 343;
+		List<Integer> changedRange1 = IntStream.rangeClosed(349, 354).boxed().collect(Collectors.toList());
+		List<Integer> changedRange2 = IntStream.rangeClosed(358, 362).boxed().collect(Collectors.toList());
+		List<Integer> changedRange3 = Arrays.asList(368);
+		List<Integer> changedVersionIndexes = new ArrayList<>();
+		changedVersionIndexes.addAll(changedRange1);
+		changedVersionIndexes.addAll(changedRange2);
+		changedVersionIndexes.addAll(changedRange3);
+		
+		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex));
+		String initialHash = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex)).getHash();
+		do {
+			if(changedVersionIndexes.contains(commitIndex)) {
+				assertTrue(parsedOutputCommitLine.versionHasChanged());
+			} else {
+				assertFalse(parsedOutputCommitLine.versionHasChanged());
+			}
+			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++commitIndex));
+		} while (parsedOutputCommitLine.getHash().equals(initialHash));
 	}
 	
 	@After
