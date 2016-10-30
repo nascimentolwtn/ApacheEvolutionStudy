@@ -53,7 +53,13 @@ public class VersionEvolutionDetectorPostProcessor {
 		currentCommit.setMavenDependencyValues(dependency);
 		findPreviousVersionsAndVersionChanges(currentCommit);
 		
-		currentProject.getDependencies().add(dependency);
+		MavenDependency mavenDependencyByArtifactId = currentProject.getMavenDependencyByArtifactId(dependency.getArtifactId());
+		if(mavenDependencyByArtifactId == null) {
+			currentProject.getDependencies().add(dependency);
+		} else {
+			mavenDependencyByArtifactId.setVersion(currentCommit.getVersion());
+		}
+		
 		writeCsvLine(writer, currentCommit);
 	}
 

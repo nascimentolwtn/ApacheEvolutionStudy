@@ -137,7 +137,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		String lastModule = null;
 		
 		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex));
-		String thirdHash = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex)).getHash();
+		String thirdHash = parsedOutputCommitLine.getHash();
 		do {
 			String currentModule = parsedOutputCommitLine.getFile();
 			if(lastModule == null) {
@@ -168,7 +168,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		String lastModule = null;
 		
 		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(forthCommitIndex));
-		String forthHash = CommitLine.parseOutputCommitLine(outputLines.get(forthCommitIndex)).getHash();
+		String forthHash = parsedOutputCommitLine.getHash();
 		do {
 			String currentModule = parsedOutputCommitLine.getFile();
 			if(lastModule == null) {
@@ -189,7 +189,50 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	}
 	
 	@Test
-	public void deteccaoDeAlteracaoDeVersoes() throws IOException {
+	public void registroDeAlteracaoDeVersoesCommit33() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		
+		int commitIndex = 343;
+		List<Integer> changedRange1 = IntStream.rangeClosed(349, 354).boxed().collect(Collectors.toList());
+		List<Integer> changedRange2 = IntStream.rangeClosed(358, 362).boxed().collect(Collectors.toList());
+		List<Integer> changedRange3 = Arrays.asList(368);
+		List<Integer> changedVersionIndexes = new ArrayList<>();
+		changedVersionIndexes.addAll(changedRange1);
+		changedVersionIndexes.addAll(changedRange2);
+		changedVersionIndexes.addAll(changedRange3);
+		
+		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex));
+		String initialHash = parsedOutputCommitLine.getHash();
+		do {
+			if(changedVersionIndexes.contains(commitIndex)) {
+				assertTrue(parsedOutputCommitLine.versionHasChanged());
+			} else {
+				assertFalse(parsedOutputCommitLine.versionHasChanged());
+			}
+			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++commitIndex));
+		} while (parsedOutputCommitLine.getHash().equals(initialHash));
+	}
+	
+	@Test
+	public void retornoDaVersaoAnteriorAposRegistroDeAlteracaoDeVersao() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		
+		int commitIndex = 418;
+		
+		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex));
+		assertEquals("82c54267948a7182657c4cf11299bf4897b94836", parsedOutputCommitLine.getHash());
+		assertEquals("E:\\metricminer-evolution-stars\\disconf\\disconf-client\\pom.xml", parsedOutputCommitLine.getFile());
+		assertEquals("commons-lang", parsedOutputCommitLine.getArtifactId());
+		assertEquals("2.4", parsedOutputCommitLine.getPreviousVersion());
+		assertFalse(parsedOutputCommitLine.versionHasChanged());
+	}
+	
+	@Test
+	public void alteracaoDeVersoesERetornoDoValorCommitAnterior() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
 		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
