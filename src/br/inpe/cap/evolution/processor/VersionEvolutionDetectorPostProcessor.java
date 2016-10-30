@@ -44,10 +44,10 @@ public class VersionEvolutionDetectorPostProcessor {
 	public void processCsvLines(final CSVFile csv, final List<String> listCsvLines, final boolean removeHeader) {
 		writeCsvHeader(csv);
 		if(removeHeader) removeHeader(listCsvLines);
-		listCsvLines.forEach((line) -> processLine(line, csv));
+		listCsvLines.forEach((line) -> processLine(csv, line));
 	}
 
-	public void processLine(final String line, final PersistenceMechanism writer) {
+	public void processLine(final PersistenceMechanism writer, final String line) {
 		final CommitLine currentCommit = CommitLine.parseCommitLine(line, INPUT);
 		final MavenProject currentProject = startProject(currentCommit);
 
