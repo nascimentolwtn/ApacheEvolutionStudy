@@ -2,13 +2,6 @@ package br.inpe.cap.evolution.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -20,8 +13,6 @@ import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.parser.XmlMavenParser;
 
 public class AllDependenciesPostProcessor {
-	
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	
 	public XmlMavenParser parser = new XmlMavenParser();
 	
@@ -59,8 +50,6 @@ public class AllDependenciesPostProcessor {
 		
 //		float percent = 100 - ((currentHashPosition*100)/(float)totalCommits);
 		
-		List<MavenDependency> previousDependencies = new ArrayList<>();
-		
 		String sourceCode = FileUtils.readFileToString(pomFile);
 		MavenProject pom = parser.readPOM(sourceCode);
 		
@@ -96,9 +85,9 @@ public class AllDependenciesPostProcessor {
 	private void writeCsvLine(PersistenceMechanism writer, int currentHashPosition, 
 							  File pomFile, MavenDependency mavenDependency) {
 		
-		try {
-			Path pomPath = Paths.get(pomFile.toURI());
-			BasicFileAttributes attr = Files.readAttributes(pomPath, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+//		try {
+//			Path pomPath = Paths.get(pomFile.toURI());
+//			BasicFileAttributes attr = Files.readAttributes(pomPath, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 			writer.write(
 					// não faz sentido gravar dessa forma a data de criação, pois todos foram "criados" novamento no momento do checkou pelo método FileUtils.writeStringToFile
 //					DATE_FORMAT.format(new Date(attr.creationTime().toMillis())), 
@@ -109,9 +98,9 @@ public class AllDependenciesPostProcessor {
 					mavenDependency.getArtifactId(),
 					mavenDependency.getVersion()
 			);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+//		} catch (IOException e) {
+//			throw new RuntimeException(e);
+//		}
 		
 	}
 

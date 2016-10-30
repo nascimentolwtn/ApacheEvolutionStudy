@@ -30,6 +30,7 @@ public class DependencyEvolutionVisitor implements CommitVisitor {
 	 */
 	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.00000", DecimalFormatSymbols.getInstance(Locale.US));
 	
+	@SuppressWarnings("unused")
 	private static Logger logger;
 
 	private String repositoryName;
