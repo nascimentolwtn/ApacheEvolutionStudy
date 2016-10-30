@@ -1,5 +1,7 @@
 package br.inpe.cap.evolution.processor;
 
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,8 +47,8 @@ public class VersionEvolutionDetectorPostProcessor {
 		listCsvLines.forEach((line) -> processLine(line, csv));
 	}
 
-	private void processLine(final String line, final PersistenceMechanism writer) {
-		final CommitLine currentCommit = CommitLine.parseInputCommitLine(line);
+	public void processLine(final String line, final PersistenceMechanism writer) {
+		final CommitLine currentCommit = CommitLine.parseCommitLine(line, INPUT);
 		final MavenProject currentProject = startProject(currentCommit);
 
 		final MavenDependency mavenDependencyByArtifactId = findPreviousVersionAndSetVersionChanged(currentCommit);

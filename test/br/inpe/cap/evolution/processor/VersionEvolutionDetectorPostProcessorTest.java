@@ -1,6 +1,7 @@
 package br.inpe.cap.evolution.processor;
 
 import static br.inpe.cap.evolution.maven.CommitLine.INITIAL_VERSION;
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,6 +25,7 @@ import com.google.common.io.Resources;
 import br.com.metricminer2.persistence.csv.CSVFile;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.maven.CommitLine;
+import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
 
 public class VersionEvolutionDetectorPostProcessorTest {
 	
@@ -52,7 +54,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void leituraDaPrimeiraDependencia() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(1));
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(1), OUTPUT);
 		MavenDependency actualDependency = postProcessor.getMavenDependencyFromCSVLine(parsedOutputCommitLine);
 		
 		MavenDependency expectedDependency = new MavenDependency();
@@ -73,10 +75,10 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		List<String> outputLines = FileUtils.readLines(fileOutput);
 		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
 		
-		String firstHash = CommitLine.parseOutputCommitLine(outputLines.get(0)).getHash();
+		String firstHash = CommitLine.parseCommitLine(outputLines.get(0), OUTPUT).getHash();
 		int firstCommitCount = 0;
 		for (String line : outputLines) {
-			CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(line);
+			CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(line, OUTPUT);
 			if(parsedOutputCommitLine.getHash().equals(firstHash)) {
 				assertEquals(INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());
 				firstCommitCount++;
@@ -93,14 +95,14 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
 		assertEquals(35727, outputLines.size());
 		
-		String thirdHash = CommitLine.parseOutputCommitLine(outputLines.get(19)).getHash();
+		String thirdHash = CommitLine.parseCommitLine(outputLines.get(19), OUTPUT).getHash();
 		int thirdCommitCount = 0;
 		int submodulesCount = 0;
 		int[] submodulesDependencyCount = {0,0,0};
 		int submoduleIndex = 0;
 		String lastModule = null;
 		for (String line : outputLines) {
-			CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(line);
+			CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(line, CommitLineType.OUTPUT);
 			if(parsedOutputCommitLine.getHash().equals(thirdHash)) {
 				thirdCommitCount++;
 
@@ -136,7 +138,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		int submoduleIndex = 0;
 		String lastModule = null;
 		
-		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(thirdCommitIndex));
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(thirdCommitIndex), OUTPUT);
 		String thirdHash = parsedOutputCommitLine.getHash();
 		do {
 			String currentModule = parsedOutputCommitLine.getFile();
@@ -153,7 +155,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 				lastModule = currentModule;
 				submoduleIndex++;
 			}
-			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++thirdCommitIndex));
+			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++thirdCommitIndex), OUTPUT);
 		} while (parsedOutputCommitLine.getHash().equals(thirdHash));
 	}
 	
@@ -167,7 +169,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		int submoduleIndex = 0;
 		String lastModule = null;
 		
-		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(forthCommitIndex));
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(forthCommitIndex), OUTPUT);
 		String forthHash = parsedOutputCommitLine.getHash();
 		do {
 			String currentModule = parsedOutputCommitLine.getFile();
@@ -184,7 +186,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 				lastModule = currentModule;
 				submoduleIndex++;
 			}
-			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++forthCommitIndex));
+			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++forthCommitIndex), OUTPUT);
 		} while (parsedOutputCommitLine.getHash().equals(forthHash));
 	}
 	
@@ -203,7 +205,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		changedVersionIndexes.addAll(changedRange2);
 		changedVersionIndexes.addAll(changedRange3);
 		
-		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex));
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);
 		String initialHash = parsedOutputCommitLine.getHash();
 		do {
 			if(changedVersionIndexes.contains(commitIndex)) {
@@ -211,7 +213,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 			} else {
 				assertFalse(parsedOutputCommitLine.versionHasChanged());
 			}
-			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++commitIndex));
+			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++commitIndex), OUTPUT);
 		} while (parsedOutputCommitLine.getHash().equals(initialHash));
 	}
 	
@@ -223,7 +225,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		
 		int commitIndex = 418;
 		
-		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex));
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);
 		assertEquals("82c54267948a7182657c4cf11299bf4897b94836", parsedOutputCommitLine.getHash());
 		assertEquals("E:\\metricminer-evolution-stars\\disconf\\disconf-client\\pom.xml", parsedOutputCommitLine.getFile());
 		assertEquals("commons-lang", parsedOutputCommitLine.getArtifactId());
@@ -246,15 +248,15 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		changedVersionIndexes.addAll(changedRange2);
 		changedVersionIndexes.addAll(changedRange3);
 		
-		CommitLine parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex));
-		String initialHash = CommitLine.parseOutputCommitLine(outputLines.get(commitIndex)).getHash();
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);
+		String initialHash = parsedOutputCommitLine.getHash();
 		do {
 			if(changedVersionIndexes.contains(commitIndex)) {
 				assertTrue(parsedOutputCommitLine.versionHasChanged());
 			} else {
 				assertFalse(parsedOutputCommitLine.versionHasChanged());
 			}
-			parsedOutputCommitLine = CommitLine.parseOutputCommitLine(outputLines.get(++commitIndex));
+			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++commitIndex), OUTPUT);
 		} while (parsedOutputCommitLine.getHash().equals(initialHash));
 	}
 	

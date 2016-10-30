@@ -22,45 +22,31 @@ public class CommitLine {
 	private boolean versionChanged;
 	private String message;
 	
+	public static enum CommitLineType {INPUT, OUTPUT};
+	
 	/**
 	 *"Use Static Factory Method parseCommitLine(String line)!
 	 */
 	private CommitLine() {}
 
-	public static CommitLine parseInputCommitLine(String line) {
+	public static CommitLine parseCommitLine(String line, CommitLineType type) {
 		String[] tokens = validateAndTokenizeLine(line);
 		CommitLine commitLine = new CommitLine();
-		commitLine.setHash(tokens[0]);
-		commitLine.setDate(tokens[1]);
-		commitLine.setRepository(tokens[2]);
-		commitLine.setFile(tokens[3]);
-		commitLine.setCommitPosition(Integer.parseInt(tokens[4]));
-		commitLine.setTotalCommits(Integer.parseInt(tokens[5]));
-		commitLine.setPercent(Float.parseFloat(tokens[6]));
-		commitLine.setDependencyManaged(Boolean.parseBoolean(tokens[7]));
-		commitLine.setGroupId(tokens[8]);
-		commitLine.setArtifactId(tokens[9]);
-		commitLine.setVersion(tokens[10]);
-		commitLine.setMessage(tokens[11]);
-		return commitLine;
-	}
-
-	public static CommitLine parseOutputCommitLine(String line) {
-		String[] tokens = validateAndTokenizeLine(line);
-		CommitLine commitLine = new CommitLine();
-		commitLine.setHash(tokens[0]);
-		commitLine.setDate(tokens[1]);
-		commitLine.setRepository(tokens[2]);
-		commitLine.setFile(tokens[3]);
-		commitLine.setCommitPosition(Integer.parseInt(tokens[4]));
-		commitLine.setTotalCommits(Integer.parseInt(tokens[5]));
-		commitLine.setPercent(Float.parseFloat(tokens[6]));
-		commitLine.setGroupId(tokens[7]);
-		commitLine.setArtifactId(tokens[8]);
-		commitLine.setVersion(tokens[9]);
-		commitLine.setPreviousVersion(tokens[10]);
-		commitLine.setVersionChanged(Boolean.parseBoolean(tokens[11]));
-		commitLine.setMessage(tokens[12]);
+		int tokenIndex = 0;
+		commitLine.setHash(tokens[tokenIndex++]);
+		commitLine.setDate(tokens[tokenIndex++]);
+		commitLine.setRepository(tokens[tokenIndex++]);
+		commitLine.setFile(tokens[tokenIndex++]);
+		commitLine.setCommitPosition(Integer.parseInt(tokens[tokenIndex++]));
+		commitLine.setTotalCommits(Integer.parseInt(tokens[tokenIndex++]));
+		commitLine.setPercent(Float.parseFloat(tokens[tokenIndex++]));
+		if(type == CommitLineType.INPUT) commitLine.setDependencyManaged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		commitLine.setGroupId(tokens[tokenIndex++]);
+		commitLine.setArtifactId(tokens[tokenIndex++]);
+		commitLine.setVersion(tokens[tokenIndex++]);
+		if(type == CommitLineType.OUTPUT) commitLine.setPreviousVersion(tokens[tokenIndex++]);
+		if(type == CommitLineType.OUTPUT) commitLine.setVersionChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		commitLine.setMessage(tokens[tokenIndex++]);
 		return commitLine;
 	}
 
@@ -75,7 +61,7 @@ public class CommitLine {
 		boolean isInputTokens = tokens.length == 12;
 		boolean isOutputTokens = tokens.length == 13;
 		if(!(isInputTokens || isOutputTokens)) {
-			throw new RuntimeException("Line cannot be parsed. Tokens="+tokens.length);
+			throw new RuntimeException("Line cannot be parsed.");
 		}
 		return tokens;
 	}

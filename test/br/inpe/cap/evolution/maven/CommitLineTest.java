@@ -1,10 +1,13 @@
 package br.inpe.cap.evolution.maven;
 
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
 
 public class CommitLineTest {
 	
@@ -14,7 +17,7 @@ public class CommitLineTest {
 	
 	@Test
 	public void regularParseCommitLine() {
-		CommitLine parsedCommitLine = CommitLine.parseInputCommitLine(line);
+		CommitLine parsedCommitLine = CommitLine.parseCommitLine(line, INPUT);
 		assertEquals("0e60b7d9888217be8499fe8b13c7b55e707f269c", parsedCommitLine.getHash());
 		assertEquals("10/05/2011 22:35:21", parsedCommitLine.getDate());
 		assertEquals("druid", parsedCommitLine.getRepository());
@@ -32,7 +35,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidLine() {
 		try {
-			CommitLine.parseInputCommitLine(invalidTokenLine);
+			CommitLine.parseCommitLine(invalidTokenLine, INPUT);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());
@@ -43,7 +46,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidEmptyLine() {
 		try {
-			CommitLine.parseInputCommitLine("");
+			CommitLine.parseCommitLine("", INPUT);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());
@@ -54,7 +57,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidNullLine() {
 		try {
-			CommitLine.parseInputCommitLine(null);
+			CommitLine.parseCommitLine(null, INPUT);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());
@@ -65,7 +68,7 @@ public class CommitLineTest {
 	@Test
 	public void invalidParseHeader() {
 		try {
-			CommitLine.parseInputCommitLine(header);
+			CommitLine.parseCommitLine(header, CommitLineType.INPUT);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
 			Assert.assertSame(RuntimeException.class, e.getClass());
