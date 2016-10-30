@@ -1,10 +1,13 @@
 package br.inpe.cap.evolution.maven;
 
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class CommitLine {
 
-	public static final String HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,MESSAGE";
+	public static final String HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
 	public static final String INITIAL_VERSION = "initial_version";
 
 	private String hash;
@@ -20,6 +23,7 @@ public class CommitLine {
 	private String version;
 	private String previousVersion = INITIAL_VERSION;
 	private boolean versionChanged;
+	private boolean versionEverChanged;
 	private String message;
 	
 	public static enum CommitLineType {INPUT, OUTPUT};
@@ -40,13 +44,14 @@ public class CommitLine {
 		commitLine.setCommitPosition(Integer.parseInt(tokens[tokenIndex++]));
 		commitLine.setTotalCommits(Integer.parseInt(tokens[tokenIndex++]));
 		commitLine.setPercent(Float.parseFloat(tokens[tokenIndex++]));
-		if(type == CommitLineType.INPUT) commitLine.setDependencyManaged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		if(type == INPUT) commitLine.setDependencyManaged(Boolean.parseBoolean(tokens[tokenIndex++]));
 		commitLine.setGroupId(tokens[tokenIndex++]);
 		commitLine.setArtifactId(tokens[tokenIndex++]);
 		commitLine.setVersion(tokens[tokenIndex++]);
-		if(type == CommitLineType.OUTPUT) commitLine.setPreviousVersion(tokens[tokenIndex++]);
-		if(type == CommitLineType.OUTPUT) commitLine.setVersionChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
-		commitLine.setMessage(tokens[tokenIndex++]);
+		if(type == OUTPUT) commitLine.setPreviousVersion(tokens[tokenIndex++]);
+		if(type == OUTPUT) commitLine.setVersionChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		if(type == OUTPUT) commitLine.setVersionEverChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		commitLine.setMessage(tokens[tokenIndex++].trim());
 		return commitLine;
 	}
 
@@ -57,11 +62,12 @@ public class CommitLine {
 		if(StringUtils.isEmpty(line)) {
 			throw new RuntimeException("CSV line is empty or null.");
 		}
+		if(line.endsWith(",")) line = line + " ";
 		String[] tokens = line.split(",");
 		boolean isInputTokens = tokens.length == 12;
-		boolean isOutputTokens = tokens.length == 13;
+		boolean isOutputTokens = tokens.length == 14;
 		if(!(isInputTokens || isOutputTokens)) {
-			throw new RuntimeException("Line cannot be parsed.");
+			throw new RuntimeException("Line cannot be parsed:\n"+line);
 		}
 		return tokens;
 	}
@@ -176,6 +182,14 @@ public class CommitLine {
 
 	public void setDependencyManaged(boolean dependencyManaged) {
 		this.dependencyManaged = dependencyManaged;
+	}
+
+	public boolean versionHasEverChanged() {
+		return versionEverChanged;
+	}
+
+	public void setVersionEverChanged(boolean versionEverChanged) {
+		this.versionEverChanged = versionEverChanged;
 	}
 
 }

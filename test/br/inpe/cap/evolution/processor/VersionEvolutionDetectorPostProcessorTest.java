@@ -224,7 +224,6 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
 		
 		int commitIndex = 418;
-		
 		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);
 		assertEquals("82c54267948a7182657c4cf11299bf4897b94836", parsedOutputCommitLine.getHash());
 		assertEquals("E:\\metricminer-evolution-stars\\disconf\\disconf-client\\pom.xml", parsedOutputCommitLine.getFile());
@@ -234,7 +233,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	}
 	
 	@Test
-	public void alteracaoDeVersoesERetornoDoValorCommitAnterior() throws IOException {
+	public void alteracaoDeVersoesComValorCommitAnterior() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
 		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
@@ -258,6 +257,22 @@ public class VersionEvolutionDetectorPostProcessorTest {
 			}
 			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++commitIndex), OUTPUT);
 		} while (parsedOutputCommitLine.getHash().equals(initialHash));
+	}
+	
+	@Test
+	public void registroDeVersaoQueJaFoiAlterada() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		
+		int commitIndex = 34763;
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);
+		assertEquals("2f704555f92c7e6b10404278cf3203cad63fe389", parsedOutputCommitLine.getHash());
+		assertEquals("E:\\metricminer-evolution-stars\\disconf\\disconf-client\\pom.xml", parsedOutputCommitLine.getFile());
+		assertEquals("commons-lang", parsedOutputCommitLine.getArtifactId());
+		assertEquals("2.4", parsedOutputCommitLine.getPreviousVersion());
+		assertFalse(parsedOutputCommitLine.versionHasChanged());
+		assertTrue(parsedOutputCommitLine.versionHasEverChanged());
 	}
 	
 	@After

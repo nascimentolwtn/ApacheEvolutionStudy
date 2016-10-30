@@ -23,12 +23,12 @@ public class VersionEvolutionDetectorPostProcessor {
 
 		final VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
 		
-		final File csvInput = new File("study" + File.separator + "all_dependency" + File.separator + "evolutions" + File.separator + "all-dependency-'disconf'.csv");
-		final CSVFile csvOutput = new CSVFile("study" + File.separator + "version-detector-'disconf'.csv");
+		final File csvInput = new File("study" + File.separator + "all_dependency" + File.separator + "evolutions" + File.separator + "all-dependency-'Activiti'.csv");
+		final CSVFile csvOutput = new CSVFile("study" + File.separator + "version-detector-'Activiti'.csv");
 		
 		final List<String> listCsvLines = FileUtils.readLines(csvInput);
 
-		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		postProcessor.processCsvLines(csvOutput, listCsvLines, false);
 		
 		System.out.println("Finish!");
 	}
@@ -65,10 +65,12 @@ public class VersionEvolutionDetectorPostProcessor {
 		final MavenProject mavenProject = this.currentMavenProjects.get(currentCommit.getFile());
 		final MavenDependency dependency = mavenProject.getMavenDependencyByArtifactId(currentCommit.getArtifactId());
 		if(dependency != null) {
-			currentCommit.setPreviousVersion(dependency.getVersion());
 			if(!currentCommit.getVersion().equals(dependency.getVersion())) {
 				currentCommit.setVersionChanged(true);
+				dependency.setVersionEverChanged(true);
 			}
+			currentCommit.setPreviousVersion(dependency.getVersion());
+			currentCommit.setVersionEverChanged(dependency.versionHasEverChanged());
 		}
 		return dependency;
 	}
@@ -113,6 +115,7 @@ public class VersionEvolutionDetectorPostProcessor {
 			commitLine.getVersion(),
 			commitLine.getPreviousVersion(),
 			commitLine.versionHasChanged(),
+			commitLine.versionHasEverChanged(),
 			commitLine.getMessage()
 		);
 		

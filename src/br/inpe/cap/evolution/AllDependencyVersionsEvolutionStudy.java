@@ -42,7 +42,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
-		System.setProperty("logfilename", FILE_PREFIX + "_run01");
+		System.setProperty("logfilename", FILE_PREFIX + "_run02");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);

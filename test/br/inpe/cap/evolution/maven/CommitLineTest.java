@@ -2,6 +2,8 @@ package br.inpe.cap.evolution.maven;
 
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Assert;
@@ -13,6 +15,7 @@ public class CommitLineTest {
 	
 	private String header = CommitLine.HEADER;
 	private String line = "0e60b7d9888217be8499fe8b13c7b55e707f269c,10/05/2011 22:35:21,druid,E:\\metricminer-evolution-stars\\druid\\pom.xml,2,4890,0.04090,false,com.alibaba.external,java.servlet,2.5,Share project 'druid' into 'http://code.alibabatech.com/svn/druid'git-svn-id: http://code.alibabatech.com/svn/druid/trunk@2 b9813039-fb51-4c41-a8b9-e21c2acb5095";
+	private String lineWithoutMessage = "6a6f3d45a521518eec4d8531ec9d8534a3f17bf3,22/07/2013 08:59,Activiti,E:\\metricminer-evolution-stars\\Activiti\\modules\\activiti-bpmn-converter\\pom.xml,3989,7530,52.97477,false,org.activiti,activiti-bpmn-model,5.14-SNAPSHOT,";
 	private String invalidTokenLine = "0e60b7,10/05/2011,22:35:21,druid,2,4890,0.04090,java.servlet,2.5,Share project 'druid'";
 	
 	@Test
@@ -33,13 +36,30 @@ public class CommitLineTest {
 	}
 
 	@Test
+	public void parseCommitLineWithoutMessage() {
+		CommitLine parsedCommitLine = CommitLine.parseCommitLine(lineWithoutMessage, INPUT);
+		assertEquals("6a6f3d45a521518eec4d8531ec9d8534a3f17bf3", parsedCommitLine.getHash());
+		assertEquals("22/07/2013 08:59", parsedCommitLine.getDate());
+		assertEquals("Activiti", parsedCommitLine.getRepository());
+		assertEquals("E:\\metricminer-evolution-stars\\Activiti\\modules\\activiti-bpmn-converter\\pom.xml", parsedCommitLine.getFile());
+		assertEquals(3989, parsedCommitLine.getCommitPosition());
+		assertEquals(7530, parsedCommitLine.getTotalCommits());
+		assertEquals(52.97477f, parsedCommitLine.getPercent(), 0.00001f);
+		assertEquals(false, parsedCommitLine.isDependencyManaged());
+		assertEquals("org.activiti", parsedCommitLine.getGroupId());
+		assertEquals("activiti-bpmn-model", parsedCommitLine.getArtifactId());
+		assertEquals("5.14-SNAPSHOT", parsedCommitLine.getVersion());
+		assertEquals("", parsedCommitLine.getMessage());
+	}
+
+	@Test
 	public void invalidLine() {
 		try {
 			CommitLine.parseCommitLine(invalidTokenLine, INPUT);
 			fail("Shoud throw Unparse Exception");
 		} catch (RuntimeException e) {
-			Assert.assertSame(RuntimeException.class, e.getClass());
-			assertEquals("Line cannot be parsed.", e.getMessage());
+			assertSame(RuntimeException.class, e.getClass());
+			assertTrue(e.getMessage().startsWith("Line cannot be parsed:"));
 		}
 	}
 	

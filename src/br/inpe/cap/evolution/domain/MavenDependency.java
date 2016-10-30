@@ -6,6 +6,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 public class MavenDependency extends MavenVersionedEntity {
 	
 	private boolean dependencyManaged;
+	private boolean versionEverChanged;
 	
 	public boolean isDependencyManaged() {
 		return dependencyManaged;
@@ -18,6 +19,14 @@ public class MavenDependency extends MavenVersionedEntity {
 	@Override
 	public String toString() {
 		return "MavenDependency [groupId=" + groupId + ", artifactId=" + artifactId + ", version=" + version + "]";
+	}
+
+	public void setVersionEverChanged(boolean versionEverChanged) {
+		this.versionEverChanged = versionEverChanged;
+	}
+	
+	public boolean versionHasEverChanged() {
+		return versionEverChanged;
 	}
 
 }
