@@ -19,10 +19,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.repodriller.persistence.csv.CSVFile;
 
 import com.google.common.io.Resources;
 
-import br.com.metricminer2.persistence.csv.CSVFile;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.maven.CommitLine;
 import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
@@ -73,7 +73,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void leituraDoPrimeiroCommit() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		
 		String firstHash = CommitLine.parseCommitLine(outputLines.get(0), OUTPUT).getHash();
 		int firstCommitCount = 0;
@@ -92,7 +92,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void contagemDeTodosCommitsESubmodulosDoTerceiroCommit() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		assertEquals(35727, outputLines.size());
 		
 		String thirdHash = CommitLine.parseCommitLine(outputLines.get(19), OUTPUT).getHash();
@@ -132,7 +132,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void dependenciasDosSubmodulosDoTerceiroCommit() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		
 		int thirdCommitIndex = 18;
 		int submoduleIndex = 0;
@@ -163,7 +163,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void dependenciasDosSubmodulosDoQuartoCommit() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		
 		int forthCommitIndex = 45;
 		int submoduleIndex = 0;
@@ -194,7 +194,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void registroDeAlteracaoDeVersoesCommit33() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		
 		int commitIndex = 343;
 		List<Integer> changedRange1 = IntStream.rangeClosed(349, 354).boxed().collect(Collectors.toList());
@@ -221,7 +221,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void retornoDaVersaoAnteriorAposRegistroDeAlteracaoDeVersao() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		
 		int commitIndex = 418;
 		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);
@@ -236,7 +236,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void alteracaoDeVersoesComValorCommitAnterior() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		
 		int commitIndex = 343;
 		List<Integer> changedRange1 = IntStream.rangeClosed(349, 354).boxed().collect(Collectors.toList());
@@ -263,7 +263,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void registroDeVersaoQueJaFoiAlterada() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		VersionEvolutionDetectorPostProcessor.removeHeader(outputLines);
+		CommitLine.removeHeader(outputLines);
 		
 		int commitIndex = 34763;
 		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);
@@ -273,6 +273,14 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		assertEquals("2.4", parsedOutputCommitLine.getPreviousVersion());
 		assertFalse(parsedOutputCommitLine.versionHasChanged());
 		assertTrue(parsedOutputCommitLine.versionHasEverChanged());
+	}
+	
+	@Test
+	public void comparacaoStudyVsVersionEvolutionDetectorMain() throws IOException, URISyntaxException {
+		List<String> studyOutput = FileUtils.readLines(new File(Resources.getResource("all-dependency-detector-'blueprints'.csv").toURI()));
+		List<String> versionEvolutionMainOutput = FileUtils.readLines(new File(Resources.getResource("version-detector-'blueprints'.csv").toURI()));
+		assertTrue(studyOutput.removeAll(versionEvolutionMainOutput));
+		assertEquals(0, studyOutput.size());
 	}
 	
 	@After
