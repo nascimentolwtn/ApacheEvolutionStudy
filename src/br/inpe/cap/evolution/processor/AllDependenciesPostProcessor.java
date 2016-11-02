@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.persistence.csv.CSVFile;
 
-import br.com.metricminer2.persistence.PersistenceMechanism;
-import br.com.metricminer2.persistence.csv.CSVFile;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.parser.XmlMavenParser;

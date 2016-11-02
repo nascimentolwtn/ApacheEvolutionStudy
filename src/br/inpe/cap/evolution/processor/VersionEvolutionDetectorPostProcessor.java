@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.persistence.csv.CSVFile;
 
-import br.com.metricminer2.persistence.PersistenceMechanism;
-import br.com.metricminer2.persistence.csv.CSVFile;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.maven.CommitLine;
@@ -20,15 +20,25 @@ public class VersionEvolutionDetectorPostProcessor {
 	
 	public static void main(final String[] args) throws IOException {
 		System.out.println("Starting...");
-
-		final VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
 		
-		final File csvInput = new File("study" + File.separator + "all_dependency" + File.separator + "evolutions" + File.separator + "all-dependency-'Activiti'.csv");
-		final CSVFile csvOutput = new CSVFile("study" + File.separator + "version-detector-'Activiti'.csv");
+		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath("study" + File.separator + "all_dependency" + File.separator + "evolutions");
 		
-		final List<String> listCsvLines = FileUtils.readLines(csvInput);
+		arquivos.parallelStream().forEach((csvInput)-> {
+			
+			final VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
+			String name = csvInput.getName();
+			System.out.println("Processing "+name);
+			final CSVFile csvOutput = new CSVFile("study" + File.separator + "detector" + File.separator + name);
+			
+			try {
+				List<String> listCsvLines = FileUtils.readLines(csvInput);
+				postProcessor.processCsvLines(csvOutput, listCsvLines, false);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+		});
 
-		postProcessor.processCsvLines(csvOutput, listCsvLines, false);
 		
 		System.out.println("Finish!");
 	}
@@ -43,7 +53,7 @@ public class VersionEvolutionDetectorPostProcessor {
 
 	public void processCsvLines(final CSVFile csv, final List<String> listCsvLines, final boolean removeHeader) {
 		writeCsvHeader(csv);
-		if(removeHeader) removeHeader(listCsvLines);
+		if(removeHeader) CommitLine.removeHeader(listCsvLines);
 		listCsvLines.forEach((line) -> processLine(csv, line));
 	}
 
@@ -119,10 +129,6 @@ public class VersionEvolutionDetectorPostProcessor {
 			commitLine.getMessage()
 		);
 		
-	}
-
-	public static void removeHeader(final List<String> listCsvLines) {
-		listCsvLines.remove(listCsvLines.get(0));
 	}
 
 	protected MavenDependency getMavenDependencyFromCSVLine(final CommitLine parsedCommitLine) {

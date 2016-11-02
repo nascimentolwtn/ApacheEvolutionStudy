@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.domain.Modification;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
 
-import br.com.metricminer2.domain.ChangeSet;
-import br.com.metricminer2.domain.Commit;
-import br.com.metricminer2.domain.Modification;
-import br.com.metricminer2.persistence.PersistenceMechanism;
-import br.com.metricminer2.scm.CommitVisitor;
-import br.com.metricminer2.scm.SCMRepository;
 import br.inpe.cap.evolution.parser.StringMavenParser;
 
 public class ApacheEvolutionVisitor implements CommitVisitor {

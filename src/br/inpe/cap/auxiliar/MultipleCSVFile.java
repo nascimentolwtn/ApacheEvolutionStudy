@@ -1,7 +1,7 @@
 package br.inpe.cap.auxiliar;
 
-import br.com.metricminer2.persistence.PersistenceMechanism;
-import br.com.metricminer2.persistence.csv.CSVFile;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.persistence.csv.CSVFile;
 
 public class MultipleCSVFile implements PersistenceMechanism {
 	

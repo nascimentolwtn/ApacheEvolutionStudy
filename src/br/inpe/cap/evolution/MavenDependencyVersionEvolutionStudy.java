@@ -11,15 +11,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.repodriller.RepoDriller;
+import org.repodriller.RepositoryMining;
+import org.repodriller.Study;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.persistence.csv.CSVFile;
+import org.repodriller.scm.GitRepository;
 
-import br.com.metricminer2.MetricMiner2;
-import br.com.metricminer2.RepositoryMining;
-import br.com.metricminer2.Study;
-import br.com.metricminer2.filter.range.Commits;
-import br.com.metricminer2.persistence.csv.CSVFile;
-import br.com.metricminer2.scm.GitRepository;
-import br.inpe.cap.auxiliar.JoinSummaryCSV;
 import br.inpe.cap.auxiliar.MultipleCSVFile;
+import br.inpe.cap.evolution.processor.JoinSummaryCSVPostProcessor;
 
 public class MavenDependencyVersionEvolutionStudy implements Study {
 
@@ -44,9 +44,9 @@ public class MavenDependencyVersionEvolutionStudy implements Study {
 		
 		checkRequiredLogFilesAndDirectories();
 		
-		new MetricMiner2().start(new MavenDependencyVersionEvolutionStudy());
+		new RepoDriller().start(new MavenDependencyVersionEvolutionStudy());
 		
-		JoinSummaryCSV.joinSummaryCSV(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + "_joined.csv"));
+		new JoinSummaryCSVPostProcessor().process(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + "_joined.csv"));
 		
 		System.out.println("Finish!");
 	}
@@ -84,7 +84,6 @@ public class MavenDependencyVersionEvolutionStudy implements Study {
 			String gitReposLogSubDir = gitReposDir.substring(gitReposDir.lastIndexOf(File.separator)+1, gitReposDir.length());
 			new RepositoryMining()
 				.in(GitRepository.singleProject(gitReposDir, 2000))
-				.startingFromTheBeginning()
 				.through(Commits.all())
 //			.withThreads(3)
 				.process(new DependencyEvolutionVisitor(EVOLUTION_LOG_PATH, gitReposLogSubDir), new MultipleCSVFile(
@@ -104,7 +103,7 @@ public class MavenDependencyVersionEvolutionStudy implements Study {
 	}
 	
 	private List<String> getRepositoryExceptDoneDirs(String rootRepositoriesPath) throws IOException {
-		List<String> allDirsIn = br.com.metricminer2.util.FileUtils.getAllDirsIn(rootRepositoriesPath);
+		List<String> allDirsIn = org.repodriller.util.FileUtils.getAllDirsIn(rootRepositoriesPath);
 		
 		FileReader arquivo = new FileReader(GITHUB_DONE_FILE);
 		BufferedReader reader = new BufferedReader(arquivo);

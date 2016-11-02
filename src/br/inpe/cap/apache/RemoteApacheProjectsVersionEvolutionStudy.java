@@ -11,13 +11,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.repodriller.RepoDriller;
+import org.repodriller.RepositoryMining;
+import org.repodriller.Study;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.persistence.csv.CSVFile;
+import org.repodriller.scm.GitRemoteRepository;
 
-import br.com.metricminer2.MetricMiner2;
-import br.com.metricminer2.RepositoryMining;
-import br.com.metricminer2.Study;
-import br.com.metricminer2.filter.range.Commits;
-import br.com.metricminer2.persistence.csv.CSVFile;
-import br.com.metricminer2.scm.GitRemoteRepository;
 import br.inpe.cap.auxiliar.MultipleCSVFile;
 
 public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
@@ -43,7 +43,7 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 		
 		checkRequiredLogFilesAndDirectories();
 		
-		new MetricMiner2().start(new RemoteApacheProjectsVersionEvolutionStudy());
+		new RepoDriller().start(new RemoteApacheProjectsVersionEvolutionStudy());
 		System.out.println("Finish!");
 	}
 	
@@ -82,7 +82,6 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 						.asBareRepos()
 						.withMaxNumberOfFilesInACommit(2000)
 						.buildAsSCMRepository())
-				.startingFromTheBeginning()
 				.through(Commits.all())
 //			.withThreads(3)
 				.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(

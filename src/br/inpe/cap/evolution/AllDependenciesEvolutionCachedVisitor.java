@@ -11,17 +11,17 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
 
-import br.com.metricminer2.domain.ChangeSet;
-import br.com.metricminer2.domain.Commit;
-import br.com.metricminer2.persistence.PersistenceMechanism;
-import br.com.metricminer2.scm.CommitVisitor;
-import br.com.metricminer2.scm.SCMRepository;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.parser.XmlMavenParser;
-import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
 import br.inpe.cap.evolution.processor.AsynchronousCheckOutFileRepositoryProcessor;
+import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
 
 public class AllDependenciesEvolutionCachedVisitor implements CommitVisitor {
 	

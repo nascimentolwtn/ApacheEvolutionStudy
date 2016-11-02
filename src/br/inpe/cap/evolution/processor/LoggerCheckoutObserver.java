@@ -2,9 +2,8 @@ package br.inpe.cap.evolution.processor;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-
-import br.com.metricminer2.domain.Commit;
-import br.com.metricminer2.scm.SCMRepository;
+import org.repodriller.domain.Commit;
+import org.repodriller.scm.SCMRepository;
 
 public class LoggerCheckoutObserver implements CheckoutObserver {
 	

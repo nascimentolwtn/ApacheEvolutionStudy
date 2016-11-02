@@ -1,7 +1,7 @@
 package br.inpe.cap.evolution.processor;
 
-import br.com.metricminer2.domain.Commit;
-import br.com.metricminer2.scm.SCMRepository;
+import org.repodriller.domain.Commit;
+import org.repodriller.scm.SCMRepository;
 
 public interface CheckoutObserver {
 

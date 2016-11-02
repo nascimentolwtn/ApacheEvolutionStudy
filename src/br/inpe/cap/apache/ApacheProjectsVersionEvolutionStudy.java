@@ -11,13 +11,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.repodriller.RepoDriller;
+import org.repodriller.RepositoryMining;
+import org.repodriller.Study;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.persistence.csv.CSVFile;
+import org.repodriller.scm.GitRepository;
 
-import br.com.metricminer2.MetricMiner2;
-import br.com.metricminer2.RepositoryMining;
-import br.com.metricminer2.Study;
-import br.com.metricminer2.filter.range.Commits;
-import br.com.metricminer2.persistence.csv.CSVFile;
-import br.com.metricminer2.scm.GitRepository;
 import br.inpe.cap.auxiliar.MultipleCSVFile;
 
 public class ApacheProjectsVersionEvolutionStudy implements Study {
@@ -41,7 +41,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 		
 		checkRequiredLogFilesAndDirectories();
 		
-		new MetricMiner2().start(new ApacheProjectsVersionEvolutionStudy());
+		new RepoDriller().start(new ApacheProjectsVersionEvolutionStudy());
 		System.out.println("Finish!");
 	}
 	
@@ -77,7 +77,6 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 		try {
 			new RepositoryMining()
 				.in(GitRepository.singleProject(gitUrl, 2000))
-				.startingFromTheBeginning()
 				.through(Commits.all())
 //			.withThreads(3)
 				.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(
@@ -97,7 +96,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 	}
 	
 	private List<String> getRepositoryExceptDoneDirs(String rootApacheStudiesPath) throws IOException {
-		List<String> allDirsIn = br.com.metricminer2.util.FileUtils.getAllDirsIn(rootApacheStudiesPath);
+		List<String> allDirsIn = org.repodriller.util.FileUtils.getAllDirsIn(rootApacheStudiesPath);
 		
 		FileReader arquivo = new FileReader(GITHUB_DONE_FILE);
 		BufferedReader reader = new BufferedReader(arquivo);

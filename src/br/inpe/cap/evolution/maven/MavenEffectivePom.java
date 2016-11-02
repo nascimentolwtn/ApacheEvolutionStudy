@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.apache.commons.io.FileUtils;
-
-import br.com.metricminer2.util.SimpleCommandExecutor;
+import org.repodriller.util.SimpleCommandExecutor;
 
 public class MavenEffectivePom {
 

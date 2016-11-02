@@ -3,11 +3,13 @@ package br.inpe.cap.evolution.maven;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class CommitLine {
 
-	public static final String HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
+	public static final String HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
 	public static final String INITIAL_VERSION = "initial_version";
 
 	private String hash;
@@ -62,7 +64,7 @@ public class CommitLine {
 		if(StringUtils.isEmpty(line)) {
 			throw new RuntimeException("CSV line is empty or null.");
 		}
-		if(line.endsWith(",")) line = line + " ";
+		line = validateCommitMessage(line);
 		String[] tokens = line.split(",");
 		boolean isInputTokens = tokens.length == 12;
 		boolean isOutputTokens = tokens.length == 14;
@@ -70,6 +72,16 @@ public class CommitLine {
 			throw new RuntimeException("Line cannot be parsed:\n"+line);
 		}
 		return tokens;
+	}
+
+	private static String validateCommitMessage(String line) {
+		boolean commitLineHasntMessage = line.endsWith(",");
+		if(commitLineHasntMessage) line = line + " "; // add space that will be trimmed later
+		return line;
+	}
+
+	public static void removeHeader(final List<String> listCsvLines) {
+		listCsvLines.remove(listCsvLines.get(0));
 	}
 
 	public String getHash() {

@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import br.com.metricminer2.domain.Commit;
-import br.com.metricminer2.scm.RepositoryFile;
-import br.com.metricminer2.scm.SCMRepository;
+import org.repodriller.domain.Commit;
+import org.repodriller.scm.RepositoryFile;
+import org.repodriller.scm.SCMRepository;
 
 public abstract class AsynchronousCheckOutFileRepositoryProcessor {
 	
