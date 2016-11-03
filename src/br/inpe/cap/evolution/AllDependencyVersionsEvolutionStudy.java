@@ -23,6 +23,7 @@ import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
 
 import br.inpe.cap.evolution.processor.JoinSummaryCSVPostProcessor;
+import br.inpe.cap.evolution.visitor.AllDependenciesEvolutionVisitor;
 
 public class AllDependencyVersionsEvolutionStudy implements Study {
 

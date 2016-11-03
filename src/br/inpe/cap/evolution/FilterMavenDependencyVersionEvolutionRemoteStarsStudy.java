@@ -20,6 +20,7 @@ import org.repodriller.scm.GitRemoteRepository;
 
 import br.inpe.cap.auxiliar.MultipleCSVFile;
 import br.inpe.cap.evolution.processor.JoinSummaryCSVPostProcessor;
+import br.inpe.cap.evolution.visitor.FilterMavenDependencyVisitor;
 
 public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements Study {
 

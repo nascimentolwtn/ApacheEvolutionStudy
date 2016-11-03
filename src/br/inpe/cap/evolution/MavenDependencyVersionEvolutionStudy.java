@@ -20,6 +20,7 @@ import org.repodriller.scm.GitRepository;
 
 import br.inpe.cap.auxiliar.MultipleCSVFile;
 import br.inpe.cap.evolution.processor.JoinSummaryCSVPostProcessor;
+import br.inpe.cap.evolution.visitor.DependencyEvolutionVisitor;
 
 public class MavenDependencyVersionEvolutionStudy implements Study {
 
