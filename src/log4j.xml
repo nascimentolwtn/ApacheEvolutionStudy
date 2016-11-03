@@ -27,7 +27,7 @@
         </layout>
 	</appender>
     
-  	<category name="br.com.metricminer2">
+  	<category name="org.repodriller">
         <priority value="INFO"/>
         <appender-ref ref="main"/>
         <appender-ref ref="roll"/>
