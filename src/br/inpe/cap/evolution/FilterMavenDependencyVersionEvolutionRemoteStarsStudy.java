@@ -41,6 +41,7 @@ public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements St
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
+		System.setProperty("git.maxfiles", "2000");
 		System.setProperty("logfilename", FILE_PREFIX + "_filter06");
 		log = Logger.getLogger(RepositoryMining.class);
 		
@@ -87,7 +88,7 @@ public class FilterMavenDependencyVersionEvolutionRemoteStarsStudy implements St
 			GitRemoteRepository gitRemoteRepository = GitRemoteRepository
 					.hostedOn(gitUrl)
 					.inTempDir(tempDir)
-					.withMaxNumberOfFilesInACommit(2000).build();
+					.build();
 			new RepositoryMining()
 				.in(gitRemoteRepository.info())
 				.through(Commits.onlyInHead())

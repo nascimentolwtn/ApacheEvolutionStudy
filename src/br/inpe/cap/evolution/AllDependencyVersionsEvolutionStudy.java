@@ -43,6 +43,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
+		System.setProperty("git.maxfiles", "2000");
 		System.setProperty("logfilename", FILE_PREFIX + "_run02");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
@@ -96,7 +97,6 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 				.in(GitRemoteRepository
 						.hostedOn(gitUrl)
 						.inTempDir(tempDir)
-						.withMaxNumberOfFilesInACommit(2000)
 						.buildAsSCMRepository())
 				.through(Commits.all())
 				.filters(new OnlyInMainBranch(),

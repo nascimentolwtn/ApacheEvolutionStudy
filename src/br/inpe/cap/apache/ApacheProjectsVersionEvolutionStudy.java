@@ -35,6 +35,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 	private static Logger log;
 	
 	public static void main(String[] args) throws IOException {
+		System.setProperty("git.maxfiles", "2000");
 		System.setProperty("logfilename", APACHE_FILE_PREFIX + "_run01");
 		log = Logger.getLogger(RepositoryMining.class);
 		ApacheEvolutionVisitor.setLogger(log);
@@ -76,7 +77,7 @@ public class ApacheProjectsVersionEvolutionStudy implements Study {
 	private void doMining(String gitUrl) {
 		try {
 			new RepositoryMining()
-				.in(GitRepository.singleProject(gitUrl, 2000))
+				.in(GitRepository.singleProject(gitUrl))
 				.through(Commits.all())
 //			.withThreads(3)
 				.process(new ApacheEvolutionVisitor(), new MultipleCSVFile(

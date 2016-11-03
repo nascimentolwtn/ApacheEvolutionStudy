@@ -37,6 +37,7 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 	private static Logger log;
 
 	public static void main(String[] args) throws IOException {
+		System.setProperty("git.maxfiles", "2000");
 		System.setProperty("logfilename", APACHE_FILE_PREFIX + "_checkout01");
 		log = Logger.getLogger(RepositoryMining.class);
 		ApacheEvolutionVisitor.setLogger(log);
@@ -80,7 +81,6 @@ public class RemoteApacheProjectsVersionEvolutionStudy implements Study {
 						.hostedOn(gitUrl)
 						.inTempDir(tempDir)
 						.asBareRepos()
-						.withMaxNumberOfFilesInACommit(2000)
 						.buildAsSCMRepository())
 				.through(Commits.all())
 //			.withThreads(3)

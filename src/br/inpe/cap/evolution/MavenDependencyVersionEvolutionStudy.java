@@ -39,6 +39,7 @@ public class MavenDependencyVersionEvolutionStudy implements Study {
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
+		System.setProperty("git.maxfiles", "2000");
 		System.setProperty("logfilename", FILE_PREFIX + "_run01");
 		log = Logger.getLogger(RepositoryMining.class);
 		DependencyEvolutionVisitor.setLogger(log);
@@ -84,7 +85,7 @@ public class MavenDependencyVersionEvolutionStudy implements Study {
 		try {
 			String gitReposLogSubDir = gitReposDir.substring(gitReposDir.lastIndexOf(File.separator)+1, gitReposDir.length());
 			new RepositoryMining()
-				.in(GitRepository.singleProject(gitReposDir, 2000))
+				.in(GitRepository.singleProject(gitReposDir))
 				.through(Commits.all())
 //			.withThreads(3)
 				.process(new DependencyEvolutionVisitor(EVOLUTION_LOG_PATH, gitReposLogSubDir), new MultipleCSVFile(

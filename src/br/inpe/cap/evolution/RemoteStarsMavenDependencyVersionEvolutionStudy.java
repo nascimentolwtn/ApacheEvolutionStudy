@@ -41,6 +41,7 @@ public class RemoteStarsMavenDependencyVersionEvolutionStudy implements Study {
 	private static Logger log;
 	
 	public static void main(String[] args) throws Exception {
+		System.setProperty("git.maxfiles", "2000");
 		System.setProperty("logfilename", FILE_PREFIX + "_checkout01");
 		log = Logger.getLogger(RepositoryMining.class);
 		DependencyEvolutionVisitor.setLogger(log);
@@ -90,7 +91,6 @@ public class RemoteStarsMavenDependencyVersionEvolutionStudy implements Study {
 						.hostedOn(gitUrl)
 						.inTempDir(tempDir)
 						.asBareRepos()
-						.withMaxNumberOfFilesInACommit(2000)
 						.buildAsSCMRepository())
 				.through(Commits.all())
 //			.withThreads(3)
