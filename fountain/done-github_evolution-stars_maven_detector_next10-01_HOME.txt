@@ -1,0 +1,7 @@
+https://github.com/alibaba/dubbo
+https://github.com/cyrilmottier/GreenDroid
+https://github.com/kevinsawicki/http-request
+https://github.com/todoroo/astrid
+https://github.com/tinkerpop/gremlin
+https://github.com/JakeWharton/ActionBarSherlock
+https://github.com/goldmansachs/gs-collections
