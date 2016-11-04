@@ -41,8 +41,8 @@ public class ApacheEvolutionVisitor implements CommitVisitor {
 			return;
 		}
 		
-		int currentHashPosition = hashes.indexOf(commit.getHash()) + 1;
 		int totalCommits = hashes.size();
+		int currentHashPosition = totalCommits - hashes.indexOf(commit.getHash()) + 1;
 		
 		float percent = 100 - ((currentHashPosition*100)/(float)totalCommits);
 		
