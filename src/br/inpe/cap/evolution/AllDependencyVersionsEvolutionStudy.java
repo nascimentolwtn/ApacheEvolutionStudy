@@ -2,6 +2,7 @@ package br.inpe.cap.evolution;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import org.repodriller.filter.range.Commits;
 import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
 
+import br.inpe.cap.evolution.processor.JoinSummaryCSVPostProcessor;
 import br.inpe.cap.evolution.visitor.AllDependenciesEvolutionVisitor;
 
 public class AllDependencyVersionsEvolutionStudy implements Study {
@@ -45,7 +47,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	
 	private static Logger log;
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 		System.setProperty("git.maxfiles", "2000");
 		System.setProperty("logfilename", FILE_PREFIX + "_run02");
 		log = Logger.getLogger(RepositoryMining.class);
@@ -56,8 +58,8 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 		
 		new RepoDriller().start(new AllDependencyVersionsEvolutionStudy());
 		
-		String joinCSV = "_01_joined.csv";
-//		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + joinCSV));
+		final String joinCSV = "_01_joined.csv";
+		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + joinCSV));
 		log.info("CSV joined: " + EVOLUTION_LOG_PATH + joinCSV);
 
 		System.out.println("Finish!");
@@ -100,8 +102,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 					.hostedOn(gitUrl)
 					.inTempDir(tempDir)
 					.build();
-			CommitRange range = startOrContinueCommit(gitReposLogSubDir, gitRepository);
-			if(true) return;
+			final CommitRange range = startOrContinueCommits(gitReposLogSubDir, gitRepository);
 			new RepositoryMining()
 				.in(gitRepository.info())
 				.through(range)
@@ -122,10 +123,10 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 		System.gc();
 	}
 
-	private CommitRange startOrContinueCommit(final String gitReposLogSubDir, final GitRemoteRepository gitRepository) throws IOException {
-		Properties prop = new Properties();
-		prop.load(this.getClass().getResourceAsStream(CONTINUE_COMMIT_FILE.getPath()));
-		String startCommit = prop.getProperty(gitReposLogSubDir);
+	private CommitRange startOrContinueCommits(final String gitReposLogSubDir, final GitRemoteRepository gitRepository) throws IOException {
+		final Properties prop = new Properties();
+		prop.load(new FileInputStream(CONTINUE_COMMIT_FILE));
+		final String startCommit = prop.getProperty(gitReposLogSubDir);
 		if(startCommit == null) {
 			return Commits.all();
 		} else {
@@ -142,12 +143,12 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 			CONTINUE_COMMIT_FILE.createNewFile();
 		}
 		
-		File studyPathDir = new File(STUDY_LOG_PATH);
+		final File studyPathDir = new File(STUDY_LOG_PATH);
 		if(!studyPathDir.exists()) {
 			studyPathDir.mkdir();
 		}
 		
-		File evolutionPathDir = new File(EVOLUTION_LOG_PATH);
+		final File evolutionPathDir = new File(EVOLUTION_LOG_PATH);
 		if(!evolutionPathDir.exists()) {
 			evolutionPathDir.mkdir();
 		}
