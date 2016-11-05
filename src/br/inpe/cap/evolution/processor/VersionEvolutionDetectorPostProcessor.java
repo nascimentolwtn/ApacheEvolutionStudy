@@ -1,6 +1,7 @@
 package br.inpe.cap.evolution.processor;
 
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import org.repodriller.persistence.csv.CSVFile;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.maven.CommitLine;
+import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
 
 public class VersionEvolutionDetectorPostProcessor {
 	
@@ -32,7 +34,7 @@ public class VersionEvolutionDetectorPostProcessor {
 			
 			try {
 				List<String> listCsvLines = FileUtils.readLines(csvInput);
-				postProcessor.processCsvLines(csvOutput, listCsvLines, false);
+				postProcessor.reprocessVersionDetectorOutputCsvLines(csvOutput, listCsvLines);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -47,18 +49,26 @@ public class VersionEvolutionDetectorPostProcessor {
 	private MavenProject currentProject;
 	private final Map<String, MavenProject> currentMavenProjects = new HashMap<>();
 
-	public void processCsvLines(final CSVFile csv, final List<String> listCsvLines) {
-		processCsvLines(csv, listCsvLines, true);
+	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
+		processCsvLines(writer, listCsvLines, true, INPUT);
 	}
 
-	public void processCsvLines(final CSVFile csv, final List<String> listCsvLines, final boolean removeHeader) {
-		writeCsvHeader(csv);
+	public void reprocessVersionDetectorOutputCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
+		processCsvLines(writer, listCsvLines, true, OUTPUT);
+	}
+
+	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines, final boolean removeHeader, final CommitLineType commitLineType) {
+		writeCsvHeader(writer);
 		if(removeHeader) CommitLine.removeHeader(listCsvLines);
-		listCsvLines.forEach((line) -> processLine(csv, line));
+		listCsvLines.forEach((line) -> processLine(writer, line, commitLineType));
 	}
 
 	public void processLine(final PersistenceMechanism writer, final String line) {
-		final CommitLine currentCommit = CommitLine.parseCommitLine(line, INPUT);
+		processLine(writer, line, INPUT);
+	}
+	
+	public void processLine(final PersistenceMechanism writer, final String line, final CommitLineType commitLineType) {
+		final CommitLine currentCommit = CommitLine.parseCommitLine(line, commitLineType);
 		final MavenProject currentProject = startProject(currentCommit);
 
 		final MavenDependency mavenDependencyByArtifactId = findPreviousVersionAndSetVersionChanged(currentCommit);
