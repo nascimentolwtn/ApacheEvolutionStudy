@@ -48,15 +48,6 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 
 	@Override
 	protected void processFile(final SCMRepository repo, final Commit commit, final RepositoryFile file) {
-		
-		// CommitFilter processa apenas commits que possuem MODIFICAÇÕES com esse FileType.
-		// Porém, aqui a ideia é fazer CHECKOUT todos arquivos mesmo, e então filtrar novamente para processar somente os poms.xml.
-		if(isntPOMFile(file)) {
-			return;
-		}
-		
-//		Thread.currentThread().setPriority(3);
-		
 		final MavenProject mavenProject = parser.readPOM(getEffectiveOrOriginalPom(file));
 		mavenProject.getDependencies().forEach(
 			(dependency) -> 
@@ -87,10 +78,6 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 		return effectivePom;
 	}
 
-	private boolean isntPOMFile(final RepositoryFile file) {
-		return !file.fileNameEndsWith("pom.xml");
-	}
-	
 	public void setCurrentHashPosition(final int currentHashPosition) {
 		this.currentHashPosition = currentHashPosition;
 	}

@@ -1,10 +1,12 @@
 package br.inpe.cap.evolution.processor;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.repodriller.domain.Commit;
 import org.repodriller.scm.RepositoryFile;
@@ -32,10 +34,13 @@ public abstract class SynchronousCheckOutRepositoryProcessor {
 			repo.getScm().checkout(commit.getHash());
 			
 			ExecutorService exec = Executors.newFixedThreadPool(10);
-			for (RepositoryFile repositoryFile : repo.getScm().files()) {
-				exec.submit(() -> {
-					processFile(repo, commit, repositoryFile);
-				});
+			// CommitFilter processa apenas commits que possuem MODIFICAÇÕES com esse FileType.
+			// Porém, aqui a ideia é fazer CHECKOUT todos arquivos mesmo, e então filtrar novamente e abrir threads somente para processar os poms.xml.
+			final List<RepositoryFile> pomFiles = repo.getScm().files().stream().filter((f)->f.fileNameEndsWith("pom.xml")).collect(Collectors.toList());
+			for (RepositoryFile repositoryFile : pomFiles) {
+				exec.submit(() -> 
+					processFile(repo, commit, repositoryFile)
+				);
 			}
 			
 			exec.shutdown();
