@@ -35,21 +35,21 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static final String STUDY_TEMP_PATH = "E:\\metricminer-evolution-stars"; // System.getenv("STUDY_TEMP_PATH");
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
 
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "all_dependency_detector";
-	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
+	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "all_dependency_detector" + File.separator;
+	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + "evolutions";
 	
-	private static final String FILE_PREFIX = "all_dependency_detector_next10-01-HOME";
+	private static final String FILE_PREFIX = "all_dependency_detector_next10-02-HOME";
 
 	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_next10.urls");
-	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+"done-github_evolution-stars_maven_detector_next10-01_HOME.txt");
-	private static final File CONTINUE_COMMIT_FILE = new File(FOUNTAIN_PATH + FILE_PREFIX + "-continue.prop");
-	private static final File EXCEPTION_FILE = new File("study" + File.separator + "exceptions-all_dependency-HOME.log");
+	private static final File GITHUB_DONE_FILE = new File(STUDY_LOG_PATH+"done-github_" + FILE_PREFIX + ".txt");
+	private static final File CONTINUE_COMMIT_FILE = new File(STUDY_LOG_PATH + FILE_PREFIX + "-continue.properties");
+	private static final File EXCEPTION_FILE = new File(STUDY_LOG_PATH + "exceptions-all_dependency-HOME.log");
 	
 	private static Logger log;
 	
 	public static void main(final String[] args) throws Exception {
 		System.setProperty("git.maxfiles", "2000");
-		System.setProperty("logfilename", FILE_PREFIX + "_run02");
+		System.setProperty("logfilename", FILE_PREFIX + "_run01");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);
@@ -124,6 +124,9 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	}
 
 	private CommitRange startOrContinueCommits(final String gitReposLogSubDir, final GitRemoteRepository gitRepository) throws IOException {
+		if(!CONTINUE_COMMIT_FILE.exists()) {
+			return Commits.all();
+		}
 		final Properties prop = new Properties();
 		prop.load(new FileInputStream(CONTINUE_COMMIT_FILE));
 		final String startCommit = prop.getProperty(gitReposLogSubDir);
@@ -137,10 +140,6 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static void checkRequiredLogFilesAndDirectories() throws IOException {
 		if(!GITHUB_DONE_FILE.exists()) {
 			GITHUB_DONE_FILE.createNewFile();
-		}
-		
-		if(!CONTINUE_COMMIT_FILE.exists()) {
-			CONTINUE_COMMIT_FILE.createNewFile();
 		}
 		
 		final File studyPathDir = new File(STUDY_LOG_PATH);
@@ -179,6 +178,4 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 		}
 	}
 		
-
-
 }
