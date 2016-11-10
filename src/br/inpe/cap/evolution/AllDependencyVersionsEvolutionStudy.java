@@ -26,7 +26,6 @@ import org.repodriller.filter.range.Commits;
 import org.repodriller.persistence.csv.CSVFile;
 import org.repodriller.scm.GitRemoteRepository;
 
-import br.inpe.cap.evolution.processor.JoinSummaryCSVPostProcessor;
 import br.inpe.cap.evolution.visitor.AllDependenciesEvolutionVisitor;
 
 public class AllDependencyVersionsEvolutionStudy implements Study {
@@ -38,7 +37,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "all_dependency_detector" + File.separator;
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + "evolutions";
 	
-	private static final String FILE_PREFIX = "all_dependency_detector_next10-02-HOME";
+	private static final String FILE_PREFIX = "all_dependency_detector_next10-04-HOME";
 
 	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_next10.urls");
 	private static final File GITHUB_DONE_FILE = new File(STUDY_LOG_PATH+"done-github_" + FILE_PREFIX + ".txt");
@@ -59,7 +58,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 		new RepoDriller().start(new AllDependencyVersionsEvolutionStudy());
 		
 		final String joinCSV = "_01_joined.csv";
-		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + joinCSV));
+//		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + joinCSV));
 		log.info("CSV joined: " + EVOLUTION_LOG_PATH + joinCSV);
 
 		System.out.println("Finish!");
