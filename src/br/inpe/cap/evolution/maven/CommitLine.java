@@ -81,7 +81,9 @@ public class CommitLine {
 	}
 
 	public static void removeHeader(final List<String> listCsvLines) {
-		listCsvLines.remove(listCsvLines.get(0));
+		if(!listCsvLines.isEmpty()) {
+			listCsvLines.remove(listCsvLines.get(0));
+		}
 	}
 
 	public String getHash() {

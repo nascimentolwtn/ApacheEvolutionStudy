@@ -6,6 +6,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,6 +53,19 @@ public class CommitLineTest {
 		assertEquals("activiti-bpmn-model", parsedCommitLine.getArtifactId());
 		assertEquals("5.14-SNAPSHOT", parsedCommitLine.getVersion());
 		assertEquals("", parsedCommitLine.getMessage());
+	}
+	
+	@Test
+	public void tratamentoRemoveHeaderDeArquivoSemNenhumaLinha() {
+		try {
+			final List<String> emptyList = Collections.emptyList();
+			assertTrue(emptyList.isEmpty());
+			CommitLine.removeHeader(emptyList);
+			assertTrue(emptyList.isEmpty());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Tratamento deveria ser realizado para evitar falha de processamento de CSV.");
+		}
 	}
 
 	@Test
