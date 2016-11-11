@@ -48,6 +48,7 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 
 	@Override
 	protected void processFile(final SCMRepository repo, final Commit commit, final RepositoryFile file) {
+		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 		final MavenProject mavenProject = parser.readPOM(getEffectiveOrOriginalPom(file));
 		mavenProject.getDependencies().forEach(
 			(dependency) -> 
