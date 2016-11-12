@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.repodriller.persistence.csv.CSVFile;
 
@@ -29,16 +30,28 @@ import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
 
 public class VersionEvolutionDetectorPostProcessorTest {
 	
+	public static final String RESOURCE_OUTPUT_DIRECTORY = 
+			"test" 		+ File.separator +
+			"resources"	+ File.separator +
+			"output"	+ File.separator;
 	private VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
 	private List<String> listCsvLines;
 	private String outputFileName;
 	private CSVFile csvOutput;
 	private File fileOutput;
 	
+	@BeforeClass
+	public static void checkResourceOutputDirectory() {
+		File outputDir = new File(RESOURCE_OUTPUT_DIRECTORY);
+		if(!outputDir.exists()) {
+			outputDir.mkdirs();
+		}
+	}
+	
 	@Before
 	public void setUpFiles() throws IOException, URISyntaxException {
-		listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-'disconf'.csv").toURI()));
-		outputFileName = "study" + File.separator + "version-detector-'disconf'.csv";
+		listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-'disconf'-input.csv").toURI()));
+		outputFileName = RESOURCE_OUTPUT_DIRECTORY + "test-version-detector-'disconf'.csv";
 		csvOutput = new CSVFile(outputFileName, false);
 		fileOutput = new File(outputFileName);
 	}
@@ -290,5 +303,4 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		FileUtils.forceDeleteOnExit(fileOutput);
 	}
 	
-
 }

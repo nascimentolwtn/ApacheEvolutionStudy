@@ -28,7 +28,7 @@ public class VersionEvolutionDetectorStandAlonePostProcessor {
 			try {
 				List<String> listCsvLines = FileUtils.readLines(csvInput);
 				postProcessor.reprocessVersionDetectorOutputCsvLines(csvOutput, listCsvLines);
-			} catch (IOException e) {
+			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
 			}
 			
