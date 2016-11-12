@@ -1,16 +1,13 @@
 package br.inpe.cap.evolution.processor;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.repodriller.persistence.PersistenceMechanism;
-import org.repodriller.persistence.csv.CSVFile;
 
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
@@ -22,41 +19,20 @@ public class ArtifactAggregatorPostProcessor {
 	public static final String HEADER = "PROJECT,SUBPROJECT,TOTAL_COMMITS,QTD_GROUPS,GROUPS,QTD_ARTIFACTS,ARTIFACTS";
 	public static final String AGGREGATE_SEPARATOR = ";";
 	
-	public static void main(String[] args) throws Exception {
-		
-		System.out.println("Starting...");
-
-		final String pathToLook = "C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\run";
-		final String outputPath = pathToLook + File.separator + "output";
-		new File(outputPath).mkdirs();
-		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);
-		
-		arquivos.parallelStream().forEach((csvInput)-> {
-			
-		});
-
-		
-		ArtifactAggregatorPostProcessor processor = new ArtifactAggregatorPostProcessor();
-		List<String> linesCsvInput = FileUtils.readLines(new File("study\\detector_first35\\evolutions"+File.separator+"all-dependency-'disconf'.csv"));
-
-		CommitLine parseCommitLine = processor.parseLastCommitLine(linesCsvInput);
-		
-		processor.process(new CSVFile("study\\aggregated.csv"), linesCsvInput, parseCommitLine.getHash());
-
-		System.out.println("Finished.");
-		
-	}
-	
 	private MavenProject currentProject;
 	private final Map<String, MavenProject> currentMavenProjects = new HashMap<>();
 	private CommitLine lastCommitLine;
 	
-	private CommitLine parseLastCommitLine(List<String> linesCsvInput) {
+	public CommitLine parseLastCommitLine(List<String> linesCsvInput) {
 		return CommitLine.parseCommitLine(lastLine(linesCsvInput), CommitLineType.OUTPUT);
 	}
 	
 	private String lastLine(List<String> linesCsvInput) {
-		return linesCsvInput.get(linesCsvInput.size()-1);
+		if(!linesCsvInput.isEmpty()) {
+			return linesCsvInput.get(linesCsvInput.size()-1);
+		} else {
+			return "";
+		}
 	}
 
 	public void process(PersistenceMechanism writer, List<String> linesCsvInput, String hash) {
