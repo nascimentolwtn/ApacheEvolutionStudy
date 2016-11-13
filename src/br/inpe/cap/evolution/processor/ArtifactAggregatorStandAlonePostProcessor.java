@@ -14,9 +14,9 @@ public class ArtifactAggregatorStandAlonePostProcessor {
 	public static void main(String[] args) throws Exception {
 		
 		System.out.println("Starting...");
-
-		final String pathToLook = "study\\detector_first35\\evolutions";
-		final String outputPath = pathToLook + File.separator + "output";
+		
+		String pathToLook = "study\\detector_first35\\evolutions";
+		String outputPath = "study\\artifact_aggregation\\evolutions\\";
 		new File(outputPath).mkdirs();
 		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);
 		
@@ -28,9 +28,11 @@ public class ArtifactAggregatorStandAlonePostProcessor {
 				
 				CommitLine parseCommitLine = processor.parseLastCommitLine(linesCsvInput);
 				
-				processor.process(new CSVFile("study\\artifact_aggregation\\"
+				String csvOutput = outputPath
 						+ csvInput.getName().substring(0, csvInput.getName().lastIndexOf(".csv"))
-						+ "_aggregated.csv"), linesCsvInput, parseCommitLine.getHash());
+						+ "_aggregated.csv";
+				processor.process(new CSVFile(csvOutput), linesCsvInput, parseCommitLine.getHash());
+				System.out.println(csvOutput + " processded.");
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
 			}

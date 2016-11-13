@@ -12,7 +12,7 @@ import br.inpe.cap.evolution.maven.CommitLine;
 
 public class JoinSummaryCSVPostProcessor {
 	
-	private static final String APACHE_FILE_PREFIX = "detector";
+	private static final String APACHE_FILE_PREFIX = "artifact_aggregation";
 	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + APACHE_FILE_PREFIX;
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
 	private static final File OUTPUT = new File(EVOLUTION_LOG_PATH + "_joined.csv");
@@ -21,7 +21,7 @@ public class JoinSummaryCSVPostProcessor {
 	
 	public static void main(String[] args) throws Exception {
 		System.out.println("Starting...");
-		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, OUTPUT);
+		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, OUTPUT, ArtifactAggregatorPostProcessor.HEADER);
 		System.out.println("Finish!");
 	}
 
@@ -31,12 +31,12 @@ public class JoinSummaryCSVPostProcessor {
 		this.processCsvWithHeader = processCsvWithHeader;
 	}
 	
-	public void process(String evolutionLogPath, File output) throws Exception {
+	public void process(String evolutionLogPath, File output, String header) throws Exception {
 		
 		File evolutions = new File(evolutionLogPath);
 		Iterator<File> iterateFiles = FileUtils.iterateFiles(evolutions, FileFileFilter.FILE, null);
 
-		if(processCsvWithHeader) FileUtils.write(output, CommitLine.HEADER+"\n");
+		if(processCsvWithHeader) FileUtils.write(output, header+"\n");
 
 		iterateFiles.forEachRemaining(
 			(f) -> {
@@ -52,6 +52,10 @@ public class JoinSummaryCSVPostProcessor {
 					e.printStackTrace();
 				}
 			});
+	}
+
+	public void process(String evolutionLogPath, File file) throws Exception {
+		process(evolutionLogPath, file, CommitLine.HEADER);
 	}
 
 }
