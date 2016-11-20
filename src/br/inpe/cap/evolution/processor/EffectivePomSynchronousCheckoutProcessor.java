@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -48,13 +49,22 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 
 	@Override
 	protected void processFile(final SCMRepository repo, final Commit commit, final RepositoryFile file) {
-		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+		setupCurrentThread(file.getFullName(), repo.getLastDir());
 		final MavenProject mavenProject = parser.readPOM(getEffectiveOrOriginalPom(file));
 		mavenProject.getDependencies().forEach(
 			(dependency) -> 
 				versionEvolutionDetector.processLine(
 					writer, this.obtainCsvLine(repo.getLastDir(), commit, this.currentHashPosition, this.totalCommits, this.percent, file.getFullName(), dependency))
 			);
+	}
+
+	private void setupCurrentThread(final String fileFullName, final String repositoryName) {
+		try {
+			final Thread currentThread = Thread.currentThread();
+			currentThread.setName(fileFullName.substring(fileFullName.indexOf(repositoryName)));
+			currentThread.setPriority(Thread.MIN_PRIORITY);
+			Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+		} catch (Exception e) {}
 	}
 
 	private String getEffectiveOrOriginalPom(final RepositoryFile file) {
