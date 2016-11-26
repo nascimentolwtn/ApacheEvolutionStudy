@@ -36,7 +36,7 @@ public class ArtifactAggregatorPostProcessor {
 	}
 
 	public void process(PersistenceMechanism writer, List<String> linesCsvInput, String hash) {
-		writer.write(HEADER);
+		writeHeader(writer);
 		linesCsvInput.stream()
 			.filter((line)->line.startsWith(hash))
 			.forEach((line) -> processLine(writer, line));
@@ -45,6 +45,11 @@ public class ArtifactAggregatorPostProcessor {
 			String artifactIds = aggregateArtifactIds(mavenProject.getDependencies());
 			writeCsvLine(writer, mavenProject.getPath(), groupIds, artifactIds);
 		}
+	}
+
+	private void writeHeader(PersistenceMechanism writer) {
+		String[] header = HEADER.split(",");
+		writer.write(header[0],header[1],header[2],header[3],header[4],header[5],header[6]);
 	}
 
 	private void processLine(PersistenceMechanism writer, String line) {
@@ -123,12 +128,16 @@ public class ArtifactAggregatorPostProcessor {
 	}
 
 	private void writeCsvLine(final PersistenceMechanism writer, String path, String groupIds, String artifactIds) {
+		final String[] groupIdSplit = groupIds.split(",");
+		final String[] artifactIdSplit = artifactIds.split(",");
 		writer.write(
 			this.lastCommitLine.getRepository(),
 			path.replace("E:\\metricminer-evolution-stars\\", ""),
 			this.lastCommitLine.getTotalCommits(),
-			groupIds,
-			artifactIds
+			groupIdSplit[0],
+			groupIdSplit[1],
+			artifactIdSplit[0],
+			artifactIdSplit[1]
 		);
 	}
 

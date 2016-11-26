@@ -15,7 +15,7 @@ public class ArtifactAggregatorStandAlonePostProcessor {
 		
 		System.out.println("Starting...");
 		
-		String pathToLook = "study\\detector_first35\\evolutions";
+		String pathToLook = "C:\\Users\\VANT\\Desktop\\next10-02";
 		String outputPath = "study\\artifact_aggregation\\evolutions\\";
 		new File(outputPath).mkdirs();
 		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);
