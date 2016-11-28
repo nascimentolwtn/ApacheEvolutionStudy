@@ -30,7 +30,7 @@ import br.inpe.cap.evolution.visitor.AllDependenciesEvolutionVisitor;
 
 public class AllDependencyVersionsEvolutionStudy implements Study {
 
-	private static final int THREADS_FOR_REPOSITORIES = 10;
+	private static final int THREADS_FOR_REPOSITORIES = 5;
 	private static final String STUDY_TEMP_PATH = "E:\\metricminer-evolution-stars"; // System.getenv("STUDY_TEMP_PATH");
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
 
@@ -48,7 +48,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	
 	public static void main(final String[] args) throws Exception {
 		System.setProperty("git.maxfiles", "2000");
-		System.setProperty("logfilename", FILE_PREFIX + "_run02");
+		System.setProperty("logfilename", FILE_PREFIX + "_run03");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);

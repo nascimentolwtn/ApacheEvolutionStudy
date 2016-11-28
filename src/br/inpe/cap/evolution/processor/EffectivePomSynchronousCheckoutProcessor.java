@@ -63,7 +63,7 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 			final Thread currentThread = Thread.currentThread();
 			currentThread.setName(fileFullName.substring(fileFullName.indexOf(repositoryName)));
 			currentThread.setPriority(Thread.MIN_PRIORITY);
-			Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+			Thread.sleep(TimeUnit.SECONDS.toMillis(10));
 		} catch (Exception e) {}
 	}
 
