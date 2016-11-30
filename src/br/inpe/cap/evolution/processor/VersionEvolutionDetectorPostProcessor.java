@@ -3,15 +3,11 @@ package br.inpe.cap.evolution.processor;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.repodriller.persistence.PersistenceMechanism;
-import org.repodriller.persistence.csv.CSVFile;
 
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
@@ -20,31 +16,6 @@ import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
 
 public class VersionEvolutionDetectorPostProcessor {
 	
-	public static void main(final String[] args) throws IOException {
-		System.out.println("Starting...");
-		
-		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath("study" + File.separator + "all_dependency" + File.separator + "evolutions");
-		
-		arquivos.parallelStream().forEach((csvInput)-> {
-			
-			final VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
-			String name = csvInput.getName();
-			System.out.println("Processing "+name);
-			final CSVFile csvOutput = new CSVFile("study" + File.separator + "detector" + File.separator + name);
-			
-			try {
-				List<String> listCsvLines = FileUtils.readLines(csvInput);
-				postProcessor.reprocessVersionDetectorOutputCsvLines(csvOutput, listCsvLines);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-		});
-
-		
-		System.out.println("Finish!");
-	}
-
 	private CommitLine previousCommit;
 	private MavenProject currentProject;
 	private final Map<String, MavenProject> currentMavenProjects = new HashMap<>();

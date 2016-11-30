@@ -36,8 +36,8 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 			
 			effectivePomProcessor.setCurrentHashPosition(currentHashPosition);
 			effectivePomProcessor.setPercent(percent);
-			effectivePomProcessor.processCommit(repo, commit);
 			printPercentageMessage(currentHashPosition, percent);
+			effectivePomProcessor.processCommit(repo, commit);
 			
 		} catch (final IOException | InterruptedException e) {
 			logger.error(e.getMessage());
