@@ -1,5 +1,7 @@
 package br.inpe.cap.evolution.processor;
 
+import static java.util.concurrent.TimeUnit.MINUTES;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -16,7 +18,7 @@ import org.repodriller.scm.SCMRepository;
 
 public abstract class SynchronousCheckOutRepositoryProcessor {
 	
-	private static final int MINUTES_TO_CHECK_THREADS = 3 * 60 * 1000;
+	private static final int MINUTES_TO_CHECK_THREADS = 3;
 
 	private final CheckoutObserver observer;
 	private static long lastThreadByCommitCheck;
@@ -40,7 +42,7 @@ public abstract class SynchronousCheckOutRepositoryProcessor {
 			this.observer.beforeCheckout(repo, commit);
 			repo.getScm().checkout(commit.getHash());
 			
-			if((System.currentTimeMillis() - lastThreadByCommitCheck) > MINUTES_TO_CHECK_THREADS) {
+			if((System.currentTimeMillis() - lastThreadByCommitCheck) > MINUTES.toMillis(MINUTES_TO_CHECK_THREADS)) {
 				readThreadsByCommits();
 			}
 			ExecutorService exec = Executors.newFixedThreadPool(threadsByCommit);
