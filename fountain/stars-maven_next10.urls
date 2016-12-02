@@ -1,8 +1,6 @@
 https://github.com/apache/flink
 https://github.com/dropwizard/dropwizard
-https://github.com/Atmosphere/atmosphere
 https://github.com/gephi/gephi
-https://github.com/thinkaurelius/titan
 https://github.com/apache/mahout
 https://github.com/amplab/tachyon
 https://github.com/swagger-api/swagger-codegen
@@ -10,6 +8,7 @@ https://github.com/spring-projects/spring-boot
 https://github.com/apache/incubator-zeppelin
 https://github.com/facebook/presto
 https://github.com/openhab/openhab
+https://github.com/Atmosphere/atmosphere
 https://github.com/neo4j/neo4j
 https://github.com/wildfly/wildfly
 https://github.com/eclipse/che
