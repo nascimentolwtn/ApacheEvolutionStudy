@@ -45,6 +45,7 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 		this.writer = writer;
 		this.totalCommits = totalCommits;
 		this.logger = logger;
+		this.versionEvolutionDetector.writeCsvHeader(writer);
 	}
 
 	@Override
@@ -113,5 +114,5 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 		sb.append(replaceLineFeedAndComma(commit.getMsg()));
 		return sb.toString();
 	}
-	
+
 }

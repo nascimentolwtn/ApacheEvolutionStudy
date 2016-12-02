@@ -88,7 +88,7 @@ public class VersionEvolutionDetectorPostProcessor {
 		return this.currentProject;
 	}
 
-	private void writeCsvHeader(final PersistenceMechanism writer) {
+	public void writeCsvHeader(final PersistenceMechanism writer) {
 		final String[] header = CommitLine.HEADER.split(",");
 		writer.write(header[0], header[1], header[2], header[3],
 					 header[4], header[5], header[6], header[7],

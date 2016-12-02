@@ -11,7 +11,6 @@ import org.repodriller.persistence.PersistenceMechanism;
 import org.repodriller.scm.CommitVisitor;
 import org.repodriller.scm.SCMRepository;
 
-import br.inpe.cap.evolution.maven.CommitLine;
 import br.inpe.cap.evolution.processor.EffectivePomSynchronousCheckoutProcessor;
 import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
 
@@ -24,10 +23,18 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 	private int totalCommits; 
 	
 	private EffectivePomSynchronousCheckoutProcessor effectivePomProcessor;
+	
+	@Override
+	public void initialize(SCMRepository repo, PersistenceMechanism writer) {
+		this.repositoryName = repo.getLastDir();
+		final List<ChangeSet> changeSets = repo.getScm().getChangeSets();
+		this.hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
+		this.totalCommits = hashes.size();
+		this.effectivePomProcessor = new EffectivePomSynchronousCheckoutProcessor(new LoggerCheckoutObserver(logger), writer, totalCommits, logger);
+	}
 
 	@Override
 	public void process(final SCMRepository repo, final Commit commit, final PersistenceMechanism writer) {
-		this.initVisitor(repo, writer);
 		
 		try {
 			
@@ -56,24 +63,9 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 		percentMessage.append(percent);
 		percentMessage.append("%");
 		System.err.println(percentMessage.toString());
+		Thread.currentThread().setName("Visitor " + this.repositoryName);
 	}
 
-	private void initVisitor(final SCMRepository repo, final PersistenceMechanism writer) {
-		if(this.hashes == null) {
-			this.repositoryName = repo.getLastDir();
-			Thread.currentThread().setName("Visitor " + this.repositoryName);
-			final List<ChangeSet> changeSets = repo.getScm().getChangeSets();
-			this.hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
-			this.totalCommits = hashes.size();
-			this.effectivePomProcessor = new EffectivePomSynchronousCheckoutProcessor(new LoggerCheckoutObserver(logger), writer, totalCommits, logger);
-			this.writeCsvHeader(writer);
-		}
-	}
-
-	private void writeCsvHeader(final PersistenceMechanism writer) {
-		writer.write(CommitLine.HEADER);
-	}
-	
 	@Override
 	public String name() {
 		return "all-dependency_" + this.repositoryName;
@@ -83,4 +75,10 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 		AllDependenciesEvolutionVisitor.logger = logger;
 	}
 	
+	@Override
+	public void finalize(SCMRepository repo, PersistenceMechanism writer) {
+		this.hashes = null;
+		this.repositoryName = null;
+		this.effectivePomProcessor = null;
+	}
 }
