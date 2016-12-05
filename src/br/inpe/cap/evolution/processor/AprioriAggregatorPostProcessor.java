@@ -43,15 +43,21 @@ public class AprioriAggregatorPostProcessor {
 
 	public void process(CSVFile writer, List<List<String>> linesCsvInputs) {
 		extractAllArtifactsFromAllSubProjects(linesCsvInputs);
-			
-		for (List<String> linesCsvInput : linesCsvInputs) {
-			final String lastCommitHash = parseLastCommitLine(linesCsvInput).getHash();
-			CommitLine.removeHeader(linesCsvInput);
-
-			linesCsvInput.stream()
-				.filter((csvLine) -> csvLine.contains(lastCommitHash))
-				.forEach((line) -> processLine(line));
-		}
+				
+		linesCsvInputs.forEach((linesCsvInput) -> {
+			try {
+				CommitLine lastCommitLine = parseLastCommitLine(linesCsvInput);
+				String lastCommitHash = lastCommitLine.getHash();
+				CommitLine.removeHeader(linesCsvInput);
+		
+				System.out.println("Processing artifacts from " + lastCommitLine.getFile());
+				linesCsvInput.stream()
+					.filter((csvLine) -> csvLine.contains(lastCommitHash))
+					.forEach((line) -> processLine(line));
+			} catch (RuntimeException e) {
+				System.err.println(e.getMessage());
+			}
+		});
 		
 		writeHeader(writer, AprioriLine.createHeader(allSubProjectArtifacts));
 		for (MavenProject mavenProject : this.currentMavenProjects.values()) {
@@ -62,12 +68,18 @@ public class AprioriAggregatorPostProcessor {
 	}
 
 	private void extractAllArtifactsFromAllSubProjects(List<List<String>> linesCsvInputs) {
-		for (List<String> linesCsvInput : linesCsvInputs) {
-			final String lastCommitHash = parseLastCommitLine(linesCsvInput).getHash();
-			CommitLine.removeHeader(linesCsvInput);
-			
-			this.allSubProjectArtifacts.addAll(extractLastCommitSubProjectArtifacts(linesCsvInput, lastCommitHash));
-		}
+		linesCsvInputs.forEach((linesCsvInput) -> {
+			try {
+				CommitLine lastCommitLine = parseLastCommitLine(linesCsvInput);
+				String lastCommitHash = lastCommitLine.getHash();
+				CommitLine.removeHeader(linesCsvInput);
+				
+				System.out.println("Extracting artifiacts from " + lastCommitLine.getFile());
+				this.allSubProjectArtifacts.addAll(extractLastCommitSubProjectArtifacts(linesCsvInput, lastCommitHash));
+			} catch (RuntimeException e) {
+				System.err.println(e.getMessage());
+			}
+		});
 	}
 
 	private void writeHeader(PersistenceMechanism writer, String aprioriHeader) {

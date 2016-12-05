@@ -13,17 +13,16 @@ public class AprioriAggregatorStandAlonePostProcessor {
 	public static void main(String[] args) throws IOException {
 		System.out.println("Starting...");
 		
-		String pathToLook = "study\\detector_first35\\evolutions";
-		String outputPath = "study\\artifact_aggregation\\";
-		new File(outputPath).mkdirs();
+		String pathToLook = "D:\\apriori";
 		List<List<String>> linesCsvInputs = new ArrayList<>();
 		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);
 		for (File csvInput : arquivos) {
+			System.out.println("Reading lines from " + csvInput.getName());
 			linesCsvInputs.add(FileUtils.readLines(csvInput));
 		}
 		
 		AprioriAggregatorPostProcessor processor = new AprioriAggregatorPostProcessor();
-		String csvOutput = outputPath + "all-dependency-first35-apriori.csv";
+		String csvOutput = "study\\artifact_aggregation\\all-dependency-first35+next10_04-apriori.csv";
 		processor.process(new CSVFile(csvOutput), linesCsvInputs);
 			
 		System.out.println("Finished.");

@@ -15,8 +15,8 @@ public class ArtifactAggregatorStandAlonePostProcessor {
 		
 		System.out.println("Starting...");
 		
-		String pathToLook = "C:\\Users\\VANT\\Desktop\\next10-02";
-		String outputPath = "study\\artifact_aggregation\\evolutions\\";
+		String pathToLook = "D:\\apriori";
+		String outputPath = "study\\artifact_aggregation\\evolutions_apriori\\";
 		new File(outputPath).mkdirs();
 		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);
 		
@@ -31,8 +31,8 @@ public class ArtifactAggregatorStandAlonePostProcessor {
 				String csvOutput = outputPath
 						+ csvInput.getName().substring(0, csvInput.getName().lastIndexOf(".csv"))
 						+ "_aggregated.csv";
+				System.out.println("Processing " + csvOutput);
 				processor.process(new CSVFile(csvOutput), linesCsvInput, parseCommitLine.getHash());
-				System.out.println(csvOutput + " processded.");
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
 			}
