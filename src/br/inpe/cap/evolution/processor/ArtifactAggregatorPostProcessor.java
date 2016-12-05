@@ -1,5 +1,7 @@
 package br.inpe.cap.evolution.processor;
 
+import static br.inpe.cap.evolution.maven.CommitLine.lastLine;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,14 +29,6 @@ public class ArtifactAggregatorPostProcessor {
 		return CommitLine.parseCommitLine(lastLine(linesCsvInput), CommitLineType.OUTPUT);
 	}
 	
-	private String lastLine(List<String> linesCsvInput) {
-		if(!linesCsvInput.isEmpty()) {
-			return linesCsvInput.get(linesCsvInput.size()-1);
-		} else {
-			return "";
-		}
-	}
-
 	public void process(PersistenceMechanism writer, List<String> linesCsvInput, String hash) {
 		writeHeader(writer);
 		linesCsvInput.stream()

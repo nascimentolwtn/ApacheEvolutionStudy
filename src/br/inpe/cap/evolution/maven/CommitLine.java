@@ -86,6 +86,14 @@ public class CommitLine {
 		}
 	}
 
+	public static String lastLine(final List<String> linesCsvInput) {
+		if(!linesCsvInput.isEmpty()) {
+			return linesCsvInput.get(linesCsvInput.size()-1);
+		} else {
+			return "";
+		}
+	}
+
 	public String getHash() {
 		return hash;
 	}
