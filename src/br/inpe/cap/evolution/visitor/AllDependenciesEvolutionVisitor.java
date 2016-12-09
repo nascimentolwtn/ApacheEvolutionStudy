@@ -43,8 +43,7 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 			
 			effectivePomProcessor.setCurrentHashPosition(currentHashPosition);
 			effectivePomProcessor.setPercent(percent);
-			printPercentageMessage(currentHashPosition, percent);
-			effectivePomProcessor.processCommit(repo, commit);
+			effectivePomProcessor.processCommit(repo, commit, percentageMessage(currentHashPosition, percent));
 			
 		} catch (final IOException | InterruptedException e) {
 			logger.error(e.getMessage());
@@ -52,18 +51,17 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 		
 	}
 
-	private void printPercentageMessage(final int currentHashPosition, final float percent) {
+	private String percentageMessage(final int currentHashPosition, final float percent) {
 		final StringBuilder percentMessage = new StringBuilder(); 
-		percentMessage.append(repositoryName);
-		percentMessage.append(" progress: commit #");
+		percentMessage.append("progress: #");
 		percentMessage.append(currentHashPosition);
 		percentMessage.append("/");
 		percentMessage.append(totalCommits);
 		percentMessage.append(" - ");
 		percentMessage.append(percent);
 		percentMessage.append("%");
-		System.err.println(percentMessage.toString());
 		Thread.currentThread().setName("Visitor " + this.repositoryName);
+		return percentMessage.toString();
 	}
 
 	@Override

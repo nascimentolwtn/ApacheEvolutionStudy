@@ -19,12 +19,15 @@ public class VersionEvolutionDetectorPostProcessor {
 	private CommitLine previousCommit;
 	private MavenProject currentProject;
 	private final Map<String, MavenProject> currentMavenProjects = new HashMap<>();
+	private int lastTotalCommits;
 
 	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
 		processCsvLines(writer, listCsvLines, true, INPUT);
 	}
 
 	public void reprocessVersionDetectorOutputCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
+		final CommitLine lastCommit = CommitLine.parseCommitLine(listCsvLines.get(listCsvLines.size()-1), OUTPUT);
+		lastTotalCommits = lastCommit.getTotalCommits();
 		processCsvLines(writer, listCsvLines, true, OUTPUT);
 	}
 
@@ -47,6 +50,10 @@ public class VersionEvolutionDetectorPostProcessor {
 			currentProject.getDependencies().add(getMavenDependencyFromCSVLine(currentCommit));
 		} else {
 			mavenDependencyByArtifactId.setVersion(currentCommit.getVersion());
+		}
+		
+		if(commitLineType == OUTPUT) {
+			currentCommit.recalculatePosition(lastTotalCommits);
 		}
 		
 		writeCsvLine(writer, currentCommit);

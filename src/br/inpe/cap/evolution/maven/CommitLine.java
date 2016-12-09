@@ -214,4 +214,13 @@ public class CommitLine {
 		this.versionEverChanged = versionEverChanged;
 	}
 
+	public void recalculatePosition(final int lastTotalCommits) {
+		this.totalCommits = lastTotalCommits;
+		this.percent = roundFiveDigits(this.commitPosition * 100 / (float) this.totalCommits);
+	}
+
+	public static float roundFiveDigits(final float fullPercent) {
+		return Math.round(fullPercent * 100000) / 100000f;
+	}
+
 }

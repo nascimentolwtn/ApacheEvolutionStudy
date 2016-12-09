@@ -296,6 +296,30 @@ public class VersionEvolutionDetectorPostProcessorTest {
 		assertEquals(0, studyOutput.size());
 	}
 	
+	@Test
+	public void recalculoDaPosicaoRelativaDosCommits() throws IOException, URISyntaxException {
+		listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-reprocess-'blueprints'.csv").toURI()));
+		outputFileName = RESOURCE_OUTPUT_DIRECTORY + "all-dependency-reprocess-'blueprints'-recalculated.csv";
+		csvOutput = new CSVFile(outputFileName, false);
+		fileOutput = new File(outputFileName);
+
+		postProcessor.reprocessVersionDetectorOutputCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		CommitLine.removeHeader(outputLines);
+		
+		CommitLine firstCommitLine = CommitLine.parseCommitLine(outputLines.get(0), OUTPUT);
+		assertEquals(1865, firstCommitLine.getTotalCommits());
+		assertEquals(0.21448f, firstCommitLine.getPercent(), 0.000001f);
+		
+		CommitLine secondCommitLine = CommitLine.parseCommitLine(outputLines.get(18), OUTPUT);
+		assertEquals(1865, secondCommitLine.getTotalCommits());
+		assertEquals(10.99196f, secondCommitLine.getPercent(), 0.000001f);
+		
+		CommitLine lastCommitLine = CommitLine.parseCommitLine(outputLines.get(77), OUTPUT);
+		assertEquals(1865, lastCommitLine.getTotalCommits());
+		assertEquals(94.26273f, lastCommitLine.getPercent(), 0.000001f);
+	}
+	
 	@After
 	public void clearTempFiles() throws IOException {
 		// Arquivo "temporário" deveria ser deletado.
