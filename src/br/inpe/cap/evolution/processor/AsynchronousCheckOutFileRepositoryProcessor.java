@@ -51,7 +51,7 @@ public abstract class AsynchronousCheckOutFileRepositoryProcessor {
 		
 		try {
 		
-			this.observer.beforeCheckout(repo, commit);
+			this.observer.beforeCheckout(repo, commit, "");
 			repo.getScm().checkout(commit.getHash());
 			
 			

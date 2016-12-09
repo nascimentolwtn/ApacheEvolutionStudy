@@ -5,7 +5,7 @@ import org.repodriller.scm.SCMRepository;
 
 public interface CheckoutObserver {
 
-	default void beforeCheckout(final SCMRepository repo, final Commit commit) {
+	default void beforeCheckout(final SCMRepository repo, final Commit commit, String message) {
 	}
 
 	default void afterReset(final SCMRepository repo, final Commit commit) {

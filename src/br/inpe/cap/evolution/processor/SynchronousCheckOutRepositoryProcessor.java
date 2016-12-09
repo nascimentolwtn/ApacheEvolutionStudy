@@ -33,13 +33,13 @@ public abstract class SynchronousCheckOutRepositoryProcessor {
 		readThreadsByCommits();
 	}
 
-	public void processCommit(final SCMRepository repo, final Commit commit) throws IOException, InterruptedException {
+	public void processCommit(final SCMRepository repo, final Commit commit, String message) throws IOException, InterruptedException {
 		
 		final ReentrantLock checkoutLock = new ReentrantLock();
 		checkoutLock.lock();
 		try {
 			
-			this.observer.beforeCheckout(repo, commit);
+			this.observer.beforeCheckout(repo, commit, message);
 			repo.getScm().checkout(commit.getHash());
 			
 			if((System.currentTimeMillis() - lastThreadByCommitCheck) > MINUTES.toMillis(MINUTES_TO_CHECK_THREADS)) {

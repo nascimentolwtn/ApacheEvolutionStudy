@@ -3,10 +3,7 @@ package br.inpe.cap.evolution.processor;
 import static br.inpe.cap.evolution.parser.XmlMavenParser.replaceLineFeedAndComma;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -18,6 +15,7 @@ import org.repodriller.scm.SCMRepository;
 
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.maven.CommitLine;
 import br.inpe.cap.evolution.maven.MavenEffectivePom;
 import br.inpe.cap.evolution.maven.UnparsableEffectivePomException;
 import br.inpe.cap.evolution.parser.XmlMavenParser;
@@ -25,11 +23,6 @@ import br.inpe.cap.evolution.parser.XmlMavenParser;
 public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOutRepositoryProcessor {
 	
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-
-	/**
-	 * Formato da porcentagem com "." para não confundir com a "," do CSV
-	 */
-	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.00000", DecimalFormatSymbols.getInstance(Locale.US));
 
 	private final PersistenceMechanism writer;
 	private final int totalCommits;
@@ -106,7 +99,7 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 		sb.append(fileName);										sb.append(",");
 		sb.append(currentHashPosition);								sb.append(",");
 		sb.append(totalCommits);									sb.append(",");
-		sb.append(PERCENT_FORMAT.format(percent));					sb.append(",");
+		sb.append(CommitLine.roundFiveDigits(percent));				sb.append(",");
 		sb.append(mavenDependency.isDependencyManaged());			sb.append(",");
 		sb.append(mavenDependency.getGroupId());					sb.append(",");
 		sb.append(mavenDependency.getArtifactId());					sb.append(",");
@@ -114,5 +107,5 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 		sb.append(replaceLineFeedAndComma(commit.getMsg()));
 		return sb.toString();
 	}
-
+	
 }

@@ -6,7 +6,7 @@ import org.repodriller.scm.SCMRepository;
 public class ConsoleCheckoutObserver implements CheckoutObserver {
 	
 	@Override
-	public void beforeCheckout(SCMRepository repo, Commit commit) {
+	public void beforeCheckout(SCMRepository repo, Commit commit, String message) {
 		System.out.println("Checking out commit " + commit.getHash() + "@" + repo.getLastDir());
 	}
 	

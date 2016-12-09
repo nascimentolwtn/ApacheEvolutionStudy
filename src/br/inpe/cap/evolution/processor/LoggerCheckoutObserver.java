@@ -20,8 +20,8 @@ public class LoggerCheckoutObserver implements CheckoutObserver {
 	}
 	
 	@Override
-	public void beforeCheckout(SCMRepository repo, Commit commit) {
-		logMessage("Checking out commit " + commit.getHash() + "@" + repo.getLastDir());
+	public void beforeCheckout(SCMRepository repo, Commit commit, String message) {
+		logMessage("Checking out commit " + commit.getHash() + "@" + repo.getLastDir() + " - " + message);
 	}
 
 	@Override
