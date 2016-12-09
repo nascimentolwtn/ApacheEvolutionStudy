@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>DiffParserTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.domain</a> &gt; <span class="el_source">DiffParserTest.java</span></div><h1>DiffParserTest.java</h1><pre class="source lang-java linenums">package org.repodriller.domain;
+
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+<span class="nc" id="L8">public class DiffParserTest {</span>
+
+	@Test
+	public void extractLineNumbersAndContentInOldAndNewFile() {
+		
+<span class="nc" id="L13">		String diff =</span>
+<span class="nc" id="L14">			&quot;diff --git a/A b/A\r\n&quot;+</span>
+			&quot;index ca17226..ae43afd 100644\r\n&quot;+
+			&quot;--- a/A\r\n&quot;+
+			&quot;+++ b/A\r\n&quot;+
+			&quot;@@ -1,8 +1,8 @@\r\n&quot;+
+			&quot;-a\r\n&quot;+
+			&quot;-b\r\n&quot;+
+			&quot;-c\r\n&quot;+
+			&quot;-log.info(\&quot;a\&quot;)\r\n&quot;+
+			&quot;-d\r\n&quot;+
+			&quot;-e\r\n&quot;+
+			&quot;-f\r\n&quot;+
+			&quot;+aa\r\n&quot;+
+			&quot;+bb\r\n&quot;+
+			&quot;+cc\r\n&quot;+
+			&quot;+log.info(\&quot;aa\&quot;)\r\n&quot;+
+			&quot;+dd\r\n&quot;+
+			&quot;+ee\r\n&quot;+
+			&quot;+ff\r\n&quot;+
+			&quot; &quot;;
+		
+<span class="nc" id="L35">		DiffParser parsedDiff = new DiffParser(diff);</span>
+		
+<span class="nc" id="L37">		List&lt;DiffLine&gt; oldLines = parsedDiff.getBlocks().get(0).getLinesInOldFile();</span>
+
+<span class="nc" id="L39">		Assert.assertTrue(oldLines.contains(new DiffLine(1, &quot;a&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L40">		Assert.assertTrue(oldLines.contains(new DiffLine(2, &quot;b&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L41">		Assert.assertTrue(oldLines.contains(new DiffLine(3, &quot;c&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L42">		Assert.assertTrue(oldLines.contains(new DiffLine(4, &quot;log.info(\&quot;a\&quot;)&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L43">		Assert.assertTrue(oldLines.contains(new DiffLine(5, &quot;d&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L44">		Assert.assertTrue(oldLines.contains(new DiffLine(6, &quot;e&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L45">		Assert.assertTrue(oldLines.contains(new DiffLine(7, &quot;f&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L46">		Assert.assertTrue(oldLines.contains(new DiffLine(8, &quot;&quot;, DiffLineType.KEPT)));</span>
+
+<span class="nc" id="L48">		List&lt;DiffLine&gt; newLines = parsedDiff.getBlocks().get(0).getLinesInNewFile();</span>
+		
+<span class="nc" id="L50">		Assert.assertTrue(newLines.contains(new DiffLine(1, &quot;aa&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L51">		Assert.assertTrue(newLines.contains(new DiffLine(2, &quot;bb&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L52">		Assert.assertTrue(newLines.contains(new DiffLine(3, &quot;cc&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L53">		Assert.assertTrue(newLines.contains(new DiffLine(4, &quot;log.info(\&quot;aa\&quot;)&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L54">		Assert.assertTrue(newLines.contains(new DiffLine(5, &quot;dd&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L55">		Assert.assertTrue(newLines.contains(new DiffLine(6, &quot;ee&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L56">		Assert.assertTrue(newLines.contains(new DiffLine(7, &quot;ff&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L57">		Assert.assertTrue(newLines.contains(new DiffLine(8, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L58">	}</span>
+
+	@Test
+	public void onlyAdditions() {
+		
+<span class="nc" id="L63">		String diff =</span>
+<span class="nc" id="L64">				&quot;diff --git a/A b/A\r\n&quot;+</span>
+				&quot;index 5ae30ef..04b86b0 100644\r\n&quot;+
+				&quot;--- a/A\r\n&quot;+
+				&quot;+++ b/A\r\n&quot;+
+				&quot;@@ -2,6 +2,7 @@ aa\r\n&quot;+
+				&quot; bb\r\n&quot;+
+				&quot; cc\r\n&quot;+
+				&quot; log.info(\&quot;aa\&quot;)\r\n&quot;+
+				&quot;+log.debug(\&quot;b\&quot;)\r\n&quot;+
+				&quot; dd\r\n&quot;+
+				&quot; ee\r\n&quot;+
+				&quot; ff&quot;;
+		
+<span class="nc" id="L77">		DiffParser parsedDiff = new DiffParser(diff);</span>
+		
+<span class="nc" id="L79">		List&lt;DiffLine&gt; oldLines = parsedDiff.getBlocks().get(0).getLinesInOldFile();</span>
+<span class="nc" id="L80">		Assert.assertTrue(oldLines.contains(new DiffLine(2, &quot;bb&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L81">		Assert.assertTrue(oldLines.contains(new DiffLine(3, &quot;cc&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L82">		Assert.assertTrue(oldLines.contains(new DiffLine(4, &quot;log.info(\&quot;aa\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L83">		Assert.assertTrue(oldLines.contains(new DiffLine(5, &quot;dd&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L84">		Assert.assertTrue(oldLines.contains(new DiffLine(6, &quot;ee&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L85">		Assert.assertTrue(oldLines.contains(new DiffLine(7, &quot;ff&quot;, DiffLineType.KEPT)));</span>
+
+<span class="nc" id="L87">		List&lt;DiffLine&gt; newLines = parsedDiff.getBlocks().get(0).getLinesInNewFile();</span>
+<span class="nc" id="L88">		Assert.assertTrue(newLines.contains(new DiffLine(2, &quot;bb&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L89">		Assert.assertTrue(newLines.contains(new DiffLine(3, &quot;cc&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L90">		Assert.assertTrue(newLines.contains(new DiffLine(4, &quot;log.info(\&quot;aa\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L91">		Assert.assertTrue(newLines.contains(new DiffLine(5, &quot;log.debug(\&quot;b\&quot;)&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L92">		Assert.assertTrue(newLines.contains(new DiffLine(6, &quot;dd&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L93">		Assert.assertTrue(newLines.contains(new DiffLine(7, &quot;ee&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L94">		Assert.assertTrue(newLines.contains(new DiffLine(8, &quot;ff&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L95">	}</span>
+
+	@Test
+	public void onlyDeletions() {
+		
+<span class="nc" id="L100">		String diff =</span>
+<span class="nc" id="L101">				&quot;diff --git a/A b/A\r\n&quot;+</span>
+						&quot;index 5ae30ef..04b86b0 100644\r\n&quot;+
+						&quot;--- a/A\r\n&quot;+
+						&quot;+++ b/A\r\n&quot;+
+						&quot;@@ -2,7 +2,6 @@ aa\r\n&quot;+
+						&quot; bb\r\n&quot;+
+						&quot; cc\r\n&quot;+
+						&quot; log.info(\&quot;aa\&quot;)\r\n&quot;+
+						&quot;-log.debug(\&quot;b\&quot;)\r\n&quot;+
+						&quot; dd\r\n&quot;+
+						&quot; ee\r\n&quot;+
+						&quot; ff&quot;;
+		
+<span class="nc" id="L114">		DiffParser parsedDiff = new DiffParser(diff);</span>
+		
+<span class="nc" id="L116">		List&lt;DiffLine&gt; oldLines = parsedDiff.getBlocks().get(0).getLinesInOldFile();</span>
+<span class="nc" id="L117">		Assert.assertTrue(oldLines.contains(new DiffLine(2, &quot;bb&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L118">		Assert.assertTrue(oldLines.contains(new DiffLine(3, &quot;cc&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L119">		Assert.assertTrue(oldLines.contains(new DiffLine(4, &quot;log.info(\&quot;aa\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L120">		Assert.assertTrue(oldLines.contains(new DiffLine(5, &quot;log.debug(\&quot;b\&quot;)&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L121">		Assert.assertTrue(oldLines.contains(new DiffLine(6, &quot;dd&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L122">		Assert.assertTrue(oldLines.contains(new DiffLine(7, &quot;ee&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L123">		Assert.assertTrue(oldLines.contains(new DiffLine(8, &quot;ff&quot;, DiffLineType.KEPT)));</span>
+		
+<span class="nc" id="L125">		List&lt;DiffLine&gt; newLines = parsedDiff.getBlocks().get(0).getLinesInNewFile();</span>
+<span class="nc" id="L126">		Assert.assertTrue(newLines.contains(new DiffLine(2, &quot;bb&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L127">		Assert.assertTrue(newLines.contains(new DiffLine(3, &quot;cc&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L128">		Assert.assertTrue(newLines.contains(new DiffLine(4, &quot;log.info(\&quot;aa\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L129">		Assert.assertTrue(newLines.contains(new DiffLine(5, &quot;dd&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L130">		Assert.assertTrue(newLines.contains(new DiffLine(6, &quot;ee&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L131">		Assert.assertTrue(newLines.contains(new DiffLine(7, &quot;ff&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L132">	}</span>
+
+	@Test
+	public void additionsAndDeletions() {
+		
+<span class="nc" id="L137">		String diff =</span>
+<span class="nc" id="L138">				&quot;diff --git a/A b/A\r\n&quot;+</span>
+				&quot;index 4624afb..870742d 100644\r\n&quot;+
+				&quot;--- a/A\r\n&quot;+
+				&quot;+++ b/A\r\n&quot;+
+				&quot;@@ -1,10 +1,10 @@\r\n&quot;+
+				&quot; aa\r\n&quot;+
+				&quot; aaa\r\n&quot;+
+				&quot;+xxx\r\n&quot;+
+				&quot; bb\r\n&quot;+
+				&quot; cc\r\n&quot;+
+				&quot; log.info(\&quot;aa\&quot;)\r\n&quot;+
+				&quot; log.debug(\&quot;b\&quot;)\r\n&quot;+
+				&quot; dd\r\n&quot;+
+				&quot; ee\r\n&quot;+
+				&quot;-log.trace()\r\n&quot;+
+				&quot; ff&quot;;
+		
+<span class="nc" id="L155">		DiffParser parsedDiff = new DiffParser(diff);</span>
+		
+<span class="nc" id="L157">		List&lt;DiffLine&gt; oldLines = parsedDiff.getBlocks().get(0).getLinesInOldFile();</span>
+<span class="nc" id="L158">		Assert.assertTrue(oldLines.contains(new DiffLine(1, &quot;aa&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L159">		Assert.assertTrue(oldLines.contains(new DiffLine(2, &quot;aaa&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L160">		Assert.assertTrue(oldLines.contains(new DiffLine(3, &quot;bb&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L161">		Assert.assertTrue(oldLines.contains(new DiffLine(4, &quot;cc&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L162">		Assert.assertTrue(oldLines.contains(new DiffLine(5, &quot;log.info(\&quot;aa\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L163">		Assert.assertTrue(oldLines.contains(new DiffLine(6, &quot;log.debug(\&quot;b\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L164">		Assert.assertTrue(oldLines.contains(new DiffLine(7, &quot;dd&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L165">		Assert.assertTrue(oldLines.contains(new DiffLine(8, &quot;ee&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L166">		Assert.assertTrue(oldLines.contains(new DiffLine(9, &quot;log.trace()&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L167">		Assert.assertTrue(oldLines.contains(new DiffLine(10, &quot;ff&quot;, DiffLineType.KEPT)));</span>
+		
+<span class="nc" id="L169">		List&lt;DiffLine&gt; newLines = parsedDiff.getBlocks().get(0).getLinesInNewFile();</span>
+<span class="nc" id="L170">		Assert.assertTrue(newLines.contains(new DiffLine(1, &quot;aa&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L171">		Assert.assertTrue(newLines.contains(new DiffLine(2, &quot;aaa&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L172">		Assert.assertTrue(newLines.contains(new DiffLine(3, &quot;xxx&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L173">		Assert.assertTrue(newLines.contains(new DiffLine(4, &quot;bb&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L174">		Assert.assertTrue(newLines.contains(new DiffLine(5, &quot;cc&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L175">		Assert.assertTrue(newLines.contains(new DiffLine(6, &quot;log.info(\&quot;aa\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L176">		Assert.assertTrue(newLines.contains(new DiffLine(7, &quot;log.debug(\&quot;b\&quot;)&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L177">		Assert.assertTrue(newLines.contains(new DiffLine(8, &quot;dd&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L178">		Assert.assertTrue(newLines.contains(new DiffLine(9, &quot;ee&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L179">		Assert.assertTrue(newLines.contains(new DiffLine(10, &quot;ff&quot;, DiffLineType.KEPT)));</span>
+
+<span class="nc" id="L181">	}</span>
+	
+	@Test
+	public void tabsEnters() {
+<span class="nc" id="L185">		String diff =</span>
+<span class="nc" id="L186">			&quot;diff --git a/A b/A\r\n&quot;+</span>
+			&quot;index 708caeb..bdc3fea 100644\r\n&quot;+
+			&quot;--- a/A\r\n&quot;+
+			&quot;+++ b/A\r\n&quot;+
+			&quot;@@ -1,4 +1,17 @@\r\n&quot;+
+			&quot; a\r\n&quot;+
+			&quot; b\r\n&quot;+
+			&quot;-c\r\n&quot;+
+			&quot;+\td\r\n&quot;+
+			&quot;+cc\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+\tg\r\n&quot;+
+			&quot;+\r\n&quot;+
+			&quot;+j\r\n&quot;+
+			&quot; &quot;;
+		
+<span class="nc" id="L210">		DiffParser parsedDiff = new DiffParser(diff);</span>
+		
+<span class="nc" id="L212">		List&lt;DiffLine&gt; oldLines = parsedDiff.getBlocks().get(0).getLinesInOldFile();</span>
+<span class="nc" id="L213">		Assert.assertTrue(oldLines.contains(new DiffLine(1, &quot;a&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L214">		Assert.assertTrue(oldLines.contains(new DiffLine(2, &quot;b&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L215">		Assert.assertTrue(oldLines.contains(new DiffLine(3, &quot;c&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L216">		Assert.assertTrue(oldLines.contains(new DiffLine(4, &quot;&quot;, DiffLineType.KEPT)));</span>
+		
+<span class="nc" id="L218">		List&lt;DiffLine&gt; newLines = parsedDiff.getBlocks().get(0).getLinesInNewFile();</span>
+<span class="nc" id="L219">		Assert.assertTrue(newLines.contains(new DiffLine(1, &quot;a&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L220">		Assert.assertTrue(newLines.contains(new DiffLine(2, &quot;b&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L221">		Assert.assertTrue(newLines.contains(new DiffLine(3, &quot;\td&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L222">		Assert.assertTrue(newLines.contains(new DiffLine(4, &quot;cc&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L223">		Assert.assertTrue(newLines.contains(new DiffLine(5, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L224">		Assert.assertTrue(newLines.contains(new DiffLine(6, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L225">		Assert.assertTrue(newLines.contains(new DiffLine(7, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L226">		Assert.assertTrue(newLines.contains(new DiffLine(8, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L227">		Assert.assertTrue(newLines.contains(new DiffLine(9, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L228">		Assert.assertTrue(newLines.contains(new DiffLine(10, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L229">		Assert.assertTrue(newLines.contains(new DiffLine(11, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L230">		Assert.assertTrue(newLines.contains(new DiffLine(12, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L231">		Assert.assertTrue(newLines.contains(new DiffLine(13, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L232">		Assert.assertTrue(newLines.contains(new DiffLine(14, &quot;\tg&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L233">		Assert.assertTrue(newLines.contains(new DiffLine(15, &quot;&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L234">		Assert.assertTrue(newLines.contains(new DiffLine(16, &quot;j&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L235">		Assert.assertTrue(newLines.contains(new DiffLine(17, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L236">	}</span>
+	
+	@Test
+	public void realExampleLargeFileWithMultipleDiffBlocks() {
+<span class="nc" id="L240">		String diff = </span>
+<span class="nc" id="L241">				&quot;diff --git a/GitRepository.java b/GitRepository.java\r\n&quot;+</span>
+				&quot;index f38a97d..2b96b0e 100644\r\n&quot;+
+				&quot;--- a/GitRepository.java\r\n&quot;+
+				&quot;+++ b/GitRepository.java\r\n&quot;+
+				&quot;@@ -72,7 +72,7 @@ public class GitRepository implements SCM {\r\n&quot;+
+				&quot; \r\n&quot;+
+				&quot;        private static Logger log = Logger.getLogger(GitRepository.class);\r\n&quot;+
+				&quot; \r\n&quot;+
+				&quot;-       public GitRepository(String path) {\r\n&quot;+
+				&quot;+       public GitRepository2(String path) {\r\n&quot;+
+				&quot;                this.path = path;\r\n&quot;+
+				&quot;                this.maxNumberFilesInACommit = checkMaxNumberOfFiles();\r\n&quot;+
+				&quot;                this.maxSizeOfDiff = checkMaxSizeOfDiff();\r\n&quot;+
+				&quot;@@ -155,7 +155,7 @@ public class GitRepository implements SCM {\r\n&quot;+
+				&quot;                return git.getRepository().getBranch();\r\n&quot;+
+				&quot;        }\r\n&quot;+
+				&quot; \r\n&quot;+
+				&quot;-       public ChangeSet getHead() {\r\n&quot;+
+				&quot;+       public ChangeSet getHead2() {\r\n&quot;+
+				&quot;                Git git = null;\r\n&quot;+
+				&quot;                try {\r\n&quot;+
+				&quot;                        git = openRepository();\r\n&quot;+
+				&quot;@@ -320,6 +320,7 @@ public class GitRepository implements SCM {\r\n&quot;+
+				&quot; \r\n&quot;+
+				&quot;                return diffs;\r\n&quot;+
+				&quot;        }\r\n&quot;+
+				&quot;+       newline\r\n&quot;+
+				&quot; \r\n&quot;+
+				&quot;        private void setContext(DiffFormatter df) {\r\n&quot;+
+				&quot;                String context = System.getProperty(\&quot;git.diffcontext\&quot;);&quot;;
+
+<span class="nc" id="L272">		DiffParser parsedDiff = new DiffParser(diff);</span>
+		
+<span class="nc" id="L274">		List&lt;DiffLine&gt; oldLinesBlock1 = parsedDiff.getBlocks().get(0).getLinesInOldFile();</span>
+<span class="nc" id="L275">		Assert.assertTrue(oldLinesBlock1.contains(new DiffLine(72, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L276">		Assert.assertTrue(oldLinesBlock1.contains(new DiffLine(73, &quot;       private static Logger log = Logger.getLogger(GitRepository.class);&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L277">		Assert.assertTrue(oldLinesBlock1.contains(new DiffLine(74, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L278">		Assert.assertTrue(oldLinesBlock1.contains(new DiffLine(75, &quot;       public GitRepository(String path) {&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L279">		Assert.assertTrue(oldLinesBlock1.contains(new DiffLine(76, &quot;               this.path = path;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L280">		Assert.assertTrue(oldLinesBlock1.contains(new DiffLine(77, &quot;               this.maxNumberFilesInACommit = checkMaxNumberOfFiles();&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L281">		Assert.assertTrue(oldLinesBlock1.contains(new DiffLine(78, &quot;               this.maxSizeOfDiff = checkMaxSizeOfDiff();&quot;, DiffLineType.KEPT)));</span>
+
+<span class="nc" id="L283">		List&lt;DiffLine&gt; newLinesBlock1 = parsedDiff.getBlocks().get(0).getLinesInNewFile();</span>
+<span class="nc" id="L284">		Assert.assertTrue(newLinesBlock1.contains(new DiffLine(72, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L285">		Assert.assertTrue(newLinesBlock1.contains(new DiffLine(73, &quot;       private static Logger log = Logger.getLogger(GitRepository.class);&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L286">		Assert.assertTrue(newLinesBlock1.contains(new DiffLine(74, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L287">		Assert.assertTrue(newLinesBlock1.contains(new DiffLine(75, &quot;       public GitRepository2(String path) {&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L288">		Assert.assertTrue(newLinesBlock1.contains(new DiffLine(76, &quot;               this.path = path;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L289">		Assert.assertTrue(newLinesBlock1.contains(new DiffLine(77, &quot;               this.maxNumberFilesInACommit = checkMaxNumberOfFiles();&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L290">		Assert.assertTrue(newLinesBlock1.contains(new DiffLine(78, &quot;               this.maxSizeOfDiff = checkMaxSizeOfDiff();&quot;, DiffLineType.KEPT)));</span>
+
+<span class="nc" id="L292">		List&lt;DiffLine&gt; oldLinesBlock2 = parsedDiff.getBlocks().get(1).getLinesInOldFile();</span>
+<span class="nc" id="L293">		Assert.assertTrue(oldLinesBlock2.contains(new DiffLine(155, &quot;               return git.getRepository().getBranch();&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L294">		Assert.assertTrue(oldLinesBlock2.contains(new DiffLine(156, &quot;       }&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L295">		Assert.assertTrue(oldLinesBlock2.contains(new DiffLine(157, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L296">		Assert.assertTrue(oldLinesBlock2.contains(new DiffLine(158, &quot;       public ChangeSet getHead() {&quot;, DiffLineType.REMOVED)));</span>
+<span class="nc" id="L297">		Assert.assertTrue(oldLinesBlock2.contains(new DiffLine(159, &quot;               Git git = null;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L298">		Assert.assertTrue(oldLinesBlock2.contains(new DiffLine(160, &quot;               try {&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L299">		Assert.assertTrue(oldLinesBlock2.contains(new DiffLine(161, &quot;                       git = openRepository();&quot;, DiffLineType.KEPT)));</span>
+
+<span class="nc" id="L301">		List&lt;DiffLine&gt; newLinesBlock2 = parsedDiff.getBlocks().get(1).getLinesInNewFile();</span>
+<span class="nc" id="L302">		Assert.assertTrue(newLinesBlock2.contains(new DiffLine(155, &quot;               return git.getRepository().getBranch();&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L303">		Assert.assertTrue(newLinesBlock2.contains(new DiffLine(156, &quot;       }&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L304">		Assert.assertTrue(newLinesBlock2.contains(new DiffLine(157, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L305">		Assert.assertTrue(newLinesBlock2.contains(new DiffLine(158, &quot;       public ChangeSet getHead2() {&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L306">		Assert.assertTrue(newLinesBlock2.contains(new DiffLine(159, &quot;               Git git = null;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L307">		Assert.assertTrue(newLinesBlock2.contains(new DiffLine(160, &quot;               try {&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L308">		Assert.assertTrue(newLinesBlock2.contains(new DiffLine(161, &quot;                       git = openRepository();&quot;, DiffLineType.KEPT)));</span>
+		
+<span class="nc" id="L310">		List&lt;DiffLine&gt; oldLinesBlock3 = parsedDiff.getBlocks().get(2).getLinesInOldFile();</span>
+<span class="nc" id="L311">		Assert.assertTrue(oldLinesBlock3.contains(new DiffLine(320, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L312">		Assert.assertTrue(oldLinesBlock3.contains(new DiffLine(321, &quot;               return diffs;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L313">		Assert.assertTrue(oldLinesBlock3.contains(new DiffLine(322, &quot;       }&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L314">		Assert.assertTrue(oldLinesBlock3.contains(new DiffLine(323, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L315">		Assert.assertTrue(oldLinesBlock3.contains(new DiffLine(324, &quot;       private void setContext(DiffFormatter df) {&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L316">		Assert.assertTrue(oldLinesBlock3.contains(new DiffLine(325, &quot;               String context = System.getProperty(\&quot;git.diffcontext\&quot;);&quot;, DiffLineType.KEPT)));</span>
+
+		
+<span class="nc" id="L319">		List&lt;DiffLine&gt; newLinesBlock3 = parsedDiff.getBlocks().get(2).getLinesInNewFile();</span>
+<span class="nc" id="L320">		Assert.assertTrue(newLinesBlock3.contains(new DiffLine(320, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L321">		Assert.assertTrue(newLinesBlock3.contains(new DiffLine(321, &quot;               return diffs;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L322">		Assert.assertTrue(newLinesBlock3.contains(new DiffLine(322, &quot;       }&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L323">		Assert.assertTrue(newLinesBlock3.contains(new DiffLine(323, &quot;       newline&quot;, DiffLineType.ADDED)));</span>
+<span class="nc" id="L324">		Assert.assertTrue(newLinesBlock3.contains(new DiffLine(324, &quot;&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L325">		Assert.assertTrue(newLinesBlock3.contains(new DiffLine(325, &quot;       private void setContext(DiffFormatter df) {&quot;, DiffLineType.KEPT)));</span>
+<span class="nc" id="L326">		Assert.assertTrue(newLinesBlock3.contains(new DiffLine(326, &quot;               String context = System.getProperty(\&quot;git.diffcontext\&quot;);&quot;, DiffLineType.KEPT)));</span>
+		
+<span class="nc" id="L328">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

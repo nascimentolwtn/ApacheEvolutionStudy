@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>GitRepository.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.scm</a> &gt; <span class="el_source">GitRepository.java</span></div><h1>GitRepository.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2014 Maurício Aniche
+
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.repodriller.scm;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
+
+import org.apache.log4j.Logger;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand.ResetType;
+import org.eclipse.jgit.api.errors.CannotDeleteCurrentBranchException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.NotMergedException;
+import org.eclipse.jgit.blame.BlameResult;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevSort;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.domain.Developer;
+import org.repodriller.domain.ModificationType;
+import org.repodriller.util.FileUtils;
+
+public class GitRepository implements SCM {
+
+	private static final int MAX_SIZE_OF_A_DIFF = 100000;
+	private static final int DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT = 5000;
+	private static final String BRANCH_MM = &quot;mm&quot;;
+
+	private String path;
+	private String mainBranchName;
+	private int maxNumberFilesInACommit;
+	private int maxSizeOfDiff;
+
+<span class="nc" id="L74">	private static Logger log = Logger.getLogger(GitRepository.class);</span>
+	private boolean firstParentOnly;
+
+<span class="nc" id="L77">	public GitRepository(String path, boolean firstParentOnly) {</span>
+<span class="nc" id="L78">		this.path = path;</span>
+<span class="nc" id="L79">		this.firstParentOnly = firstParentOnly;</span>
+<span class="nc" id="L80">		this.maxNumberFilesInACommit = checkMaxNumberOfFiles();</span>
+<span class="nc" id="L81">		this.maxSizeOfDiff = checkMaxSizeOfDiff();</span>
+<span class="nc" id="L82">	}</span>
+
+	public GitRepository(String path) {
+<span class="nc" id="L85">		this(path, false);</span>
+<span class="nc" id="L86">	}</span>
+
+	private int checkMaxNumberOfFiles() {
+<span class="nc" id="L89">		String prop = System.getProperty(&quot;git.maxfiles&quot;);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if(prop == null) {</span>
+<span class="nc" id="L91">			return DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT;</span>
+		}
+<span class="nc" id="L93">		return Integer.parseInt(prop);</span>
+	}
+
+	private int checkMaxSizeOfDiff() {
+<span class="nc" id="L97">		String prop = System.getProperty(&quot;git.maxdiff&quot;);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">		if(prop == null) {</span>
+<span class="nc" id="L99">			return MAX_SIZE_OF_A_DIFF;</span>
+		}
+<span class="nc" id="L101">		return Integer.parseInt(prop);</span>
+	}
+
+	public static SCMRepository singleProject(String path) {
+<span class="nc" id="L105">		return new GitRepository(path).info();</span>
+	}
+
+	public static SCMRepository singleProject(String path, boolean singleParentOnly) {
+<span class="nc" id="L109">		return new GitRepository(path, singleParentOnly).info();</span>
+	}
+
+	public static SCMRepository[] allProjectsIn(String path) {
+<span class="nc" id="L113">		return allProjectsIn(path, false);</span>
+	}
+	
+	public static SCMRepository[] allProjectsIn(String path, boolean singleParentOnly) {
+<span class="nc" id="L117">		List&lt;SCMRepository&gt; repos = new ArrayList&lt;SCMRepository&gt;();</span>
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		for (String dir : FileUtils.getAllDirsIn(path)) {</span>
+<span class="nc" id="L120">			repos.add(singleProject(dir, singleParentOnly));</span>
+		}
+
+<span class="nc" id="L123">		return repos.toArray(new SCMRepository[repos.size()]);</span>
+	}
+
+	public SCMRepository info() {
+<span class="nc" id="L127">		RevWalk rw = null;</span>
+<span class="nc" id="L128">		Git git = null;</span>
+		try {
+<span class="nc" id="L130">			git = openRepository();</span>
+<span class="nc" id="L131">			AnyObjectId headId = git.getRepository().resolve(Constants.HEAD);</span>
+
+<span class="nc" id="L133">			rw = new RevWalk(git.getRepository());</span>
+<span class="nc" id="L134">			RevCommit root = rw.parseCommit(headId);</span>
+<span class="nc" id="L135">			rw.sort(RevSort.REVERSE);</span>
+<span class="nc" id="L136">			rw.markStart(root);</span>
+<span class="nc" id="L137">			RevCommit lastCommit = rw.next();</span>
+
+<span class="nc" id="L139">			String origin = git.getRepository().getConfig().getString(&quot;remote&quot;, &quot;origin&quot;, &quot;url&quot;);</span>
+
+<span class="nc" id="L141">			return new SCMRepository(this, origin, path, headId.getName(), lastCommit.getName());</span>
+<span class="nc" id="L142">		} catch (Exception e) {</span>
+<span class="nc" id="L143">			throw new RuntimeException(&quot;error when info &quot; + path, e);</span>
+<span class="nc" id="L144">		} finally {</span>
+<span class="nc bnc" id="L145" title="All 4 branches missed.">			if (rw != null)</span>
+<span class="nc" id="L146">				rw.release();</span>
+<span class="nc bnc" id="L147" title="All 4 branches missed.">			if (git != null)</span>
+<span class="nc" id="L148">				git.close();</span>
+<span class="nc" id="L149">		}</span>
+
+	}
+
+	protected Git openRepository() throws IOException, GitAPIException {
+<span class="nc" id="L154">		Git git = Git.open(new File(path));</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">		if(this.mainBranchName == null) {</span>
+<span class="nc" id="L156">			this.mainBranchName = discoverMainBranchName(git);</span>
+		}
+<span class="nc" id="L158">		return git;</span>
+	}
+
+	private String discoverMainBranchName(Git git) throws IOException {
+<span class="nc" id="L162">		return git.getRepository().getBranch();</span>
+	}
+
+	public ChangeSet getHead() {
+<span class="nc" id="L166">		Git git = null;</span>
+		try {
+<span class="nc" id="L168">			git = openRepository();</span>
+<span class="nc" id="L169">			ObjectId head = git.getRepository().resolve(Constants.HEAD);</span>
+
+<span class="nc" id="L171">			RevWalk revWalk = new RevWalk(git.getRepository());</span>
+<span class="nc" id="L172">			RevCommit r = revWalk.parseCommit(head);</span>
+<span class="nc" id="L173">			return new ChangeSet(r.getName(), convertToDate(r));</span>
+
+<span class="nc" id="L175">		} catch (Exception e) {</span>
+<span class="nc" id="L176">			throw new RuntimeException(&quot;error in getHead() for &quot; + path, e);</span>
+<span class="nc" id="L177">		} finally {</span>
+<span class="nc bnc" id="L178" title="All 4 branches missed.">			if (git != null)</span>
+<span class="nc" id="L179">				git.close();</span>
+<span class="nc" id="L180">		}</span>
+
+	}
+
+	@Override
+	public List&lt;ChangeSet&gt; getChangeSets() {
+<span class="nc" id="L186">		Git git = null;</span>
+		try {
+<span class="nc" id="L188">			git = openRepository();</span>
+
+			List&lt;ChangeSet&gt; allCs;
+<span class="nc bnc" id="L191" title="All 2 branches missed.">			if(!firstParentOnly) allCs = getAllCommits(git);</span>
+<span class="nc" id="L192">			else allCs = firstParentsOnly(git);</span>
+
+<span class="nc" id="L194">			return allCs;</span>
+<span class="nc" id="L195">		} catch (Exception e) {</span>
+<span class="nc" id="L196">			throw new RuntimeException(&quot;error in getChangeSets for &quot; + path, e);</span>
+<span class="nc" id="L197">		} finally {</span>
+<span class="nc bnc" id="L198" title="All 4 branches missed.">			if (git != null)</span>
+<span class="nc" id="L199">				git.close();</span>
+<span class="nc" id="L200">		}</span>
+	}
+
+	private List&lt;ChangeSet&gt; firstParentsOnly(Git git) {
+		
+		try {
+<span class="nc" id="L206">			List&lt;ChangeSet&gt; allCs = new ArrayList&lt;ChangeSet&gt;();</span>
+			
+<span class="nc" id="L208">			RevWalk revWalk = new RevWalk(git.getRepository());</span>
+<span class="nc" id="L209">			revWalk.setRevFilter(new FirstParentFilter());</span>
+<span class="nc" id="L210">			revWalk.sort(RevSort.TOPO);</span>
+<span class="nc" id="L211">			Ref headRef = git.getRepository().getRef(Constants.HEAD);</span>
+<span class="nc" id="L212">			RevCommit headCommit = revWalk.parseCommit(headRef.getObjectId());</span>
+<span class="nc" id="L213">			revWalk.markStart( headCommit );</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">			for(RevCommit revCommit : revWalk) {</span>
+<span class="nc" id="L215">				allCs.add(extractChangeSet(revCommit));</span>
+			}
+			
+<span class="nc" id="L218">			return allCs;</span>
+			
+<span class="nc" id="L220">		} catch (Exception e) {</span>
+<span class="nc" id="L221">			throw new RuntimeException(e);</span>
+		}
+	}
+
+	private List&lt;ChangeSet&gt; getAllCommits(Git git) throws GitAPIException, NoHeadException, IOException {
+<span class="nc" id="L226">		List&lt;ChangeSet&gt; allCs = new ArrayList&lt;ChangeSet&gt;();</span>
+
+<span class="nc bnc" id="L228" title="All 2 branches missed.">		for (RevCommit r : git.log().all().call()) {</span>
+<span class="nc" id="L229">			allCs.add(extractChangeSet(r));</span>
+		}
+<span class="nc" id="L231">		return allCs;</span>
+	}
+
+	private ChangeSet extractChangeSet(RevCommit r) {
+<span class="nc" id="L235">		String hash = r.getName();</span>
+<span class="nc" id="L236">		GregorianCalendar date = convertToDate(r);</span>
+
+<span class="nc" id="L238">		ChangeSet cs = new ChangeSet(hash, date);</span>
+<span class="nc" id="L239">		return cs;</span>
+	}
+
+	private GregorianCalendar convertToDate(RevCommit revCommit) {
+<span class="nc" id="L243">		GregorianCalendar date = new GregorianCalendar();</span>
+<span class="nc" id="L244">		date.setTimeZone(revCommit.getAuthorIdent().getTimeZone());</span>
+<span class="nc" id="L245">		date.setTime(revCommit.getAuthorIdent().getWhen());</span>
+		
+<span class="nc" id="L247">		return date;</span>
+	}
+
+	@Override
+	public Commit getCommit(String id) {
+<span class="nc" id="L252">		Git git = null;</span>
+		try {
+<span class="nc" id="L254">			git = openRepository();</span>
+<span class="nc" id="L255">			Repository repo = git.getRepository();</span>
+
+<span class="nc" id="L257">			Iterable&lt;RevCommit&gt; commits = git.log().add(repo.resolve(id)).call();</span>
+<span class="nc" id="L258">			Commit theCommit = null;</span>
+
+<span class="nc bnc" id="L260" title="All 2 branches missed.">			for (RevCommit jgitCommit : commits) {</span>
+
+<span class="nc" id="L262">				Developer author = new Developer(jgitCommit.getAuthorIdent().getName(), jgitCommit.getAuthorIdent().getEmailAddress());</span>
+<span class="nc" id="L263">				Developer committer = new Developer(jgitCommit.getCommitterIdent().getName(), jgitCommit.getCommitterIdent().getEmailAddress());</span>
+
+<span class="nc" id="L265">				TimeZone authorTimeZone = jgitCommit.getAuthorIdent().getTimeZone();</span>
+<span class="nc" id="L266">				TimeZone committerTimeZone = jgitCommit.getCommitterIdent().getTimeZone();</span>
+				
+<span class="nc" id="L268">				String msg = jgitCommit.getFullMessage().trim();</span>
+<span class="nc" id="L269">				String hash = jgitCommit.getName().toString();</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">				String parent = (jgitCommit.getParentCount() &gt; 0) ? jgitCommit.getParent(0).getName().toString() : &quot;&quot;;</span>
+
+<span class="nc" id="L272">				GregorianCalendar authorDate = new GregorianCalendar();</span>
+<span class="nc" id="L273">				authorDate.setTime(jgitCommit.getAuthorIdent().getWhen());</span>
+<span class="nc" id="L274">				authorDate.setTimeZone(jgitCommit.getAuthorIdent().getTimeZone());</span>
+
+<span class="nc" id="L276">				GregorianCalendar committerDate = new GregorianCalendar();</span>
+<span class="nc" id="L277">				committerDate.setTime(jgitCommit.getCommitterIdent().getWhen());</span>
+<span class="nc" id="L278">				committerDate.setTimeZone(jgitCommit.getCommitterIdent().getTimeZone());</span>
+				
+<span class="nc" id="L280">				boolean merge = false;</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">				if(jgitCommit.getParentCount() &gt; 1) merge = true;</span>
+<span class="nc" id="L282">				Set&lt;String&gt; branches = getBranches(git, hash);</span>
+<span class="nc" id="L283">				boolean isCommitInMainBranch = branches.contains(this.mainBranchName);</span>
+<span class="nc" id="L284">				theCommit = new Commit(hash, author, committer, authorDate, authorTimeZone, committerDate, committerTimeZone, msg, parent, merge, branches, isCommitInMainBranch);</span>
+
+<span class="nc" id="L286">				List&lt;DiffEntry&gt; diffsForTheCommit = diffsForTheCommit(repo, jgitCommit);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">				if (diffsForTheCommit.size() &gt; this.getMaxNumberFilesInACommit()) {</span>
+<span class="nc" id="L288">					log.error(&quot;commit &quot; + id + &quot; has more than files than the limit&quot;);</span>
+<span class="nc" id="L289">					throw new RuntimeException(&quot;commit &quot; + id + &quot; too big, sorry&quot;);</span>
+				}
+
+<span class="nc bnc" id="L292" title="All 2 branches missed.">				for (DiffEntry diff : diffsForTheCommit) {</span>
+
+<span class="nc" id="L294">					ModificationType change = Enum.valueOf(ModificationType.class, diff.getChangeType().toString());</span>
+
+<span class="nc" id="L296">					String oldPath = diff.getOldPath();</span>
+<span class="nc" id="L297">					String newPath = diff.getNewPath();</span>
+
+<span class="nc" id="L299">					String diffText = &quot;&quot;;</span>
+<span class="nc" id="L300">					String sc = &quot;&quot;;</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">					if (diff.getChangeType() != ChangeType.DELETE) {</span>
+<span class="nc" id="L302">						diffText = getDiffText(repo, diff);</span>
+<span class="nc" id="L303">						sc = getSourceCode(repo, diff);</span>
+					}
+
+<span class="nc bnc" id="L306" title="All 2 branches missed.">					if (diffText.length() &gt; maxSizeOfDiff) {</span>
+<span class="nc" id="L307">						log.error(&quot;diff for &quot; + newPath + &quot; too big&quot;);</span>
+<span class="nc" id="L308">						diffText = &quot;-- TOO BIG --&quot;;</span>
+					}
+					
+<span class="nc" id="L311">					theCommit.addModification(oldPath, newPath, change, diffText, sc);</span>
+
+				}
+
+				break;
+			}
+
+<span class="nc" id="L318">			return theCommit;</span>
+<span class="nc" id="L319">		} catch (Exception e) {</span>
+<span class="nc" id="L320">			throw new RuntimeException(&quot;error detailing &quot; + id + &quot; in &quot; + path, e);</span>
+<span class="nc" id="L321">		} finally {</span>
+<span class="nc bnc" id="L322" title="All 4 branches missed.">			if (git != null)</span>
+<span class="nc" id="L323">				git.close();</span>
+<span class="nc" id="L324">		}</span>
+	}
+
+
+	private Set&lt;String&gt; getBranches(Git git, String hash) throws GitAPIException {
+<span class="nc" id="L329">		List&lt;Ref&gt; gitBranches = git.branchList().setContains(hash).call();</span>
+<span class="nc" id="L330">		Set&lt;String&gt; mappedBranches = gitBranches.stream()</span>
+<span class="nc" id="L331">				.map(</span>
+<span class="nc" id="L332">					(ref) -&gt; ref.getName().substring(ref.getName().lastIndexOf(&quot;/&quot;)+1))</span>
+<span class="nc" id="L333">				.collect(Collectors.toSet());</span>
+<span class="nc" id="L334">		return mappedBranches;</span>
+	}
+
+	private List&lt;DiffEntry&gt; diffsForTheCommit(Repository repo, RevCommit commit) throws IOException, AmbiguousObjectException,
+			IncorrectObjectTypeException {
+
+<span class="nc" id="L340">		AnyObjectId currentCommit = repo.resolve(commit.getName());</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">		AnyObjectId parentCommit = commit.getParentCount() &gt; 0 ? repo.resolve(commit.getParent(0).getName()) : null;</span>
+
+<span class="nc" id="L343">		DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);</span>
+<span class="nc" id="L344">		df.setBinaryFileThreshold(2 * 1024); // 2 mb max a file</span>
+<span class="nc" id="L345">		df.setRepository(repo);</span>
+<span class="nc" id="L346">		df.setDiffComparator(RawTextComparator.DEFAULT);</span>
+<span class="nc" id="L347">		df.setDetectRenames(true);</span>
+<span class="nc" id="L348">		setContext(df);</span>
+		
+<span class="nc" id="L350">		List&lt;DiffEntry&gt; diffs = null;</span>
+
+<span class="nc bnc" id="L352" title="All 2 branches missed.">		if (parentCommit == null) {</span>
+<span class="nc" id="L353">			RevWalk rw = new RevWalk(repo);</span>
+<span class="nc" id="L354">			diffs = df.scan(new EmptyTreeIterator(), new CanonicalTreeParser(null, rw.getObjectReader(), commit.getTree()));</span>
+<span class="nc" id="L355">			rw.release();</span>
+<span class="nc" id="L356">		} else {</span>
+<span class="nc" id="L357">			diffs = df.scan(parentCommit, currentCommit);</span>
+		}
+
+<span class="nc" id="L360">		df.release();</span>
+
+<span class="nc" id="L362">		return diffs;</span>
+	}
+
+	private void setContext(DiffFormatter df) {
+<span class="nc" id="L366">		String context = System.getProperty(&quot;git.diffcontext&quot;);</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">		if(context==null) return;</span>
+<span class="nc" id="L368">		df.setContext(Integer.parseInt(System.getProperty(&quot;git.diffcontext&quot;)));</span>
+<span class="nc" id="L369">	}</span>
+
+	private String getSourceCode(Repository repo, DiffEntry diff) throws MissingObjectException, IOException, UnsupportedEncodingException {
+
+		try {
+<span class="nc" id="L374">			ObjectReader reader = repo.newObjectReader();</span>
+<span class="nc" id="L375">			byte[] bytes = reader.open(diff.getNewId().toObjectId()).getBytes();</span>
+<span class="nc" id="L376">			return new String(bytes, &quot;utf-8&quot;);</span>
+<span class="nc" id="L377">		} catch (Throwable e) {</span>
+<span class="nc" id="L378">			return &quot;&quot;;</span>
+		}
+	}
+
+	private String getDiffText(Repository repo, DiffEntry diff) throws IOException, UnsupportedEncodingException {
+<span class="nc" id="L383">		DiffFormatter df2 = null;</span>
+		try {
+			String diffText;
+<span class="nc" id="L386">			ByteArrayOutputStream out = new ByteArrayOutputStream();</span>
+<span class="nc" id="L387">			df2 = new DiffFormatter(out);</span>
+<span class="nc" id="L388">			df2.setRepository(repo);</span>
+<span class="nc" id="L389">			df2.format(diff);</span>
+<span class="nc" id="L390">			diffText = out.toString(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L391">			return diffText;</span>
+<span class="nc" id="L392">		} catch (Throwable e) {</span>
+<span class="nc" id="L393">			return &quot;&quot;;</span>
+<span class="nc" id="L394">		} finally {</span>
+<span class="nc bnc" id="L395" title="All 6 branches missed.">			if (df2 != null)</span>
+<span class="nc" id="L396">				df2.release();</span>
+<span class="nc" id="L397">		}</span>
+	}
+
+	public synchronized void checkout(String hash) {
+<span class="nc" id="L401">		Git git = null;</span>
+		try {
+<span class="nc" id="L403">			git = openRepository();</span>
+<span class="nc" id="L404">			git.reset().setMode(ResetType.HARD).call();</span>
+<span class="nc" id="L405">			git.checkout().setName(mainBranchName).call();</span>
+<span class="nc" id="L406">			deleteMMBranch(git);</span>
+<span class="nc" id="L407">			git.checkout().setCreateBranch(true).setName(BRANCH_MM).setStartPoint(hash).setForce(true).setOrphan(true).call();</span>
+
+<span class="nc" id="L409">		} catch (Exception e) {</span>
+<span class="nc" id="L410">			throw new RuntimeException(e);</span>
+<span class="nc" id="L411">		} finally {</span>
+<span class="nc bnc" id="L412" title="All 4 branches missed.">			if (git != null)</span>
+<span class="nc" id="L413">				git.close();</span>
+<span class="nc" id="L414">		}</span>
+<span class="nc" id="L415">	}</span>
+
+	private synchronized void deleteMMBranch(Git git) throws GitAPIException, NotMergedException, CannotDeleteCurrentBranchException {
+<span class="nc" id="L418">		List&lt;Ref&gt; refs = git.branchList().call();</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">		for (Ref r : refs) {</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">			if (r.getName().endsWith(BRANCH_MM)) {</span>
+<span class="nc" id="L421">				git.branchDelete().setBranchNames(BRANCH_MM).setForce(true).call();</span>
+<span class="nc" id="L422">				break;</span>
+			}
+		}
+<span class="nc" id="L425">	}</span>
+
+	public List&lt;RepositoryFile&gt; files() {
+<span class="nc" id="L428">		List&lt;RepositoryFile&gt; all = new ArrayList&lt;RepositoryFile&gt;();</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">		for (File f : getAllFilesInPath()) {</span>
+<span class="nc" id="L430">			all.add(new RepositoryFile(f));</span>
+		}
+
+<span class="nc" id="L433">		return all;</span>
+	}
+
+	public synchronized void reset() {
+<span class="nc" id="L437">		Git git = null;</span>
+		try {
+<span class="nc" id="L439">			git = openRepository();</span>
+
+<span class="nc" id="L441">			git.checkout().setName(mainBranchName).setForce(true).call();</span>
+<span class="nc" id="L442">			git.branchDelete().setBranchNames(BRANCH_MM).setForce(true).call();</span>
+<span class="nc" id="L443">		} catch (Exception e) {</span>
+<span class="nc" id="L444">			throw new RuntimeException(e);</span>
+<span class="nc" id="L445">		} finally {</span>
+<span class="nc bnc" id="L446" title="All 4 branches missed.">			if (git != null)</span>
+<span class="nc" id="L447">				git.close();</span>
+<span class="nc" id="L448">		}</span>
+
+<span class="nc" id="L450">	}</span>
+
+	private List&lt;File&gt; getAllFilesInPath() {
+<span class="nc" id="L453">		return FileUtils.getAllFilesInPath(path);</span>
+	}
+
+	@Override
+	public long totalCommits() {
+<span class="nc" id="L458">		return getChangeSets().size();</span>
+	}
+
+	@Override
+	@Deprecated
+	public String blame(String file, String commitToBeBlamed, Integer line) {
+<span class="nc" id="L464">		return blame(file,commitToBeBlamed).get(line).getCommit();</span>
+	}
+	
+	public List&lt;BlamedLine&gt; blame(String file, String commitToBeBlamed) {
+<span class="nc" id="L468">		return blame(file, commitToBeBlamed, true);</span>
+	}
+	
+	public List&lt;BlamedLine&gt; blame(String file, String commitToBeBlamed, boolean priorCommit) {
+<span class="nc" id="L472">		Git git = null;</span>
+		try {
+<span class="nc" id="L474">			git = openRepository();</span>
+
+			ObjectId gitCommitToBeBlamed;
+<span class="nc bnc" id="L477" title="All 2 branches missed.">			if(priorCommit) {</span>
+<span class="nc" id="L478">				Iterable&lt;RevCommit&gt; commits = git.log().add(git.getRepository().resolve(commitToBeBlamed)).call();</span>
+<span class="nc" id="L479">				gitCommitToBeBlamed = commits.iterator().next().getParent(0).getId();</span>
+<span class="nc" id="L480">			} else {</span>
+<span class="nc" id="L481">				gitCommitToBeBlamed = git.getRepository().resolve(commitToBeBlamed); </span>
+			}
+
+<span class="nc" id="L484">			BlameResult blameResult = git.blame().setFilePath(file).setStartCommit(gitCommitToBeBlamed).setFollowFileRenames(true).call();</span>
+<span class="nc bnc" id="L485" title="All 2 branches missed.">			if(blameResult != null) {</span>
+<span class="nc" id="L486">				int rows = blameResult.getResultContents().size();</span>
+<span class="nc" id="L487">				List&lt;BlamedLine&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">				for(int i = 0; i &lt; rows; i++) {</span>
+<span class="nc" id="L489">					result.add(new BlamedLine(i, </span>
+<span class="nc" id="L490">							blameResult.getResultContents().getString(i), </span>
+<span class="nc" id="L491">							blameResult.getSourceAuthor(i).getName(), </span>
+<span class="nc" id="L492">							blameResult.getSourceCommitter(i).getName(), </span>
+<span class="nc" id="L493">							blameResult.getSourceCommit(i).getId().getName()));</span>
+				}
+				
+<span class="nc" id="L496">				return result;</span>
+			} else {
+<span class="nc" id="L498">				throw new RuntimeException(&quot;BlameResult not found.&quot;);</span>
+			}
+
+<span class="nc" id="L501">		} catch (Exception e) {</span>
+<span class="nc" id="L502">			throw new RuntimeException(e);</span>
+<span class="nc" id="L503">		} finally {</span>
+<span class="nc bnc" id="L504" title="All 4 branches missed.">			if (git != null)</span>
+<span class="nc" id="L505">				git.close();</span>
+<span class="nc" id="L506">		}</span>
+	}
+	
+	public Integer getMaxNumberFilesInACommit() {
+<span class="nc" id="L510">		return maxNumberFilesInACommit;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

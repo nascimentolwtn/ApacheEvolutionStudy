@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>JoinSummaryCSV.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.auxiliar</a> &gt; <span class="el_source">JoinSummaryCSV.java</span></div><h1>JoinSummaryCSV.java</h1><pre class="source lang-java linenums">package br.inpe.cap.auxiliar;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFileFilter;
+
+<span class="nc" id="L10">public class JoinSummaryCSV {</span>
+	
+	private static final String APACHE_FILE_PREFIX = &quot;dependency_eval&quot;;
+<span class="nc" id="L13">	private static final String STUDY_LOG_PATH = &quot;.&quot; + File.separator + &quot;study&quot; + File.separator + APACHE_FILE_PREFIX;</span>
+<span class="nc" id="L14">	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + &quot;evolutions&quot;;</span>
+<span class="nc" id="L15">	private static final File OUTPUT = new File(EVOLUTION_LOG_PATH + &quot;_joined.csv&quot;);</span>
+
+	public static void main(String[] args) throws Exception {
+<span class="nc" id="L18">		System.out.println(&quot;Starting...&quot;);</span>
+<span class="nc" id="L19">		joinSummaryCSV(EVOLUTION_LOG_PATH, OUTPUT);</span>
+<span class="nc" id="L20">		System.out.println(&quot;Finish!&quot;);</span>
+<span class="nc" id="L21">	}</span>
+	
+	public static void joinSummaryCSV(String evolutionLogPath, File output) throws Exception {
+		
+<span class="nc" id="L25">		File evolutions = new File(evolutionLogPath);</span>
+<span class="nc" id="L26">		Iterator&lt;File&gt; iterateFiles = FileUtils.iterateFiles(evolutions, FileFileFilter.FILE, null);</span>
+		
+<span class="nc" id="L28">		iterateFiles.forEachRemaining(</span>
+<span class="nc" id="L29">				(f) -&gt; {</span>
+					try {
+<span class="nc" id="L31">						FileUtils.writeStringToFile(output, FileUtils.readFileToString(f), true);</span>
+<span class="nc" id="L32">					} catch (IOException e) {</span>
+<span class="nc" id="L33">						e.printStackTrace();</span>
+					}
+<span class="nc" id="L35">				});</span>
+<span class="nc" id="L36">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

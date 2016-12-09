@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>AllDependenciesEvolutionCachedVisitor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.visitor</a> &gt; <span class="el_source">AllDependenciesEvolutionCachedVisitor.java</span></div><h1>AllDependenciesEvolutionCachedVisitor.java</h1><pre class="source lang-java linenums"><span class="nc" id="L1">package br.inpe.cap.evolution.visitor;</span>
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
+
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.parser.XmlMavenParser;
+import br.inpe.cap.evolution.processor.AsynchronousCheckOutFileRepositoryProcessor;
+import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
+
+<span class="nc" id="L26">public class AllDependenciesEvolutionCachedVisitor implements CommitVisitor {</span>
+	
+<span class="nc" id="L28">	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(&quot;dd/MM/yyyy HH:mm:ss&quot;);</span>
+	
+	/**
+	 * Formato da porcentagem com &quot;.&quot; para não confundir com a &quot;,&quot; do CSV
+	 */
+<span class="nc" id="L33">	private static final DecimalFormat PERCENT_FORMAT = new DecimalFormat(&quot;0.00000&quot;, DecimalFormatSymbols.getInstance(Locale.US));</span>
+	
+<span class="nc" id="L35">	private static Logger logger;</span>
+
+	private String repositoryName;
+	private List&lt;String&gt; hashes;
+	
+<span class="nc" id="L40">	public XmlMavenParser parser = new XmlMavenParser();</span>
+
+	@Override
+	public void process(final SCMRepository repo, final Commit commit, final PersistenceMechanism writer) {
+<span class="nc" id="L44">		this.initHashes(repo);</span>
+		
+<span class="nc" id="L46">		final int totalCommits = hashes.size();</span>
+<span class="nc" id="L47">		final int currentHashPosition = totalCommits - hashes.indexOf(commit.getHash());</span>
+		
+<span class="nc" id="L49">		final float percent = ((currentHashPosition*100)/(float)totalCommits);</span>
+		
+		try {
+			
+<span class="nc" id="L53">			AsynchronousCheckOutFileRepositoryProcessor processor = new AsynchronousCheckOutFileRepositoryProcessor(</span>
+<span class="nc" id="L54">				new LoggerCheckoutObserver(logger)</span>
+			){
+			
+			@Override
+			protected void processFile(final SCMRepository repo, final Commit commit, final String fileName, final ByteArrayInputStream file) {
+				
+				// CommitFilter processa apenas commits que possuem MODIFICAÇÕES com esse FileType.
+				// Porém, aqui a ideia é fazer CHECKOUT todos arquivos mesmo, e então filtrar novamente para processar somente os poms.xml.
+<span class="nc bnc" id="L62" title="All 2 branches missed.">				if(isntPOM(fileName)) {</span>
+<span class="nc" id="L63">					return;</span>
+				}
+				
+				try {
+<span class="nc" id="L67">					final String sourceCode = new String(IOUtils.toCharArray(file));</span>
+<span class="nc" id="L68">					final MavenProject pom = parser.readPOM(sourceCode);</span>
+<span class="nc" id="L69">					pom.getDependencies().forEach(</span>
+<span class="nc" id="L70">						(dependency) -&gt; </span>
+<span class="nc" id="L71">							writeCsvLine(writer, commit, currentHashPosition, totalCommits, percent, fileName, dependency)</span>
+						);
+<span class="nc" id="L73">				} catch (final IOException e) {</span>
+<span class="nc" id="L74">					logger.error(e.getMessage());</span>
+				}
+<span class="nc" id="L76">			}</span>
+
+			private boolean isntPOM(final String fileName) {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">				return !fileName.endsWith(&quot;pom.xml&quot;);</span>
+			}};
+		
+<span class="nc" id="L82">			processor.processCommit(repo, commit);</span>
+<span class="nc" id="L83">			final String percentMessage = repositoryName</span>
+<span class="nc" id="L84">					+ &quot; progress: commit #&quot;</span>
+<span class="nc" id="L85">					+ currentHashPosition</span>
+<span class="nc" id="L86">					+ &quot;/&quot;</span>
+<span class="nc" id="L87">					+ totalCommits</span>
+<span class="nc" id="L88">					+ &quot; - &quot;</span>
+<span class="nc" id="L89">					+ percent</span>
+<span class="nc" id="L90">					+ &quot;%&quot;;</span>
+<span class="nc" id="L91">			System.err.println(percentMessage);</span>
+<span class="nc" id="L92">		} catch (final IOException e) {</span>
+<span class="nc" id="L93">			logger.error(e.getMessage());</span>
+		}
+		
+<span class="nc" id="L96">	}</span>
+
+	private void writeCsvLine(final PersistenceMechanism writer, final Commit commit, final int currentHashPosition, final int totalCommits,
+			final float percent, final String fileName, final MavenDependency mavenDependency) {
+<span class="nc" id="L100">		writer.write(</span>
+<span class="nc" id="L101">				commit.getHash(),</span>
+<span class="nc" id="L102">				DATE_FORMAT.format(commit.getDate().getTime()),</span>
+<span class="nc" id="L103">				repositoryName,</span>
+<span class="nc" id="L104">				fileName,</span>
+<span class="nc" id="L105">				currentHashPosition,</span>
+<span class="nc" id="L106">				totalCommits,</span>
+<span class="nc" id="L107">				PERCENT_FORMAT.format(percent),</span>
+<span class="nc" id="L108">				mavenDependency.getGroupId(),</span>
+<span class="nc" id="L109">				mavenDependency.getArtifactId(),</span>
+<span class="nc" id="L110">				mavenDependency.getVersion(),</span>
+<span class="nc" id="L111">				XmlMavenParser.replaceLineFeedAndComma(commit.getMsg())</span>
+		);
+<span class="nc" id="L113">	}</span>
+
+	private void initHashes(final SCMRepository repo) {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if(this.hashes == null) {</span>
+<span class="nc" id="L117">			repositoryName = repo.getLastDir();</span>
+<span class="nc" id="L118">			final List&lt;ChangeSet&gt; changeSets = repo.getScm().getChangeSets();</span>
+<span class="nc" id="L119">			hashes = changeSets.stream().map((cs)-&gt;cs.getId()).collect(Collectors.toList());</span>
+<span class="nc" id="L120">			Thread.currentThread().setName(&quot;Visitor &quot; + this.repositoryName);</span>
+		}
+<span class="nc" id="L122">	}</span>
+
+	@Override
+	public String name() {
+<span class="nc" id="L126">		return &quot;all-dependency_&quot; + this.repositoryName;</span>
+	}
+
+	public static void setLogger(final Logger logger) {
+<span class="nc" id="L130">		AllDependenciesEvolutionCachedVisitor.logger = logger;</span>
+<span class="nc" id="L131">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

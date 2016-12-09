@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>AprioriAggregatorPostProcessor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.processor</a> &gt; <span class="el_source">AprioriAggregatorPostProcessor.java</span></div><h1>AprioriAggregatorPostProcessor.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.processor;
+
+import static br.inpe.cap.evolution.maven.CommitLine.lastLine;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.persistence.csv.CSVFile;
+
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.maven.AprioriLine;
+import br.inpe.cap.evolution.maven.CommitLine;
+import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
+
+<span class="fc" id="L20">public class AprioriAggregatorPostProcessor {</span>
+
+	public static final String FIRST_CELL = &quot;SUBPROJECT&quot;;
+	
+<span class="fc" id="L24">	private Set&lt;String&gt; allSubProjectArtifacts = new TreeSet&lt;&gt;();</span>
+
+	private MavenProject currentProject;
+<span class="fc" id="L27">	private final Map&lt;String, MavenProject&gt; currentMavenProjects = new TreeMap&lt;&gt;();</span>
+
+	private static CommitLine parseLastCommitLine(List&lt;String&gt; linesCsvInput) {
+<span class="fc" id="L30">		return CommitLine.parseCommitLine(lastLine(linesCsvInput), CommitLineType.OUTPUT);</span>
+	}
+	
+	private static Set&lt;String&gt; extractLastCommitSubProjectArtifacts(List&lt;String&gt; linesCsvInput, String lastCommitHash) {
+<span class="fc" id="L34">		Set&lt;String&gt; artifacts = new TreeSet&lt;&gt;();</span>
+<span class="fc" id="L35">		linesCsvInput.stream()</span>
+<span class="fc" id="L36">			.filter((csvLine) -&gt; csvLine.contains(lastCommitHash))</span>
+<span class="fc" id="L37">			.forEach((csvLine) -&gt; {</span>
+<span class="fc" id="L38">				final CommitLine commitLine = CommitLine.parseCommitLine(csvLine, CommitLineType.OUTPUT);</span>
+<span class="fc" id="L39">				artifacts.add(commitLine.getArtifactId());</span>
+<span class="fc" id="L40">			});</span>
+<span class="fc" id="L41">		return artifacts;</span>
+	}
+
+	public void process(CSVFile writer, List&lt;List&lt;String&gt;&gt; linesCsvInputs) {
+<span class="fc" id="L45">		extractAllArtifactsFromAllSubProjects(linesCsvInputs);</span>
+				
+<span class="fc" id="L47">		linesCsvInputs.forEach((linesCsvInput) -&gt; {</span>
+			try {
+<span class="fc" id="L49">				CommitLine lastCommitLine = parseLastCommitLine(linesCsvInput);</span>
+<span class="fc" id="L50">				String lastCommitHash = lastCommitLine.getHash();</span>
+<span class="fc" id="L51">				CommitLine.removeHeader(linesCsvInput);</span>
+		
+<span class="fc" id="L53">				System.out.println(&quot;Processing artifacts from &quot; + lastCommitLine.getFile());</span>
+<span class="fc" id="L54">				linesCsvInput.stream()</span>
+<span class="fc" id="L55">					.filter((csvLine) -&gt; csvLine.contains(lastCommitHash))</span>
+<span class="fc" id="L56">					.forEach((line) -&gt; processLine(line));</span>
+<span class="pc" id="L57">			} catch (RuntimeException e) {</span>
+<span class="nc" id="L58">				System.err.println(e.getMessage());</span>
+			}
+<span class="fc" id="L60">		});</span>
+		
+<span class="fc" id="L62">		writeHeader(writer, AprioriLine.createHeader(allSubProjectArtifacts));</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">		for (MavenProject mavenProject : this.currentMavenProjects.values()) {</span>
+<span class="fc" id="L64">			AprioriLine aprioriLine = AprioriLine.parseMavenProject(mavenProject, this.allSubProjectArtifacts);</span>
+<span class="fc" id="L65">			writer.write(aprioriLine.toCSVLine());</span>
+		}
+		
+<span class="fc" id="L68">	}</span>
+
+	private void extractAllArtifactsFromAllSubProjects(List&lt;List&lt;String&gt;&gt; linesCsvInputs) {
+<span class="fc" id="L71">		linesCsvInputs.forEach((linesCsvInput) -&gt; {</span>
+			try {
+<span class="fc" id="L73">				CommitLine lastCommitLine = parseLastCommitLine(linesCsvInput);</span>
+<span class="fc" id="L74">				String lastCommitHash = lastCommitLine.getHash();</span>
+<span class="fc" id="L75">				CommitLine.removeHeader(linesCsvInput);</span>
+				
+<span class="fc" id="L77">				System.out.println(&quot;Extracting artifiacts from &quot; + lastCommitLine.getFile());</span>
+<span class="fc" id="L78">				this.allSubProjectArtifacts.addAll(extractLastCommitSubProjectArtifacts(linesCsvInput, lastCommitHash));</span>
+<span class="pc" id="L79">			} catch (RuntimeException e) {</span>
+<span class="nc" id="L80">				System.err.println(e.getMessage());</span>
+			}
+<span class="fc" id="L82">		});</span>
+<span class="fc" id="L83">	}</span>
+
+	private void writeHeader(PersistenceMechanism writer, String aprioriHeader) {
+<span class="fc" id="L86">		Object[] headerTokens = aprioriHeader.split(&quot;,&quot;);</span>
+<span class="fc" id="L87">		writer.write(headerTokens);</span>
+<span class="fc" id="L88">	}</span>
+	
+	public Set&lt;String&gt; getAllSubProjectArtifacts() {
+<span class="fc" id="L91">		return allSubProjectArtifacts;</span>
+	}
+
+	private void processLine(String line) {
+<span class="fc" id="L95">		final CommitLine currentCommit = CommitLine.parseCommitLine(line, CommitLineType.OUTPUT);</span>
+<span class="fc" id="L96">		final MavenProject currentProject = projectRegardCurrentCommit(currentCommit);</span>
+		
+<span class="fc" id="L98">		final MavenDependency mavenDependencyByArtifactId = getMavenDependencyCommitLine(currentCommit);</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		if(mavenDependencyByArtifactId == null) {</span>
+<span class="fc" id="L100">			currentProject.getDependencies().add(getMavenDependencyFromCSVLine(currentCommit));</span>
+		}
+<span class="fc" id="L102">	}</span>
+	
+	protected MavenDependency getMavenDependencyFromCSVLine(final CommitLine parsedCommitLine) {
+<span class="fc" id="L105">		final MavenDependency dependency = new MavenDependency();</span>
+<span class="fc" id="L106">		dependency.setGroupId(parsedCommitLine.getGroupId());</span>
+<span class="fc" id="L107">		dependency.setArtifactId(parsedCommitLine.getArtifactId());</span>
+<span class="fc" id="L108">		dependency.setVersion(parsedCommitLine.getVersion());</span>
+<span class="fc" id="L109">		return dependency;</span>
+	}
+
+	private MavenProject projectRegardCurrentCommit(final CommitLine currentCommit) {
+<span class="fc bfc" id="L113" title="All 4 branches covered.">		if(currentProject == null || this.currentMavenProjects.get(currentCommit.getFile()) == null) {</span>
+<span class="fc" id="L114">			this.currentProject = new MavenProject();</span>
+<span class="fc" id="L115">			this.currentProject.setPath(currentCommit.getFile());</span>
+<span class="fc" id="L116">			this.currentMavenProjects.put(currentCommit.getFile(), this.currentProject);</span>
+<span class="fc" id="L117">		} else {</span>
+<span class="fc" id="L118">			this.currentProject = this.currentMavenProjects.get(currentCommit.getFile());</span>
+		}
+<span class="fc" id="L120">		return this.currentProject;</span>
+	}
+
+	private MavenDependency getMavenDependencyCommitLine(final CommitLine currentCommit) {
+<span class="fc" id="L124">		final MavenProject mavenProject = this.currentMavenProjects.get(currentCommit.getFile());</span>
+<span class="fc" id="L125">		return mavenProject.getMavenDependencyByArtifactId(currentCommit.getArtifactId());</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

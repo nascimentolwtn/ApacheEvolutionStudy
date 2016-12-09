@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>DatesAndTimezonesTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.integration</a> &gt; <span class="el_source">DatesAndTimezonesTest.java</span></div><h1>DatesAndTimezonesTest.java</h1><pre class="source lang-java linenums">package org.repodriller.integration;
+
+import java.text.SimpleDateFormat;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.repodriller.RepositoryMining;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.scm.GitRepository;
+
+<span class="nc" id="L12">public class DatesAndTimezonesTest {</span>
+
+	private String path4;
+	private String path2;
+
+	@Before
+	public void setUp() {
+<span class="nc" id="L19">		this.path4 = this.getClass().getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-4&quot;;</span>
+<span class="nc" id="L20">		this.path2 = this.getClass().getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-2&quot;;</span>
+<span class="nc" id="L21">	}</span>
+	
+	@Test
+	public void oneTimezone() {
+<span class="nc" id="L25">		TestVisitor visitor = new TestVisitor();</span>
+		
+<span class="nc" id="L27">		new RepositoryMining()</span>
+<span class="nc" id="L28">		.in(GitRepository.singleProject(path4))</span>
+<span class="nc" id="L29">		.through(Commits.single(&quot;375de7a8275ecdc0b28dc8de2568f47241f443e9&quot;))</span>
+<span class="nc" id="L30">		.process(visitor)</span>
+<span class="nc" id="L31">		.mine();</span>
+		
+<span class="nc" id="L33">		SimpleDateFormat sdf = new SimpleDateFormat(&quot;dd/MM/yyyy HH:mm:ss z&quot;);</span>
+<span class="nc" id="L34">		sdf.setTimeZone(visitor.getVisitedCommits().get(0).getAuthorTimeZone());</span>
+<span class="nc" id="L35">		String time = sdf.format(visitor.getVisitedCommits().get(0).getDate().getTime());</span>
+<span class="nc" id="L36">		Assert.assertEquals(&quot;08/10/2016 17:57:49 GMT-04:00&quot;, time);</span>
+<span class="nc" id="L37">	}</span>
+
+	@Test
+	public void otherTimezone() {
+<span class="nc" id="L41">		TestVisitor visitor = new TestVisitor();</span>
+		
+<span class="nc" id="L43">		new RepositoryMining()</span>
+<span class="nc" id="L44">		.in(GitRepository.singleProject(path2))</span>
+<span class="nc" id="L45">		.through(Commits.single(&quot;29e929fbc5dc6a2e9c620069b24e2a143af4285f&quot;))</span>
+<span class="nc" id="L46">		.process(visitor)</span>
+<span class="nc" id="L47">		.mine();</span>
+		
+<span class="nc" id="L49">		SimpleDateFormat sdf = new SimpleDateFormat(&quot;dd/MM/yyyy HH:mm:ss z&quot;);</span>
+<span class="nc" id="L50">		sdf.setTimeZone(visitor.getVisitedCommits().get(0).getAuthorTimeZone());</span>
+<span class="nc" id="L51">		String time = sdf.format(visitor.getVisitedCommits().get(0).getDate().getTime());</span>
+<span class="nc" id="L52">		Assert.assertEquals(&quot;04/04/2016 13:21:25 GMT+02:00&quot;, time);</span>
+<span class="nc" id="L53">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

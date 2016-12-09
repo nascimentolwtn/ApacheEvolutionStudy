@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>SingleGitRemoteRepositoryBuilder.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.scm</a> &gt; <span class="el_source">SingleGitRemoteRepositoryBuilder.java</span></div><h1>SingleGitRemoteRepositoryBuilder.java</h1><pre class="source lang-java linenums">package org.repodriller.scm;
+
+import org.eclipse.jgit.api.errors.GitAPIException;
+
+public class SingleGitRemoteRepositoryBuilder extends GitRemoteRepositoryBuilder {
+
+	private String gitUrl;
+	
+<span class="nc" id="L9">	public SingleGitRemoteRepositoryBuilder(String gitUrl) {</span>
+<span class="nc" id="L10">		this.gitUrl = gitUrl;</span>
+<span class="nc" id="L11">	}</span>
+	
+	public SingleGitRemoteRepositoryBuilder inTempDir(String tempDir) {
+<span class="nc" id="L14">		super.tempDir = tempDir;</span>
+<span class="nc" id="L15">		return this;</span>
+	}
+
+	public SingleGitRemoteRepositoryBuilder asBareRepos() {
+<span class="nc" id="L19">		super.bare = true;</span>
+<span class="nc" id="L20">		return this;</span>
+	}
+
+	public GitRemoteRepository build() throws GitAPIException {
+<span class="nc" id="L24">		return new GitRemoteRepository(this.gitUrl, this.tempDir, this.bare);</span>
+	}
+
+	public SCMRepository buildAsSCMRepository() {
+<span class="nc" id="L28">		return GitRemoteRepository.singleProject(this.gitUrl, this.tempDir, this.bare);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

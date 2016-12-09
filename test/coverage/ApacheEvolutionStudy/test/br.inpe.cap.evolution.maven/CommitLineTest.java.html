@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>CommitLineTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.maven</a> &gt; <span class="el_source">CommitLineTest.java</span></div><h1>CommitLineTest.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.maven;
+
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
+
+<span class="fc" id="L17">public class CommitLineTest {</span>
+	
+<span class="fc" id="L19">	private String header = CommitLine.HEADER;</span>
+<span class="fc" id="L20">	private String line = &quot;0e60b7d9888217be8499fe8b13c7b55e707f269c,10/05/2011 22:35:21,druid,E:\\metricminer-evolution-stars\\druid\\pom.xml,2,4890,0.04090,false,com.alibaba.external,java.servlet,2.5,Share project 'druid' into 'http://code.alibabatech.com/svn/druid'git-svn-id: http://code.alibabatech.com/svn/druid/trunk@2 b9813039-fb51-4c41-a8b9-e21c2acb5095&quot;;</span>
+<span class="fc" id="L21">	private String lineWithoutMessage = &quot;6a6f3d45a521518eec4d8531ec9d8534a3f17bf3,22/07/2013 08:59,Activiti,E:\\metricminer-evolution-stars\\Activiti\\modules\\activiti-bpmn-converter\\pom.xml,3989,7530,52.97477,false,org.activiti,activiti-bpmn-model,5.14-SNAPSHOT,&quot;;</span>
+<span class="fc" id="L22">	private String invalidTokenLine = &quot;0e60b7,10/05/2011,22:35:21,druid,2,4890,0.04090,java.servlet,2.5,Share project 'druid'&quot;;</span>
+	
+	@Test
+	public void regularParseCommitLine() {
+<span class="fc" id="L26">		CommitLine parsedCommitLine = CommitLine.parseCommitLine(line, INPUT);</span>
+<span class="fc" id="L27">		assertEquals(&quot;0e60b7d9888217be8499fe8b13c7b55e707f269c&quot;, parsedCommitLine.getHash());</span>
+<span class="fc" id="L28">		assertEquals(&quot;10/05/2011 22:35:21&quot;, parsedCommitLine.getDate());</span>
+<span class="fc" id="L29">		assertEquals(&quot;druid&quot;, parsedCommitLine.getRepository());</span>
+<span class="fc" id="L30">		assertEquals(&quot;E:\\metricminer-evolution-stars\\druid\\pom.xml&quot;, parsedCommitLine.getFile());</span>
+<span class="fc" id="L31">		assertEquals(2, parsedCommitLine.getCommitPosition());</span>
+<span class="fc" id="L32">		assertEquals(4890, parsedCommitLine.getTotalCommits());</span>
+<span class="fc" id="L33">		assertEquals(0.04090f, parsedCommitLine.getPercent(), 0.00001f);</span>
+<span class="fc" id="L34">		assertEquals(false, parsedCommitLine.isDependencyManaged());</span>
+<span class="fc" id="L35">		assertEquals(&quot;com.alibaba.external&quot;, parsedCommitLine.getGroupId());</span>
+<span class="fc" id="L36">		assertEquals(&quot;java.servlet&quot;, parsedCommitLine.getArtifactId());</span>
+<span class="fc" id="L37">		assertEquals(&quot;2.5&quot;, parsedCommitLine.getVersion());</span>
+<span class="fc" id="L38">		assertEquals(&quot;Share project 'druid' into 'http://code.alibabatech.com/svn/druid'git-svn-id: http://code.alibabatech.com/svn/druid/trunk@2 b9813039-fb51-4c41-a8b9-e21c2acb5095&quot;, parsedCommitLine.getMessage());</span>
+<span class="fc" id="L39">	}</span>
+
+	@Test
+	public void parseCommitLineWithoutMessage() {
+<span class="fc" id="L43">		CommitLine parsedCommitLine = CommitLine.parseCommitLine(lineWithoutMessage, INPUT);</span>
+<span class="fc" id="L44">		assertEquals(&quot;6a6f3d45a521518eec4d8531ec9d8534a3f17bf3&quot;, parsedCommitLine.getHash());</span>
+<span class="fc" id="L45">		assertEquals(&quot;22/07/2013 08:59&quot;, parsedCommitLine.getDate());</span>
+<span class="fc" id="L46">		assertEquals(&quot;Activiti&quot;, parsedCommitLine.getRepository());</span>
+<span class="fc" id="L47">		assertEquals(&quot;E:\\metricminer-evolution-stars\\Activiti\\modules\\activiti-bpmn-converter\\pom.xml&quot;, parsedCommitLine.getFile());</span>
+<span class="fc" id="L48">		assertEquals(3989, parsedCommitLine.getCommitPosition());</span>
+<span class="fc" id="L49">		assertEquals(7530, parsedCommitLine.getTotalCommits());</span>
+<span class="fc" id="L50">		assertEquals(52.97477f, parsedCommitLine.getPercent(), 0.00001f);</span>
+<span class="fc" id="L51">		assertEquals(false, parsedCommitLine.isDependencyManaged());</span>
+<span class="fc" id="L52">		assertEquals(&quot;org.activiti&quot;, parsedCommitLine.getGroupId());</span>
+<span class="fc" id="L53">		assertEquals(&quot;activiti-bpmn-model&quot;, parsedCommitLine.getArtifactId());</span>
+<span class="fc" id="L54">		assertEquals(&quot;5.14-SNAPSHOT&quot;, parsedCommitLine.getVersion());</span>
+<span class="fc" id="L55">		assertEquals(&quot;&quot;, parsedCommitLine.getMessage());</span>
+<span class="fc" id="L56">	}</span>
+	
+	@Test
+	public void tratamentoRemoveHeaderDeArquivoSemNenhumaLinha() {
+		try {
+<span class="fc" id="L61">			final List&lt;String&gt; emptyList = Collections.emptyList();</span>
+<span class="fc" id="L62">			assertTrue(emptyList.isEmpty());</span>
+<span class="fc" id="L63">			CommitLine.removeHeader(emptyList);</span>
+<span class="fc" id="L64">			assertTrue(emptyList.isEmpty());</span>
+<span class="pc" id="L65">		} catch (Exception e) {</span>
+<span class="nc" id="L66">			e.printStackTrace();</span>
+<span class="nc" id="L67">			fail(&quot;Tratamento deveria ser realizado para evitar falha de processamento de CSV.&quot;);</span>
+		}
+<span class="fc" id="L69">	}</span>
+
+	@Test
+	public void invalidLine() {
+		try {
+<span class="nc" id="L74">			CommitLine.parseCommitLine(invalidTokenLine, INPUT);</span>
+<span class="nc" id="L75">			fail(&quot;Shoud throw Unparse Exception&quot;);</span>
+<span class="pc" id="L76">		} catch (RuntimeException e) {</span>
+<span class="fc" id="L77">			assertSame(RuntimeException.class, e.getClass());</span>
+<span class="fc" id="L78">			assertTrue(e.getMessage().startsWith(&quot;Line cannot be parsed:&quot;));</span>
+		}
+<span class="fc" id="L80">	}</span>
+	
+	@Test
+	public void invalidEmptyLine() {
+		try {
+<span class="nc" id="L85">			CommitLine.parseCommitLine(&quot;&quot;, INPUT);</span>
+<span class="nc" id="L86">			fail(&quot;Shoud throw Unparse Exception&quot;);</span>
+<span class="pc" id="L87">		} catch (RuntimeException e) {</span>
+<span class="fc" id="L88">			Assert.assertSame(RuntimeException.class, e.getClass());</span>
+<span class="fc" id="L89">			assertEquals(&quot;CSV line is empty or null.&quot;, e.getMessage());</span>
+		}
+<span class="fc" id="L91">	}</span>
+	
+	@Test
+	public void invalidNullLine() {
+		try {
+<span class="nc" id="L96">			CommitLine.parseCommitLine(null, INPUT);</span>
+<span class="nc" id="L97">			fail(&quot;Shoud throw Unparse Exception&quot;);</span>
+<span class="pc" id="L98">		} catch (RuntimeException e) {</span>
+<span class="fc" id="L99">			Assert.assertSame(RuntimeException.class, e.getClass());</span>
+<span class="fc" id="L100">			assertEquals(&quot;CSV line is empty or null.&quot;, e.getMessage());</span>
+		}
+<span class="fc" id="L102">	}</span>
+	
+	@Test
+	public void invalidParseHeader() {
+		try {
+<span class="nc" id="L107">			CommitLine.parseCommitLine(header, CommitLineType.INPUT);</span>
+<span class="nc" id="L108">			fail(&quot;Shoud throw Unparse Exception&quot;);</span>
+<span class="pc" id="L109">		} catch (RuntimeException e) {</span>
+<span class="fc" id="L110">			Assert.assertSame(RuntimeException.class, e.getClass());</span>
+<span class="fc" id="L111">			assertEquals(&quot;Should not parse the CSV header.&quot;, e.getMessage());</span>
+		}
+<span class="fc" id="L113">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>CommitLine.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.maven</a> &gt; <span class="el_source">CommitLine.java</span></div><h1>CommitLine.java</h1><pre class="source lang-java linenums"><span class="nc" id="L1">package br.inpe.cap.evolution.maven;</span>
+
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
+
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
+public class CommitLine {
+
+	public static final String HEADER = &quot;HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE&quot;;
+	public static final String INITIAL_VERSION = &quot;initial_version&quot;;
+
+	private String hash;
+	private String date;
+	private String repository;
+	private String file;
+	private int commitPosition;
+	private int totalCommits;
+	private float percent;
+	private boolean dependencyManaged;
+	private String groupId;
+	private String artifactId;
+	private String version;
+<span class="fc" id="L26">	private String previousVersion = INITIAL_VERSION;</span>
+	private boolean versionChanged;
+	private boolean versionEverChanged;
+	private String message;
+	
+<span class="fc" id="L31">	public static enum CommitLineType {INPUT, OUTPUT};</span>
+	
+	/**
+	 *&quot;Use Static Factory Method parseCommitLine(String line)!
+	 */
+<span class="fc" id="L36">	private CommitLine() {}</span>
+
+	public static CommitLine parseCommitLine(String line, CommitLineType type) {
+<span class="fc" id="L39">		String[] tokens = validateAndTokenizeLine(line);</span>
+<span class="fc" id="L40">		CommitLine commitLine = new CommitLine();</span>
+<span class="fc" id="L41">		int tokenIndex = 0;</span>
+<span class="fc" id="L42">		commitLine.setHash(tokens[tokenIndex++]);</span>
+<span class="fc" id="L43">		commitLine.setDate(tokens[tokenIndex++]);</span>
+<span class="fc" id="L44">		commitLine.setRepository(tokens[tokenIndex++]);</span>
+<span class="fc" id="L45">		commitLine.setFile(tokens[tokenIndex++]);</span>
+<span class="fc" id="L46">		commitLine.setCommitPosition(Integer.parseInt(tokens[tokenIndex++]));</span>
+<span class="fc" id="L47">		commitLine.setTotalCommits(Integer.parseInt(tokens[tokenIndex++]));</span>
+<span class="fc" id="L48">		commitLine.setPercent(Float.parseFloat(tokens[tokenIndex++]));</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">		if(type == INPUT) commitLine.setDependencyManaged(Boolean.parseBoolean(tokens[tokenIndex++]));</span>
+<span class="fc" id="L50">		commitLine.setGroupId(tokens[tokenIndex++]);</span>
+<span class="fc" id="L51">		commitLine.setArtifactId(tokens[tokenIndex++]);</span>
+<span class="fc" id="L52">		commitLine.setVersion(tokens[tokenIndex++]);</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">		if(type == OUTPUT) commitLine.setPreviousVersion(tokens[tokenIndex++]);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">		if(type == OUTPUT) commitLine.setVersionChanged(Boolean.parseBoolean(tokens[tokenIndex++]));</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">		if(type == OUTPUT) commitLine.setVersionEverChanged(Boolean.parseBoolean(tokens[tokenIndex++]));</span>
+<span class="fc" id="L56">		commitLine.setMessage(tokens[tokenIndex++].trim());</span>
+<span class="fc" id="L57">		return commitLine;</span>
+	}
+
+	private static String[] validateAndTokenizeLine(String line) {
+<span class="fc bfc" id="L61" title="All 2 branches covered.">		if(HEADER.equals(line)) {</span>
+<span class="fc" id="L62">			throw new RuntimeException(&quot;Should not parse the CSV header.&quot;);</span>
+		}
+<span class="fc bfc" id="L64" title="All 2 branches covered.">		if(StringUtils.isEmpty(line)) {</span>
+<span class="fc" id="L65">			throw new RuntimeException(&quot;CSV line is empty or null.&quot;);</span>
+		}
+<span class="fc" id="L67">		line = validateCommitMessage(line);</span>
+<span class="fc" id="L68">		String[] tokens = line.split(&quot;,&quot;);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">		boolean isInputTokens = tokens.length == 12;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">		boolean isOutputTokens = tokens.length == 14;</span>
+<span class="fc bfc" id="L71" title="All 4 branches covered.">		if(!(isInputTokens || isOutputTokens)) {</span>
+<span class="fc" id="L72">			throw new RuntimeException(&quot;Line cannot be parsed:\n&quot;+line);</span>
+		}
+<span class="fc" id="L74">		return tokens;</span>
+	}
+
+	private static String validateCommitMessage(String line) {
+<span class="fc" id="L78">		boolean commitLineHasntMessage = line.endsWith(&quot;,&quot;);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">		if(commitLineHasntMessage) line = line + &quot; &quot;; // add space that will be trimmed later</span>
+<span class="fc" id="L80">		return line;</span>
+	}
+
+	public static void removeHeader(final List&lt;String&gt; listCsvLines) {
+<span class="fc bfc" id="L84" title="All 2 branches covered.">		if(!listCsvLines.isEmpty()) {</span>
+<span class="fc" id="L85">			listCsvLines.remove(listCsvLines.get(0));</span>
+		}
+<span class="fc" id="L87">	}</span>
+
+	public static String lastLine(final List&lt;String&gt; linesCsvInput) {
+<span class="fc bfc" id="L90" title="All 2 branches covered.">		if(!linesCsvInput.isEmpty()) {</span>
+<span class="fc" id="L91">			return linesCsvInput.get(linesCsvInput.size()-1);</span>
+		} else {
+<span class="fc" id="L93">			return &quot;&quot;;</span>
+		}
+	}
+
+	public String getHash() {
+<span class="fc" id="L98">		return hash;</span>
+	}
+
+	public void setHash(String hash) {
+<span class="fc" id="L102">		this.hash = hash;</span>
+<span class="fc" id="L103">	}</span>
+
+	public String getDate() {
+<span class="fc" id="L106">		return date;</span>
+	}
+
+	public void setDate(String date) {
+<span class="fc" id="L110">		this.date = date;</span>
+<span class="fc" id="L111">	}</span>
+
+	public String getRepository() {
+<span class="fc" id="L114">		return repository;</span>
+	}
+
+	public void setRepository(String repository) {
+<span class="fc" id="L118">		this.repository = repository;</span>
+<span class="fc" id="L119">	}</span>
+
+	public String getFile() {
+<span class="fc" id="L122">		return file;</span>
+	}
+
+	public void setFile(String file) {
+<span class="fc" id="L126">		this.file = file;</span>
+<span class="fc" id="L127">	}</span>
+
+	public int getCommitPosition() {
+<span class="fc" id="L130">		return commitPosition;</span>
+	}
+
+	public void setCommitPosition(int commitPosition) {
+<span class="fc" id="L134">		this.commitPosition = commitPosition;</span>
+<span class="fc" id="L135">	}</span>
+
+	public int getTotalCommits() {
+<span class="fc" id="L138">		return totalCommits;</span>
+	}
+
+	public void setTotalCommits(int totalCommits) {
+<span class="fc" id="L142">		this.totalCommits = totalCommits;</span>
+<span class="fc" id="L143">	}</span>
+
+	public float getPercent() {
+<span class="fc" id="L146">		return percent;</span>
+	}
+
+	public void setPercent(float porcent) {
+<span class="fc" id="L150">		this.percent = porcent;</span>
+<span class="fc" id="L151">	}</span>
+
+	public String getGroupId() {
+<span class="fc" id="L154">		return groupId;</span>
+	}
+
+	public void setGroupId(String groupId) {
+<span class="fc" id="L158">		this.groupId = groupId;</span>
+<span class="fc" id="L159">	}</span>
+
+	public String getArtifactId() {
+<span class="fc" id="L162">		return artifactId;</span>
+	}
+
+	public void setArtifactId(String artifactId) {
+<span class="fc" id="L166">		this.artifactId = artifactId;</span>
+<span class="fc" id="L167">	}</span>
+
+	public String getVersion() {
+<span class="fc" id="L170">		return version;</span>
+	}
+
+	public void setVersion(String version) {
+<span class="fc" id="L174">		this.version = version;</span>
+<span class="fc" id="L175">	}</span>
+
+	public String getMessage() {
+<span class="fc" id="L178">		return message;</span>
+	}
+
+	public void setMessage(String message) {
+<span class="fc" id="L182">		this.message = message;</span>
+<span class="fc" id="L183">	}</span>
+
+	public String getPreviousVersion() {
+<span class="fc" id="L186">		return previousVersion;</span>
+	}
+
+	public void setPreviousVersion(String previousVersion) {
+<span class="fc" id="L190">		this.previousVersion = previousVersion;</span>
+<span class="fc" id="L191">	}</span>
+
+	public boolean versionHasChanged() {
+<span class="fc" id="L194">		return versionChanged;</span>
+	}
+
+	public void setVersionChanged(boolean versionChanged) {
+<span class="fc" id="L198">		this.versionChanged = versionChanged;</span>
+<span class="fc" id="L199">	}</span>
+
+	public boolean isDependencyManaged() {
+<span class="fc" id="L202">		return dependencyManaged;</span>
+	}
+
+	public void setDependencyManaged(boolean dependencyManaged) {
+<span class="fc" id="L206">		this.dependencyManaged = dependencyManaged;</span>
+<span class="fc" id="L207">	}</span>
+
+	public boolean versionHasEverChanged() {
+<span class="fc" id="L210">		return versionEverChanged;</span>
+	}
+
+	public void setVersionEverChanged(boolean versionEverChanged) {
+<span class="fc" id="L214">		this.versionEverChanged = versionEverChanged;</span>
+<span class="fc" id="L215">	}</span>
+
+	public void recalculatePosition(int lastTotalCommits) {
+<span class="fc" id="L218">		this.totalCommits = lastTotalCommits;</span>
+<span class="fc" id="L219">		this.percent = roundFiveDigits(this.commitPosition * 100 / (float) this.totalCommits);</span>
+<span class="fc" id="L220">	}</span>
+
+	public static float roundFiveDigits(float fullPercent) {
+<span class="fc" id="L223">		return Math.round(fullPercent * 100000) / 100000f;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

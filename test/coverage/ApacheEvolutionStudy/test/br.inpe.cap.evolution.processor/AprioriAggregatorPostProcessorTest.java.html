@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>AprioriAggregatorPostProcessorTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.processor</a> &gt; <span class="el_source">AprioriAggregatorPostProcessorTest.java</span></div><h1>AprioriAggregatorPostProcessorTest.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.processor;
+
+import static br.inpe.cap.evolution.processor.VersionEvolutionDetectorPostProcessorTest.RESOURCE_OUTPUT_DIRECTORY;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.repodriller.persistence.csv.CSVFile;
+
+import com.google.common.io.Resources;
+
+import br.inpe.cap.evolution.maven.AprioriLine;
+import br.inpe.cap.evolution.maven.CommitLine;
+
+<span class="fc" id="L28">public class AprioriAggregatorPostProcessorTest {</span>
+	
+<span class="fc" id="L30">	private List&lt;List&lt;String&gt;&gt; linesCsvInputs = new ArrayList&lt;&gt;();</span>
+	private AprioriAggregatorPostProcessor processor;
+	private String outputFileName;
+	private CSVFile csvOutput;
+	private File fileOutput;
+	
+	@BeforeClass
+	public static void checkResourceOutputDirectory() {
+<span class="fc" id="L38">		File outputDir = new File(RESOURCE_OUTPUT_DIRECTORY);</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">		if(!outputDir.exists()) {</span>
+<span class="nc" id="L40">			outputDir.mkdirs();</span>
+		}
+<span class="fc" id="L42">	}</span>
+	
+	@Before
+	public void setUp() throws URISyntaxException, IOException {
+<span class="fc" id="L46">		processor = new AprioriAggregatorPostProcessor();</span>
+<span class="fc" id="L47">		File csvFile1 = new File(Resources.getResource(&quot;apriori\\all-dependency-'blueprints'.csv&quot;).toURI());</span>
+<span class="fc" id="L48">		File csvFile2 = new File(Resources.getResource(&quot;apriori\\all-dependency-'disconf'.csv&quot;).toURI());</span>
+<span class="fc" id="L49">		linesCsvInputs.add(FileUtils.readLines(csvFile1));</span>
+<span class="fc" id="L50">		linesCsvInputs.add(FileUtils.readLines(csvFile2));</span>
+<span class="fc" id="L51">		outputFileName = RESOURCE_OUTPUT_DIRECTORY + &quot;test-all-dependency-apriori.csv&quot;;</span>
+<span class="fc" id="L52">		csvOutput = new CSVFile(outputFileName, false);</span>
+<span class="fc" id="L53">		fileOutput = new File(outputFileName);</span>
+<span class="fc" id="L54">	}</span>
+
+	@Test
+	public void leituraDeTodosArtifactsDeTodosSubprojetosDoUltimoCommitEscritaNoHeader() throws IOException {
+<span class="fc" id="L58">		processor.process(csvOutput, linesCsvInputs);</span>
+
+<span class="fc" id="L60">		Set&lt;String&gt; allSubProjectArtifacts = processor.getAllSubProjectArtifacts();</span>
+<span class="fc" id="L61">		assertEquals(85, allSubProjectArtifacts.size());</span>
+
+<span class="fc" id="L63">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L64">		String outputHeader = outputLines.get(0);</span>
+<span class="fc" id="L65">		assertTrue(outputHeader.startsWith(AprioriLine.FIRST_CELL));</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">		for (String artifact : allSubProjectArtifacts) {</span>
+<span class="fc" id="L67">			assertTrue(outputHeader.contains(artifact));</span>
+		}
+<span class="fc" id="L69">	}</span>
+	
+	@Test
+	public void leituraDosSubmodulosEscritaLinhasApriori() throws IOException {
+<span class="fc" id="L73">		processor.process(csvOutput, linesCsvInputs);</span>
+		
+<span class="fc" id="L75">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L76">		CommitLine.removeHeader(outputLines);</span>
+<span class="fc" id="L77">		assertEquals(12, outputLines.size());</span>
+		
+<span class="fc" id="L79">		String blueprints_core = outputLines.get(0);</span>
+<span class="fc" id="L80">		assertQtdContaisAndNotContains(blueprints_core, &quot;blueprints-core&quot;, 6, 79);</span>
+		
+<span class="fc" id="L82">		String blueprints_graph_jung = outputLines.get(1);</span>
+<span class="fc" id="L83">		assertQtdContaisAndNotContains(blueprints_graph_jung, &quot;blueprints-graph-jung&quot;, 5, 80);</span>
+		
+<span class="fc" id="L85">		String blueprints_graph_sail = outputLines.get(2);</span>
+<span class="fc" id="L86">		assertQtdContaisAndNotContains(blueprints_graph_sail, &quot;blueprints-graph-sail&quot;, 15, 70);</span>
+		
+<span class="fc" id="L88">		String blueprints_neo4j_graph = outputLines.get(3);</span>
+<span class="fc" id="L89">		assertQtdContaisAndNotContains(blueprints_neo4j_graph, &quot;blueprints-neo4j-graph&quot;, 5, 80);</span>
+		
+<span class="fc" id="L91">		String blueprints_neo4j2_graph = outputLines.get(4);</span>
+<span class="fc" id="L92">		assertQtdContaisAndNotContains(blueprints_neo4j2_graph, &quot;blueprints-neo4j2-graph&quot;, 9, 76);</span>
+		
+<span class="fc" id="L94">		String blueprints_rexster_graph = outputLines.get(5);</span>
+<span class="fc" id="L95">		assertQtdContaisAndNotContains(blueprints_rexster_graph, &quot;blueprints-rexster-graph&quot;, 3, 82);</span>
+		
+<span class="fc" id="L97">		String blueprints_sail_graph = outputLines.get(6);</span>
+<span class="fc" id="L98">		assertQtdContaisAndNotContains(blueprints_sail_graph, &quot;blueprints-sail-graph&quot;, 8, 77);</span>
+		
+<span class="fc" id="L100">		String blueprints_sparksee_graph = outputLines.get(7);</span>
+<span class="fc" id="L101">		assertQtdContaisAndNotContains(blueprints_sparksee_graph, &quot;blueprints-sparksee-graph&quot;, 3, 82);</span>
+		
+<span class="fc" id="L103">		String blueprints_test = outputLines.get(8);</span>
+<span class="fc" id="L104">		assertQtdContaisAndNotContains(blueprints_test, &quot;blueprints-test&quot;, 2, 83);</span>
+		
+<span class="fc" id="L106">		String disconf_client = outputLines.get(9);</span>
+<span class="fc" id="L107">		assertQtdContaisAndNotContains(disconf_client, &quot;disconf-client&quot;, 20, 65);</span>
+		
+<span class="fc" id="L109">		String disconf_core = outputLines.get(10);</span>
+<span class="fc" id="L110">		assertQtdContaisAndNotContains(disconf_core, &quot;disconf-core&quot;, 11, 74);</span>
+		
+<span class="fc" id="L112">		String disconf_web = outputLines.get(11);</span>
+<span class="fc" id="L113">		assertQtdContaisAndNotContains(disconf_web, &quot;disconf-web&quot;, 47, 38);</span>
+	
+<span class="fc" id="L115">	}</span>
+
+	private void assertQtdContaisAndNotContains(String aprioriLine, String expectedSubProject, int expectedQtdContains, int expectedQtdNotContains) {
+<span class="fc" id="L118">		String[] apririSplit = aprioriLine.split(&quot;,&quot;);</span>
+<span class="fc" id="L119">		int qtdContains = Arrays.asList(apririSplit).stream().filter((c)-&gt;c.equals(AprioriLine.CONTAINS_ARTIFACT)).collect(Collectors.toList()).size();</span>
+<span class="fc" id="L120">		int qtdNotContains = Arrays.asList(apririSplit).stream().filter((c)-&gt;c.equals(AprioriLine.NOT_CONTAINS_ARTIFACT)).collect(Collectors.toList()).size();</span>
+<span class="fc" id="L121">		assertTrue(aprioriLine.contains(expectedSubProject));</span>
+<span class="fc" id="L122">		assertEquals(expectedQtdContains, qtdContains);</span>
+<span class="fc" id="L123">		assertEquals(expectedQtdNotContains, qtdNotContains);</span>
+<span class="fc" id="L124">	}</span>
+
+	@After
+	public void clearTempFiles() throws IOException {
+		// Arquivo &quot;temporário&quot; deveria ser deletado.
+		// Entretanto, a independência dos testes é garantida com o argumento do csvOutput append = false 
+<span class="fc" id="L130">		FileUtils.forceDeleteOnExit(fileOutput);</span>
+<span class="fc" id="L131">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

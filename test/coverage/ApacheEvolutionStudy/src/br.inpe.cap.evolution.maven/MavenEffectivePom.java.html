@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>MavenEffectivePom.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.maven</a> &gt; <span class="el_source">MavenEffectivePom.java</span></div><h1>MavenEffectivePom.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.maven;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import org.apache.commons.io.FileUtils;
+import org.repodriller.util.SimpleCommandExecutor;
+
+<span class="nc" id="L10">public class MavenEffectivePom {</span>
+
+	// Poderia ser parametrizado, ou utilizado plugin hierarchy maven plugin.
+	// Mas com a forma 'hard-coded' dessa classe, procuro garantir maior perfomance na execução multi-thread. 
+	
+	// Trocar esta linha de comando para cada máquina
+	private static final String MAVEN_PATH = &quot;C:\\Progra~2\\apache-maven-3.3.9\\bin\\mvn.cmd&quot;;
+	private static final String MAVEN_EFFECTIVE_POM_ONLINE = &quot;help:effective-pom&quot;;
+	private static final String MAVEN_EFFECTIVE_POM_OFFLINE = &quot;help:effective-pom -o&quot;;
+	private static final String MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND_ONLINE = 
+								MAVEN_PATH + &quot; &quot; + MAVEN_EFFECTIVE_POM_ONLINE;
+	@SuppressWarnings(&quot;unused&quot;)
+	private static final String MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND_OFFLINE = 
+								MAVEN_PATH + &quot; &quot; + MAVEN_EFFECTIVE_POM_OFFLINE;
+
+	private static final String MAVEN_PROJECT_START_TOKEN = &quot;&lt;project &quot;;
+	private static final String END_PROJECT_TAG = &quot;&lt;/project&gt;&quot;;
+<span class="nc" id="L27">	private static final int END_PROJECT_TAG_LENGTH = END_PROJECT_TAG.length();</span>
+
+<span class="nc" id="L29">	private SimpleCommandExecutor executor = new SimpleCommandExecutor();</span>
+	
+	public String resolveEffectivePom(final File file) throws UnparsableEffectivePomException {
+<span class="nc" id="L32">		final String basePath = file.toPath().getParent().toString();</span>
+<span class="nc" id="L33">		final String executeResult = this.executor.execute(MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND_ONLINE, basePath);</span>
+<span class="nc" id="L34">		return this.extractPom(executeResult);</span>
+	}
+	
+	private String extractPom(final String execultResult) throws UnparsableEffectivePomException {
+		try {
+<span class="nc" id="L39">			return execultResult.substring(</span>
+<span class="nc" id="L40">					   execultResult.indexOf(MAVEN_PROJECT_START_TOKEN),</span>
+<span class="nc" id="L41">					   execultResult.indexOf(END_PROJECT_TAG)+END_PROJECT_TAG_LENGTH);</span>
+<span class="nc" id="L42">		} catch (StringIndexOutOfBoundsException e) {</span>
+<span class="nc" id="L43">			throw new UnparsableEffectivePomException(execultResult);</span>
+		}
+	}
+	
+	public static void main(String[] args) throws IOException, URISyntaxException, UnparsableEffectivePomException {
+		
+<span class="nc" id="L49">		MavenEffectivePom mep = new MavenEffectivePom();</span>
+		
+<span class="nc" id="L51">		SimpleCommandExecutor executor = new SimpleCommandExecutor();</span>
+<span class="nc" id="L52">		String root = executor.execute(MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND_ONLINE, </span>
+<span class="nc" id="L53">				&quot;G:\\HD-Games\\GitRepos\\disconf&quot;);</span>
+<span class="nc" id="L54">		FileUtils.writeStringToFile(new File(&quot;root.xml&quot;), mep.extractPom(root));</span>
+//		System.out.println(extractPom(root));
+		
+<span class="nc" id="L57">		String client = executor.execute(MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND_ONLINE, </span>
+<span class="nc" id="L58">				&quot;G:\\HD-Games\\GitRepos\\disconf\\disconf-client&quot;);</span>
+<span class="nc" id="L59">		FileUtils.writeStringToFile(new File(&quot;client.xml&quot;), mep.extractPom(client));</span>
+//		System.out.println(extractPom(client));
+		
+<span class="nc" id="L62">		String core = executor.execute(MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND_ONLINE, </span>
+<span class="nc" id="L63">				&quot;G:\\HD-Games\\GitRepos\\disconf\\disconf-core&quot;);</span>
+<span class="nc" id="L64">		FileUtils.writeStringToFile(new File(&quot;core.xml&quot;), mep.extractPom(core));</span>
+//		System.out.println(extractPom(core));
+		
+<span class="nc" id="L67">		String web = executor.execute(MAVEN_EFFECTIVE_POM_EXTRACT_COMMAND_ONLINE, </span>
+<span class="nc" id="L68">				&quot;G:\\HD-Games\\GitRepos\\disconf\\disconf-web&quot;);</span>
+<span class="nc" id="L69">		FileUtils.writeStringToFile(new File(&quot;web.xml&quot;), mep.extractPom(web));</span>
+//		System.out.println(extractPom(web));
+
+<span class="nc" id="L72">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

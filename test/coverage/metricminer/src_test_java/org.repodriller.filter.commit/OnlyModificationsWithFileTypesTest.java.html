@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>OnlyModificationsWithFileTypesTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.filter.commit</a> &gt; <span class="el_source">OnlyModificationsWithFileTypesTest.java</span></div><h1>OnlyModificationsWithFileTypesTest.java</h1><pre class="source lang-java linenums">package org.repodriller.filter.commit;
+
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TimeZone;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.repodriller.domain.Commit;
+import org.repodriller.domain.Developer;
+import org.repodriller.domain.ModificationType;
+import org.repodriller.filter.commit.OnlyModificationsWithFileTypes;
+
+<span class="nc" id="L16">public class OnlyModificationsWithFileTypesTest {</span>
+
+	@Test
+	public void shouldAcceptIfCommitContainsFilesWithThatType() {
+<span class="nc" id="L20">		Set&lt;String&gt; branches = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L21">		branches.add(&quot;master&quot;);</span>
+<span class="nc" id="L22">		branches.add(&quot;b1&quot;);</span>
+		
+<span class="nc" id="L24">		Calendar d = Calendar.getInstance();</span>
+<span class="nc" id="L25">		Commit commit = new Commit(&quot;123&quot;, new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), d, TimeZone.getDefault(), d, TimeZone.getDefault(), &quot;x&quot;, null, false, branches, true);</span>
+<span class="nc" id="L26">		commit.addModification(&quot;/dir/File.java&quot;, &quot;/dir/File.java&quot;, ModificationType.MODIFY, &quot;aaa&quot;, &quot;bla&quot;);</span>
+<span class="nc" id="L27">		commit.addModification(&quot;/dir/File.css&quot;, &quot;/dir/File.css&quot;, ModificationType.MODIFY, &quot;aaa&quot;, &quot;bla&quot;);</span>
+
+<span class="nc" id="L29">		Assert.assertTrue(new OnlyModificationsWithFileTypes(Arrays.asList(&quot;.java&quot;)).accept(commit));</span>
+
+<span class="nc" id="L31">		Commit commit2 = new Commit(&quot;123&quot;, new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), d, TimeZone.getDefault(), d, TimeZone.getDefault(), &quot;x&quot;, null, false, branches, true);</span>
+<span class="nc" id="L32">		commit2.addModification(&quot;/dir/File.js&quot;, &quot;/dir/File.js&quot;, ModificationType.MODIFY, &quot;aaa&quot;, &quot;bla&quot;);</span>
+<span class="nc" id="L33">		commit2.addModification(&quot;/dir/File.css&quot;, &quot;/dir/File.css&quot;, ModificationType.MODIFY, &quot;aaa&quot;, &quot;bla&quot;);</span>
+<span class="nc" id="L34">		Assert.assertFalse(new OnlyModificationsWithFileTypes(Arrays.asList(&quot;.java&quot;)).accept(commit2));</span>
+<span class="nc" id="L35">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

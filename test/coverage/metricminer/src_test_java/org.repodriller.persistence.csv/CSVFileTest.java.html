@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>CSVFileTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.persistence.csv</a> &gt; <span class="el_source">CSVFileTest.java</span></div><h1>CSVFileTest.java</h1><pre class="source lang-java linenums">package org.repodriller.persistence.csv;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.junit.Test;
+
+import org.junit.Assert;
+import org.junit.Before;
+
+<span class="nc" id="L14">public class CSVFileTest {</span>
+
+	private String tmpPath;
+
+	@Before
+	public void setUp() {
+<span class="nc" id="L20">		String tmpDir = System.getProperty(&quot;java.io.tmpdir&quot;);</span>
+<span class="nc bnc" id="L21" title="All 2 branches missed.">		this.tmpPath = tmpDir + (tmpDir.endsWith(File.separator) ? &quot;&quot; : File.separator) + &quot;test.csv&quot;;</span>
+<span class="nc" id="L22">	}</span>
+	
+	@Test
+	public void printSimpleCSV() throws IOException {
+<span class="nc" id="L26">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;);</span>
+		
+<span class="nc" id="L28">		file.write(&quot;1&quot;, &quot;2&quot;, &quot;3&quot;);</span>
+<span class="nc" id="L29">		file.write(&quot;4&quot;, &quot;5&quot;, &quot;6&quot;);</span>
+		
+<span class="nc" id="L31">		String text = new String(Files.readAllBytes(Paths.get(tmpPath)), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L32">		String[] lines = text.split(System.getProperty(&quot;line.separator&quot;));</span>
+<span class="nc" id="L33">		Assert.assertEquals(&quot;1,2,3&quot;, lines[0]);</span>
+<span class="nc" id="L34">		Assert.assertEquals(&quot;4,5,6&quot;, lines[1]);</span>
+<span class="nc" id="L35">	}</span>
+
+	@Test
+	public void singleColumn() throws IOException {
+<span class="nc" id="L39">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;);</span>
+		
+<span class="nc" id="L41">		file.write(&quot;1&quot;);</span>
+<span class="nc" id="L42">		file.write(&quot;4&quot;);</span>
+		
+<span class="nc" id="L44">		String text = new String(Files.readAllBytes(Paths.get(tmpPath)), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L45">		String[] lines = text.split(System.getProperty(&quot;line.separator&quot;));</span>
+<span class="nc" id="L46">		Assert.assertEquals(&quot;1&quot;, lines[0]);</span>
+<span class="nc" id="L47">		Assert.assertEquals(&quot;4&quot;, lines[1]);</span>
+<span class="nc" id="L48">	}</span>
+
+	@Test
+	public void printNulls() throws IOException {
+<span class="nc" id="L52">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;);</span>
+		
+<span class="nc" id="L54">		file.write(&quot;1&quot;, null, &quot;3&quot;);</span>
+<span class="nc" id="L55">		file.write(&quot;4&quot;, &quot;5&quot;, &quot;6&quot;);</span>
+		
+<span class="nc" id="L57">		String text = new String(Files.readAllBytes(Paths.get(tmpPath)), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L58">		String[] lines = text.split(System.getProperty(&quot;line.separator&quot;));</span>
+<span class="nc" id="L59">		Assert.assertEquals(&quot;1,null,3&quot;, lines[0]);</span>
+<span class="nc" id="L60">		Assert.assertEquals(&quot;4,5,6&quot;, lines[1]);</span>
+<span class="nc" id="L61">	}</span>
+
+	@Test
+	public void printStringsAndOtherTypes() throws IOException {
+<span class="nc" id="L65">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;);</span>
+		
+<span class="nc" id="L67">		file.write(1, null, true);</span>
+<span class="nc" id="L68">		file.write(4.55, &quot;mauricio&quot;, &quot;'hey'&quot;);</span>
+		
+<span class="nc" id="L70">		String text = new String(Files.readAllBytes(Paths.get(tmpPath)), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L71">		String[] lines = text.split(System.getProperty(&quot;line.separator&quot;));</span>
+<span class="nc" id="L72">		Assert.assertEquals(&quot;1,null,true&quot;, lines[0]);</span>
+<span class="nc" id="L73">		Assert.assertEquals(&quot;4.55,mauricio,'hey'&quot;, lines[1]);</span>
+<span class="nc" id="L74">	}</span>
+
+	@Test
+	public void escapeStrings() throws IOException {
+<span class="nc" id="L78">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;);</span>
+		
+<span class="nc" id="L80">		file.write(1, &quot;my name is \&quot;repodriller\&quot;, man&quot;, &quot;fim&quot;);</span>
+		
+<span class="nc" id="L82">		String text = new String(Files.readAllBytes(Paths.get(tmpPath)), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L83">		String[] lines = text.split(System.getProperty(&quot;line.separator&quot;));</span>
+<span class="nc" id="L84">		Assert.assertEquals(&quot;1,\&quot;my name is \&quot;\&quot;repodriller\&quot;\&quot;, man\&quot;,fim&quot;, lines[0]);</span>
+<span class="nc" id="L85">	}</span>
+	
+	@Test
+	public void nullHeader() throws IOException {
+<span class="nc" id="L89">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;, null);</span>
+		
+<span class="nc" id="L91">		file.write(&quot;0&quot;, 10.3, &quot;1&quot;);</span>
+		
+<span class="nc" id="L93">		String text = new String(Files.readAllBytes(Paths.get(tmpPath)), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L94">		String[] lines = text.split(System.getProperty(&quot;line.separator&quot;));</span>
+<span class="nc" id="L95">		Assert.assertEquals(&quot;0,10.3,1&quot;, lines[0]);</span>
+<span class="nc" id="L96">	}</span>
+	
+	@Test
+	public void valuesMatchHeaders() throws IOException {
+<span class="nc" id="L100">		String[] header = new String[] {&quot;column1&quot;,&quot;column2&quot;,&quot;column3&quot;};</span>
+<span class="nc" id="L101">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;, header);</span>
+		
+<span class="nc" id="L103">		file.write(&quot;just&quot;,&quot;another&quot;,1);		</span>
+
+<span class="nc" id="L105">		String text = new String(Files.readAllBytes(Paths.get(tmpPath)), StandardCharsets.UTF_8);</span>
+<span class="nc" id="L106">		String[] lines = text.split(System.getProperty(&quot;line.separator&quot;));</span>
+<span class="nc" id="L107">		Assert.assertEquals(&quot;column1, column2, column3&quot;, lines[0]);</span>
+<span class="nc" id="L108">		Assert.assertEquals(&quot;just,another,1&quot;, lines[1]);		</span>
+<span class="nc" id="L109">	}</span>
+
+	@Test (expected= CSVFileFormatException.class)
+	public void valuesDoNotMatchHeaders() throws IOException {
+<span class="nc" id="L113">		String[] header = new String[] {&quot;column1&quot;,&quot;column2&quot;};</span>
+<span class="nc" id="L114">		CSVFile file = new CSVFile(System.getProperty(&quot;java.io.tmpdir&quot;), &quot;test.csv&quot;, header);</span>
+		
+<span class="nc" id="L116">		file.write(&quot;value1&quot;);</span>
+		
+<span class="nc" id="L118">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

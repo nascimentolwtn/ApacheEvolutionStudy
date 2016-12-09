@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>CommitFilterIntegrationTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.integration</a> &gt; <span class="el_source">CommitFilterIntegrationTest.java</span></div><h1>CommitFilterIntegrationTest.java</h1><pre class="source lang-java linenums">package org.repodriller.integration;
+
+import java.util.Arrays;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.repodriller.RepositoryMining;
+import org.repodriller.filter.commit.OnlyInMainBranch;
+import org.repodriller.filter.commit.OnlyModificationsWithFileTypes;
+import org.repodriller.filter.commit.OnlyNoMerge;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.scm.GitRepository;
+
+<span class="nc" id="L15">public class CommitFilterIntegrationTest {</span>
+
+	private String pathToRepo4;
+	private String pathToRepo5;
+
+	@Before
+	public void setUp() {
+<span class="nc" id="L22">		this.pathToRepo4 = this.getClass().getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-4&quot;;</span>
+<span class="nc" id="L23">		this.pathToRepo5 = this.getClass().getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-5&quot;;</span>
+<span class="nc" id="L24">	}</span>
+	
+	@Test
+	public void shouldFilterCommits() {
+		
+<span class="nc" id="L29">		TestVisitor visitor = new TestVisitor();</span>
+		
+<span class="nc" id="L31">		new RepositoryMining()</span>
+<span class="nc" id="L32">			.in(GitRepository.singleProject(pathToRepo4))</span>
+<span class="nc" id="L33">			.through(Commits.all())</span>
+<span class="nc" id="L34">			.filters(new OnlyModificationsWithFileTypes(Arrays.asList(&quot;java&quot;)))</span>
+<span class="nc" id="L35">			.process(visitor)</span>
+<span class="nc" id="L36">			.mine();</span>
+		
+<span class="nc" id="L38">		Assert.assertEquals(2, visitor.getVisitedHashes().size());</span>
+<span class="nc" id="L39">		Assert.assertTrue(visitor.getVisitedHashes().get(0).equals(&quot;a1b6136f978644ff1d89816bc0f2bd86f6d9d7f5&quot;));</span>
+<span class="nc" id="L40">		Assert.assertTrue(visitor.getVisitedHashes().get(1).equals(&quot;b8c2be250786975f1c6f47e96922096f1bb25e39&quot;));</span>
+<span class="nc" id="L41">	}</span>
+
+	@Test
+	public void shouldFilterCommitsUsingManyFilters() {
+		
+<span class="nc" id="L46">		TestVisitor visitor = new TestVisitor();</span>
+		
+<span class="nc" id="L48">		new RepositoryMining()</span>
+<span class="nc" id="L49">		.in(GitRepository.singleProject(pathToRepo5))</span>
+<span class="nc" id="L50">		.through(Commits.all())</span>
+<span class="nc" id="L51">		.filters(new OnlyInMainBranch())</span>
+<span class="nc" id="L52">		.process(visitor)</span>
+<span class="nc" id="L53">		.mine();</span>
+		
+<span class="nc" id="L55">		Assert.assertEquals(5, visitor.getVisitedHashes().size());</span>
+<span class="nc" id="L56">		Assert.assertTrue(visitor.getVisitedHashes().get(0).equals(&quot;4a17f31c0d1285477a3a467d0bc3cb38e775097d&quot;));</span>
+<span class="nc" id="L57">		Assert.assertTrue(visitor.getVisitedHashes().get(1).equals(&quot;ff663cf1931a67d5e47b75fc77dcea432c728052&quot;));</span>
+<span class="nc" id="L58">		Assert.assertTrue(visitor.getVisitedHashes().get(2).equals(&quot;fa8217c324e7fb46c80e1ddf907f4e141449637e&quot;));</span>
+<span class="nc" id="L59">		Assert.assertTrue(visitor.getVisitedHashes().get(3).equals(&quot;5d9d79607d7e82b6f236aa29be4ba89a28fb4f15&quot;));</span>
+<span class="nc" id="L60">		Assert.assertTrue(visitor.getVisitedHashes().get(4).equals(&quot;377e0f474d70f6205784d0150ee0069a050c29ed&quot;));</span>
+
+<span class="nc" id="L62">		visitor = new TestVisitor();</span>
+<span class="nc" id="L63">		new RepositoryMining()</span>
+<span class="nc" id="L64">		.in(GitRepository.singleProject(pathToRepo5))</span>
+<span class="nc" id="L65">		.through(Commits.all())</span>
+<span class="nc" id="L66">		.filters(new OnlyInMainBranch(), new OnlyNoMerge())</span>
+<span class="nc" id="L67">		.process(visitor)</span>
+<span class="nc" id="L68">		.mine();</span>
+		
+<span class="nc" id="L70">		Assert.assertEquals(4, visitor.getVisitedHashes().size());</span>
+<span class="nc" id="L71">		Assert.assertTrue(visitor.getVisitedHashes().get(0).equals(&quot;4a17f31c0d1285477a3a467d0bc3cb38e775097d&quot;));</span>
+<span class="nc" id="L72">		Assert.assertTrue(visitor.getVisitedHashes().get(1).equals(&quot;ff663cf1931a67d5e47b75fc77dcea432c728052&quot;));</span>
+<span class="nc" id="L73">		Assert.assertTrue(visitor.getVisitedHashes().get(2).equals(&quot;fa8217c324e7fb46c80e1ddf907f4e141449637e&quot;));</span>
+<span class="nc" id="L74">		Assert.assertTrue(visitor.getVisitedHashes().get(3).equals(&quot;377e0f474d70f6205784d0150ee0069a050c29ed&quot;));</span>
+<span class="nc" id="L75">	}</span>
+
+	@Test
+	public void shouldVisitAllIfNoFilter() {
+		
+<span class="nc" id="L80">		TestVisitor visitor = new TestVisitor();</span>
+
+<span class="nc" id="L82">		new RepositoryMining()</span>
+<span class="nc" id="L83">		.in(GitRepository.singleProject(pathToRepo4))</span>
+<span class="nc" id="L84">		.through(Commits.all())</span>
+<span class="nc" id="L85">		.process(visitor)</span>
+<span class="nc" id="L86">		.mine();</span>
+		
+<span class="nc" id="L88">		Assert.assertEquals(3, visitor.getVisitedHashes().size());</span>
+<span class="nc" id="L89">		Assert.assertTrue(visitor.getVisitedHashes().get(0).equals(&quot;a1b6136f978644ff1d89816bc0f2bd86f6d9d7f5&quot;));</span>
+<span class="nc" id="L90">		Assert.assertTrue(visitor.getVisitedHashes().get(1).equals(&quot;375de7a8275ecdc0b28dc8de2568f47241f443e9&quot;));</span>
+<span class="nc" id="L91">		Assert.assertTrue(visitor.getVisitedHashes().get(2).equals(&quot;b8c2be250786975f1c6f47e96922096f1bb25e39&quot;));</span>
+<span class="nc" id="L92">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

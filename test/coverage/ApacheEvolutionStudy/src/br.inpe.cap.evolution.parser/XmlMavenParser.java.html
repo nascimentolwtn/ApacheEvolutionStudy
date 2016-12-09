@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>XmlMavenParser.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.parser</a> &gt; <span class="el_source">XmlMavenParser.java</span></div><h1>XmlMavenParser.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.parser;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.thoughtworks.xstream.XStream;
+
+import br.inpe.cap.evolution.domain.MavenProject;
+
+public class XmlMavenParser {
+
+	public static final String REGEX_LINEFEED_AND_COMMA = &quot;[\\r\\n,]+&quot;;
+	private XStream xstream;
+
+<span class="fc" id="L14">	public XmlMavenParser() {</span>
+<span class="fc" id="L15">		xstream = new XStream();</span>
+<span class="fc" id="L16">		xstream.ignoreUnknownElements();</span>
+<span class="fc" id="L17">		xstream.processAnnotations(</span>
+<span class="fc" id="L18">				new Class[] {</span>
+<span class="fc" id="L19">					MavenProject.class, </span>
+				});
+<span class="fc" id="L21">	}</span>
+
+	/**
+	 * Factory Method
+	 */
+	public MavenProject readPOM(String pom) {
+<span class="fc bfc" id="L27" title="All 2 branches covered.">		if(!StringUtils.isEmpty(pom)) {</span>
+<span class="fc" id="L28">			MavenProject mavenProjectfromXML = (MavenProject) xstream.fromXML(pom);</span>
+<span class="fc" id="L29">			mavenProjectfromXML.replaceDependencyLineFeedCarriageReturn();</span>
+<span class="fc" id="L30">			mavenProjectfromXML.replaceVariables();</span>
+<span class="fc" id="L31">			mavenProjectfromXML.setupDependencyManagedDependencies();</span>
+<span class="fc" id="L32">			return mavenProjectfromXML;</span>
+		} else {
+<span class="fc" id="L34">			return new MavenProject();</span>
+		}
+	}
+
+	public static String replaceLineFeedAndComma(String commitMessage) {
+<span class="fc" id="L39">		return commitMessage.replaceAll(REGEX_LINEFEED_AND_COMMA, &quot;&quot;);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

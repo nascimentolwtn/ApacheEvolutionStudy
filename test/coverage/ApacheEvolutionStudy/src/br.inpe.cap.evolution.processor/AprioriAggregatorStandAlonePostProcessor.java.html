@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>AprioriAggregatorStandAlonePostProcessor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.processor</a> &gt; <span class="el_source">AprioriAggregatorStandAlonePostProcessor.java</span></div><h1>AprioriAggregatorStandAlonePostProcessor.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.processor;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.repodriller.persistence.csv.CSVFile;
+
+<span class="nc" id="L11">public class AprioriAggregatorStandAlonePostProcessor {</span>
+
+	public static void main(String[] args) throws IOException {
+<span class="nc" id="L14">		System.out.println(&quot;Starting...&quot;);</span>
+		
+<span class="nc" id="L16">		String pathToLook = &quot;D:\\apriori&quot;;</span>
+<span class="nc" id="L17">		List&lt;List&lt;String&gt;&gt; linesCsvInputs = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L18">		List&lt;File&gt; arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">		for (File csvInput : arquivos) {</span>
+<span class="nc" id="L20">			System.out.println(&quot;Reading lines from &quot; + csvInput.getName());</span>
+<span class="nc" id="L21">			linesCsvInputs.add(FileUtils.readLines(csvInput));</span>
+		}
+		
+<span class="nc" id="L24">		AprioriAggregatorPostProcessor processor = new AprioriAggregatorPostProcessor();</span>
+<span class="nc" id="L25">		String csvOutput = &quot;study\\artifact_aggregation\\all-dependency-first35+next10_04-apriori.csv&quot;;</span>
+<span class="nc" id="L26">		processor.process(new CSVFile(csvOutput), linesCsvInputs);</span>
+			
+<span class="nc" id="L28">		System.out.println(&quot;Finished.&quot;);</span>
+
+<span class="nc" id="L30">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>MavenVersionedEntity.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.domain</a> &gt; <span class="el_source">MavenVersionedEntity.java</span></div><h1>MavenVersionedEntity.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.domain;
+
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
+import br.inpe.cap.evolution.parser.XmlMavenParser;
+
+<span class="fc" id="L7">public class MavenVersionedEntity {</span>
+
+	@XStreamAlias(&quot;groupId&quot;)
+	protected String groupId;
+	
+	@XStreamAlias(&quot;artifactId&quot;)
+	protected String artifactId;
+	
+	@XStreamAlias(&quot;version&quot;)
+	protected String version;
+
+	public String getGroupId() {
+<span class="fc" id="L19">		return this.groupId;</span>
+	}
+
+	public String getArtifactId() {
+<span class="fc" id="L23">		return this.artifactId;</span>
+	}
+
+	public String getVersion() {
+<span class="fc" id="L27">		return this.version;</span>
+	}
+
+	public void setVersion(String version) {
+<span class="fc" id="L31">		this.version = version;</span>
+<span class="fc" id="L32">	}</span>
+
+	public void setGroupId(String groupId) {
+<span class="fc" id="L35">		this.groupId = groupId;</span>
+<span class="fc" id="L36">	}</span>
+	
+	public void setArtifactId(String artifactId) {
+<span class="fc" id="L39">		this.artifactId = artifactId;</span>
+<span class="fc" id="L40">	}</span>
+
+	@Override
+	public int hashCode() {
+<span class="nc" id="L44">		final int prime = 31;</span>
+<span class="nc" id="L45">		int result = 1;</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		result = prime * result + ((artifactId == null) ? 0 : artifactId.hashCode());</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		result = prime * result + ((groupId == null) ? 0 : groupId.hashCode());</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">		result = prime * result + ((version == null) ? 0 : version.hashCode());</span>
+<span class="nc" id="L49">		return result;</span>
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">		if (this == obj)</span>
+<span class="nc" id="L55">			return true;</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">		if (obj == null)</span>
+<span class="nc" id="L57">			return false;</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">		if (getClass() != obj.getClass())</span>
+<span class="nc" id="L59">			return false;</span>
+<span class="fc" id="L60">		MavenVersionedEntity other = (MavenVersionedEntity) obj;</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">		if (artifactId == null) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">			if (other.artifactId != null)</span>
+<span class="nc" id="L63">				return false;</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">		} else if (!artifactId.equals(other.artifactId))</span>
+<span class="nc" id="L65">			return false;</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">		if (groupId == null) {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			if (other.groupId != null)</span>
+<span class="nc" id="L68">				return false;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">		} else if (!groupId.equals(other.groupId))</span>
+<span class="nc" id="L70">			return false;</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">		if (version == null) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (other.version != null)</span>
+<span class="nc" id="L73">				return false;</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">		} else if (!version.equals(other.version))</span>
+<span class="nc" id="L75">			return false;</span>
+<span class="fc" id="L76">		return true;</span>
+	}
+
+	public void replaceLineFeedCarriageReturnAndTrim() {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">		if(this.groupId != null)</span>
+<span class="fc" id="L81">			this.groupId = XmlMavenParser.replaceLineFeedAndComma(this.groupId).trim();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">		if(this.artifactId != null)</span>
+<span class="fc" id="L83">			this.artifactId = XmlMavenParser.replaceLineFeedAndComma(this.artifactId).trim();</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">		if(this.version != null)</span>
+<span class="fc" id="L85">			this.version = XmlMavenParser.replaceLineFeedAndComma(this.version).trim();</span>
+<span class="fc" id="L86">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

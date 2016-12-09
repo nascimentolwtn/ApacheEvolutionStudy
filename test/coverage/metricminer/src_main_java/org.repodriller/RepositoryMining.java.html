@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>RepositoryMining.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller</a> &gt; <span class="el_source">RepositoryMining.java</span></div><h1>RepositoryMining.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2014 Maurício Aniche
+
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.repodriller;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.log4j.Logger;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.filter.commit.CommitFilter;
+import org.repodriller.filter.commit.NoFilter;
+import org.repodriller.filter.range.CommitRange;
+import org.repodriller.persistence.NoPersistence;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
+
+import com.google.common.collect.Lists;
+
+public class RepositoryMining {
+
+	private static final String DATE_FORMAT = &quot;dd/MM/yyyy HH:mm:ss&quot;;
+<span class="nc" id="L44">	private static final Logger log = Logger.getLogger(RepositoryMining.class);</span>
+
+	private List&lt;SCMRepository&gt; repos;
+	private CommitVisitorIterator visitors;
+	private CommitRange range;
+	private int threads;
+	private boolean reverseOrder;
+	private List&lt;CommitFilter&gt; filters;
+	
+<span class="nc" id="L53">	public RepositoryMining() {</span>
+<span class="nc" id="L54">		repos = new ArrayList&lt;SCMRepository&gt;();</span>
+<span class="nc" id="L55">		visitors = new CommitVisitorIterator(log);</span>
+<span class="nc" id="L56">		filters = Arrays.asList((CommitFilter) new NoFilter());</span>
+<span class="nc" id="L57">		this.threads = 1;</span>
+<span class="nc" id="L58">	}</span>
+	
+	public RepositoryMining through(CommitRange range) {
+<span class="nc" id="L61">		this.range = range;</span>
+<span class="nc" id="L62">		return this;</span>
+	}
+	
+	public RepositoryMining in(SCMRepository... repo) {
+<span class="nc" id="L66">		this.repos.addAll(Arrays.asList(repo));</span>
+<span class="nc" id="L67">		return this;</span>
+	}
+	
+	public RepositoryMining process(CommitVisitor visitor, PersistenceMechanism writer) {
+<span class="nc" id="L71">		visitors.put(visitor, writer);</span>
+<span class="nc" id="L72">		return this;</span>
+	}
+	
+	public RepositoryMining filters(CommitFilter... filters) {
+<span class="nc" id="L76">		this.filters = Arrays.asList(filters);</span>
+<span class="nc" id="L77">		return this;</span>
+	}
+	
+	public RepositoryMining reverseOrder() {
+<span class="nc" id="L81">		reverseOrder = true;</span>
+<span class="nc" id="L82">		return this;</span>
+	}
+
+	public RepositoryMining process(CommitVisitor visitor) {
+<span class="nc" id="L86">		return process(visitor, new NoPersistence());</span>
+	}
+	
+	public void mine() {
+		
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		for(SCMRepository repo : repos) {</span>
+<span class="nc" id="L92">			visitors.initializeVisitors(repo);</span>
+<span class="nc" id="L93">			processRepos(repo);</span>
+<span class="nc" id="L94">			visitors.finalizeVisitors(repo);</span>
+		}
+<span class="nc" id="L96">		visitors.closeAllPersistence();</span>
+<span class="nc" id="L97">		printScript();</span>
+		
+<span class="nc" id="L99">	}</span>
+
+	private void processRepos(SCMRepository repo) {
+<span class="nc" id="L102">		log.info(&quot;Git repository in &quot; + repo.getPath());</span>
+		
+<span class="nc" id="L104">		List&lt;ChangeSet&gt; allCs = range.get(repo.getScm());</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if(!reverseOrder) Collections.reverse(allCs);</span>
+		
+<span class="nc" id="L107">		log.info(&quot;Total of commits: &quot; + allCs.size());</span>
+		
+<span class="nc" id="L109">		log.info(&quot;Starting threads: &quot; + threads);</span>
+<span class="nc" id="L110">		ExecutorService exec = Executors.newFixedThreadPool(threads);</span>
+<span class="nc" id="L111">		List&lt;List&lt;ChangeSet&gt;&gt; partitions = Lists.partition(allCs, threads);</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		for(List&lt;ChangeSet&gt; partition : partitions) {</span>
+			
+<span class="nc" id="L114">			exec.submit(() -&gt; {</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">					for(ChangeSet cs : partition) {</span>
+						try {
+<span class="nc" id="L117">							processChangeSet(repo, cs);</span>
+<span class="nc" id="L118">						} catch (OutOfMemoryError e) {</span>
+<span class="nc" id="L119">							System.err.println(&quot;Commit &quot; + cs.getId() + &quot; in &quot; + repo.getLastDir() + &quot; caused OOME&quot;);</span>
+<span class="nc" id="L120">							e.printStackTrace();</span>
+<span class="nc" id="L121">							System.err.println(&quot;goodbye :/&quot;);</span>
+							
+<span class="nc" id="L123">							log.fatal(&quot;Commit &quot; + cs.getId() + &quot; in &quot; + repo.getLastDir() + &quot; caused OOME&quot;, e);</span>
+<span class="nc" id="L124">							log.fatal(&quot;Goodbye! ;/&quot;);</span>
+<span class="nc" id="L125">							System.exit(-1);</span>
+<span class="nc" id="L126">						} catch(Throwable t) {</span>
+<span class="nc" id="L127">							log.error(t);</span>
+						}
+					}
+<span class="nc" id="L130">			});</span>
+		}
+		
+		try {
+<span class="nc" id="L134">			exec.shutdown();</span>
+<span class="nc" id="L135">			exec.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);</span>
+<span class="nc" id="L136">		} catch (InterruptedException e) {</span>
+<span class="nc" id="L137">			log.error(&quot;error waiting for threads to terminate in &quot; + repo.getLastDir(), e);</span>
+		}
+<span class="nc" id="L139">	}</span>
+
+	private void printScript() {
+<span class="nc" id="L142">		log.info(&quot;# --------------------------------------------------&quot;);</span>
+<span class="nc" id="L143">		log.info(&quot;Study has been executed in the following projects:&quot;);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		for(SCMRepository repo : repos) {</span>
+<span class="nc" id="L145">			log.info(&quot;- &quot; + repo.getOrigin() + &quot;, from &quot; + repo.getFirstCommit() + &quot; to &quot; + repo.getHeadCommit());</span>
+		}
+		
+<span class="nc" id="L148">		log.info(&quot;The following processors were executed:&quot;);</span>
+		
+<span class="nc" id="L150">		visitors.printScript();</span>
+<span class="nc" id="L151">	}</span>
+
+	private void processChangeSet(SCMRepository repo, ChangeSet cs) {
+<span class="nc" id="L154">		Commit commit = repo.getScm().getCommit(cs.getId());</span>
+<span class="nc" id="L155">		log.info(</span>
+<span class="nc" id="L156">				&quot;Commit #&quot; + commit.getHash() + </span>
+<span class="nc" id="L157">				&quot; @ &quot; + repo.getLastDir() +</span>
+<span class="nc" id="L158">				&quot; in &quot; + DateFormatUtils.format(commit.getDate().getTime(), DATE_FORMAT) +</span>
+<span class="nc" id="L159">				&quot; from &quot; + commit.getAuthor().getName() + </span>
+<span class="nc" id="L160">				&quot; with &quot; + commit.getModifications().size() + &quot; modifications&quot;);</span>
+
+<span class="nc bnc" id="L162" title="All 2 branches missed.">		if(!filtersAccept(commit)) {</span>
+<span class="nc" id="L163">			log.info(&quot;-&gt; Filtered&quot;);</span>
+<span class="nc" id="L164">			return;</span>
+		}
+		
+<span class="nc" id="L167">		visitors.processCommit(repo, commit);</span>
+		
+<span class="nc" id="L169">	}</span>
+
+	private boolean filtersAccept(Commit commit) {
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		for(CommitFilter filter : filters) {</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">			if(!filter.accept(commit)) return false;</span>
+		}
+<span class="nc" id="L175">		return true;</span>
+	}
+
+	public RepositoryMining withThreads(int n) {
+<span class="nc" id="L179">		this.threads = n;</span>
+<span class="nc" id="L180">		return this;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

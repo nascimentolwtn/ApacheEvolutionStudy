@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>AllDependenciesEvolutionVisitor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.visitor</a> &gt; <span class="el_source">AllDependenciesEvolutionVisitor.java</span></div><h1>AllDependenciesEvolutionVisitor.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.visitor;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.log4j.Logger;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
+
+import br.inpe.cap.evolution.processor.EffectivePomSynchronousCheckoutProcessor;
+import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
+
+<span class="nc" id="L17">public class AllDependenciesEvolutionVisitor implements CommitVisitor {</span>
+	
+	private static Logger logger;
+
+	private String repositoryName;
+	private List&lt;String&gt; hashes;
+	private int totalCommits; 
+	
+	private EffectivePomSynchronousCheckoutProcessor effectivePomProcessor;
+	
+	@Override
+	public void initialize(SCMRepository repo, PersistenceMechanism writer) {
+<span class="nc" id="L29">		this.repositoryName = repo.getLastDir();</span>
+<span class="nc" id="L30">		final List&lt;ChangeSet&gt; changeSets = repo.getScm().getChangeSets();</span>
+<span class="nc" id="L31">		this.hashes = changeSets.stream().map((cs)-&gt;cs.getId()).collect(Collectors.toList());</span>
+<span class="nc" id="L32">		this.totalCommits = hashes.size();</span>
+<span class="nc" id="L33">		this.effectivePomProcessor = new EffectivePomSynchronousCheckoutProcessor(new LoggerCheckoutObserver(logger), writer, totalCommits, logger);</span>
+<span class="nc" id="L34">	}</span>
+
+	@Override
+	public void process(final SCMRepository repo, final Commit commit, final PersistenceMechanism writer) {
+		
+		try {
+			
+<span class="nc" id="L41">			final int currentHashPosition = totalCommits - hashes.indexOf(commit.getHash());</span>
+<span class="nc" id="L42">			final float percent = ((currentHashPosition*100)/(float)totalCommits);</span>
+			
+<span class="nc" id="L44">			effectivePomProcessor.setCurrentHashPosition(currentHashPosition);</span>
+<span class="nc" id="L45">			effectivePomProcessor.setPercent(percent);</span>
+<span class="nc" id="L46">			effectivePomProcessor.processCommit(repo, commit, percentageMessage(currentHashPosition, percent));</span>
+			
+<span class="nc" id="L48">		} catch (final IOException | InterruptedException e) {</span>
+<span class="nc" id="L49">			logger.error(e.getMessage());</span>
+		}
+		
+<span class="nc" id="L52">	}</span>
+
+	private String percentageMessage(final int currentHashPosition, final float percent) {
+<span class="nc" id="L55">		final StringBuilder percentMessage = new StringBuilder(); </span>
+<span class="nc" id="L56">		percentMessage.append(&quot;progress: #&quot;);</span>
+<span class="nc" id="L57">		percentMessage.append(currentHashPosition);</span>
+<span class="nc" id="L58">		percentMessage.append(&quot;/&quot;);</span>
+<span class="nc" id="L59">		percentMessage.append(totalCommits);</span>
+<span class="nc" id="L60">		percentMessage.append(&quot; - &quot;);</span>
+<span class="nc" id="L61">		percentMessage.append(percent);</span>
+<span class="nc" id="L62">		percentMessage.append(&quot;%&quot;);</span>
+<span class="nc" id="L63">		Thread.currentThread().setName(&quot;Visitor &quot; + this.repositoryName);</span>
+<span class="nc" id="L64">		return percentMessage.toString();</span>
+	}
+
+	@Override
+	public String name() {
+<span class="nc" id="L69">		return &quot;all-dependency_&quot; + this.repositoryName;</span>
+	}
+
+	public static void setLogger(final Logger logger) {
+<span class="nc" id="L73">		AllDependenciesEvolutionVisitor.logger = logger;</span>
+<span class="nc" id="L74">	}</span>
+	
+	@Override
+	public void finalize(SCMRepository repo, PersistenceMechanism writer) {
+<span class="nc" id="L78">		this.hashes = null;</span>
+<span class="nc" id="L79">		this.repositoryName = null;</span>
+<span class="nc" id="L80">		this.effectivePomProcessor = null;</span>
+<span class="nc" id="L81">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

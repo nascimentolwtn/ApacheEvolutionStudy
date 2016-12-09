@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>FileUtils.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.util</a> &gt; <span class="el_source">FileUtils.java</span></div><h1>FileUtils.java</h1><pre class="source lang-java linenums">package org.repodriller.util;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+
+<span class="nc" id="L10">public class FileUtils {</span>
+
+	public static List&lt;String&gt; getAllDirsIn(String path) {
+<span class="nc" id="L13">		File dir = new File(path);</span>
+<span class="nc" id="L14">		String[] files = dir.list();</span>
+
+<span class="nc" id="L16">		List&lt;String&gt; projects = new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L17" title="All 2 branches missed.">		for (String file : files) {</span>
+<span class="nc" id="L18">			File possibleDir = new File(dir, file);</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">			if (possibleDir.isDirectory()) {</span>
+<span class="nc" id="L20">				projects.add(possibleDir.getAbsolutePath());</span>
+			}
+		}
+
+<span class="nc" id="L24">		return projects;</span>
+	}
+	public static List&lt;File&gt; getAllFilesInPath(String pathToLook) {
+<span class="nc" id="L27">		return getAllFilesInPath(pathToLook, new ArrayList&lt;&gt;());</span>
+	}
+
+	private static List&lt;File&gt; getAllFilesInPath(String pathToLook, List&lt;File&gt; files) {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">		for (File f : new File(pathToLook).listFiles()) {</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">			if (f.isFile())</span>
+<span class="nc" id="L33">				files.add(f);</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">			if (isAProjectSubdirectory(f))</span>
+<span class="nc" id="L35">				getAllFilesInPath(f.getAbsolutePath(), files);</span>
+		}
+<span class="nc" id="L37">		return files;</span>
+	}
+	
+
+	public static String readFile(File f) {
+		try {
+<span class="nc" id="L43">			FileInputStream input = new FileInputStream(f);</span>
+<span class="nc" id="L44">			String text = IOUtils.toString(input);</span>
+<span class="nc" id="L45">			input.close();</span>
+<span class="nc" id="L46">			return text;</span>
+<span class="nc" id="L47">		} catch (Exception e) {</span>
+<span class="nc" id="L48">			throw new RuntimeException(&quot;error reading file &quot; + f.getAbsolutePath(), e);</span>
+		}
+	}
+	
+
+	private static boolean isAProjectSubdirectory(File f) {
+<span class="nc bnc" id="L54" title="All 6 branches missed.">		return f.isDirectory() &amp;&amp; !f.getName().equals(&quot;.svn&quot;) &amp;&amp; !f.getName().equals(&quot;.git&quot;);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

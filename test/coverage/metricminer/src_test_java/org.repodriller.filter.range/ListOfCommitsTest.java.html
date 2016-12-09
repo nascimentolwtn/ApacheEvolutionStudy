@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ListOfCommitsTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.filter.range</a> &gt; <span class="el_source">ListOfCommitsTest.java</span></div><h1>ListOfCommitsTest.java</h1><pre class="source lang-java linenums">package org.repodriller.filter.range;
+
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.filter.range.ListOfCommits;
+import org.repodriller.scm.SCM;
+
+<span class="nc" id="L16">public class ListOfCommitsTest {</span>
+
+	private ListOfCommits range;
+	private SCM scm;
+	
+	@Before
+	public void setUp() {
+<span class="nc" id="L23">		scm = Mockito.mock(SCM.class);</span>
+<span class="nc" id="L24">	}</span>
+	
+	@Test
+	public void should_get_commits_in_range() {
+<span class="nc" id="L28">		range = new ListOfCommits(Arrays.asList(&quot;2&quot;, &quot;3&quot;, &quot;4&quot;));</span>
+		
+<span class="nc" id="L30">		ChangeSet c1 = new ChangeSet(&quot;1&quot;, new GregorianCalendar(2015, Calendar.JANUARY, 23));</span>
+<span class="nc" id="L31">		ChangeSet c2 = new ChangeSet(&quot;2&quot;, new GregorianCalendar(2015, Calendar.MARCH, 24));</span>
+<span class="nc" id="L32">		ChangeSet c3 = new ChangeSet(&quot;3&quot;, new GregorianCalendar(2015, Calendar.APRIL, 25));</span>
+<span class="nc" id="L33">		ChangeSet c4 = new ChangeSet(&quot;4&quot;, new GregorianCalendar(2014, Calendar.APRIL, 25));</span>
+<span class="nc" id="L34">		ChangeSet c5 = new ChangeSet(&quot;5&quot;, new GregorianCalendar(2013, Calendar.APRIL, 25));</span>
+		
+<span class="nc" id="L36">		Mockito.when(scm.getChangeSets()).thenReturn(Arrays.asList(c1, c2, c3, c4, c5));</span>
+		
+<span class="nc" id="L38">		List&lt;ChangeSet&gt; list = range.get(scm);</span>
+		
+<span class="nc" id="L40">		Assert.assertEquals(3, list.size());</span>
+<span class="nc" id="L41">		Assert.assertEquals(c2, list.get(0));</span>
+<span class="nc" id="L42">		Assert.assertEquals(c3, list.get(1));</span>
+<span class="nc" id="L43">		Assert.assertEquals(c4, list.get(2));</span>
+<span class="nc" id="L44">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

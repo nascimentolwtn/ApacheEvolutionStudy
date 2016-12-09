@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>AllDependenciesPostProcessor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.processor</a> &gt; <span class="el_source">AllDependenciesPostProcessor.java</span></div><h1>AllDependenciesPostProcessor.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.processor;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.persistence.csv.CSVFile;
+
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.parser.XmlMavenParser;
+
+<span class="nc" id="L15">public class AllDependenciesPostProcessor {</span>
+	
+<span class="nc" id="L17">	public XmlMavenParser parser = new XmlMavenParser();</span>
+	
+	public static void main(String[] args) throws IOException {
+<span class="nc" id="L20">		System.out.println(&quot;Starting...&quot;);</span>
+
+<span class="nc" id="L22">		AllDependenciesPostProcessor postProcessor = new AllDependenciesPostProcessor();</span>
+		
+<span class="nc" id="L24">		CSVFile csv = new CSVFile(&quot;study&quot; + File.separator + &quot;effective_pom.csv&quot;, true);</span>
+<span class="nc" id="L25">		postProcessor.writeCsvHeader(csv);</span>
+
+<span class="nc" id="L27">		File disconfiDir = new File(&quot;C:\\Users\\VANT\\workspace\\disconf-poms&quot;);</span>
+<span class="nc" id="L28">		File[] listFiles = disconfiDir.listFiles();</span>
+<span class="nc" id="L29">		postProcessor.processDirectory(csv, listFiles);</span>
+		
+<span class="nc" id="L31">		System.out.println(&quot;Finish!&quot;);</span>
+<span class="nc" id="L32">	}</span>
+
+	private void processDirectory(CSVFile csv, File[] listFiles) throws IOException {
+<span class="nc bnc" id="L35" title="All 2 branches missed.">		for (File file : listFiles) {</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">			if(file.isDirectory()) {</span>
+<span class="nc" id="L37">				this.processDirectory(csv, file.listFiles());</span>
+			}
+<span class="nc bnc" id="L39" title="All 2 branches missed.">			if(file.getName().startsWith(&quot;_&quot;)) {</span>
+<span class="nc" id="L40">				this.process(file, csv);</span>
+			}
+		}
+<span class="nc" id="L43">	}</span>
+
+	public void process(File pomFile, PersistenceMechanism writer) throws IOException {
+		
+//		int totalCommits = hashes.size();
+<span class="nc" id="L48">		int currentHashPosition = Integer.valueOf(pomFile.getName().substring(pomFile.getName().lastIndexOf(&quot;.&quot;)+1));</span>
+//		int currentHashPosition = 1;
+		
+//		float percent = 100 - ((currentHashPosition*100)/(float)totalCommits);
+		
+<span class="nc" id="L53">		String sourceCode = FileUtils.readFileToString(pomFile);</span>
+<span class="nc" id="L54">		MavenProject pom = parser.readPOM(sourceCode);</span>
+		
+<span class="nc" id="L56">		List&lt;MavenDependency&gt; currentDependencies = pom.getDependencies();</span>
+<span class="nc" id="L57">		List&lt;MavenDependency&gt; dependencyManagedDependencies = pom.getDependencyManagement().getDependencies();</span>
+<span class="nc" id="L58">		currentDependencies.addAll(dependencyManagedDependencies);</span>
+
+<span class="nc" id="L60">		currentDependencies.forEach(</span>
+<span class="nc" id="L61">			(dependency) -&gt; </span>
+<span class="nc" id="L62">				writeCsvLine(writer, currentHashPosition, pomFile , dependency)</span>
+			);
+		
+<span class="nc" id="L65">		dependencyManagedDependencies.forEach(</span>
+<span class="nc" id="L66">			(dependency) -&gt; </span>
+<span class="nc" id="L67">				writeCsvLine(writer, currentHashPosition, pomFile , dependency)</span>
+			);
+			
+		
+<span class="nc" id="L71">	}</span>
+
+	private void writeCsvHeader(PersistenceMechanism writer) {
+<span class="nc" id="L74">		writer.write(</span>
+//				&quot;DATE&quot;,
+<span class="nc" id="L76">				&quot;FILE&quot;,</span>
+<span class="nc" id="L77">				&quot;COMMIT_POSISTION&quot;,</span>
+<span class="nc" id="L78">				&quot;IS_DependencyManeged&quot;,</span>
+<span class="nc" id="L79">				&quot;GROUP_ID&quot;,</span>
+<span class="nc" id="L80">				&quot;ARTIFACT_ID&quot;,</span>
+<span class="nc" id="L81">				&quot;VERSION&quot;</span>
+		);
+<span class="nc" id="L83">	}</span>
+	
+	private void writeCsvLine(PersistenceMechanism writer, int currentHashPosition, 
+							  File pomFile, MavenDependency mavenDependency) {
+		
+//		try {
+//			Path pomPath = Paths.get(pomFile.toURI());
+//			BasicFileAttributes attr = Files.readAttributes(pomPath, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+<span class="nc" id="L91">			writer.write(</span>
+					// não faz sentido gravar dessa forma a data de criação, pois todos foram &quot;criados&quot; novamento no momento do checkou pelo método FileUtils.writeStringToFile
+//					DATE_FORMAT.format(new Date(attr.creationTime().toMillis())), 
+<span class="nc" id="L94">					pomFile.getAbsolutePath(),</span>
+<span class="nc" id="L95">					currentHashPosition,</span>
+<span class="nc" id="L96">					mavenDependency.isDependencyManaged(),</span>
+<span class="nc" id="L97">					mavenDependency.getGroupId(),</span>
+<span class="nc" id="L98">					mavenDependency.getArtifactId(),</span>
+<span class="nc" id="L99">					mavenDependency.getVersion()</span>
+			);
+//		} catch (IOException e) {
+//			throw new RuntimeException(e);
+//		}
+		
+<span class="nc" id="L105">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

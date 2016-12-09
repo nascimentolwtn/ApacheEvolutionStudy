@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>MavenDependencyVersionEvolutionStudy.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution</a> &gt; <span class="el_source">MavenDependencyVersionEvolutionStudy.java</span></div><h1>MavenDependencyVersionEvolutionStudy.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import org.repodriller.RepoDriller;
+import org.repodriller.RepositoryMining;
+import org.repodriller.Study;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.persistence.csv.CSVFile;
+import org.repodriller.scm.GitRepository;
+
+import br.inpe.cap.auxiliar.MultipleCSVFile;
+import br.inpe.cap.evolution.processor.JoinSummaryCSVPostProcessor;
+import br.inpe.cap.evolution.visitor.DependencyEvolutionVisitor;
+
+<span class="nc" id="L25">public class MavenDependencyVersionEvolutionStudy implements Study {</span>
+
+	private static final int THREADS_FOR_REPOSITORIES = 10;
+<span class="nc" id="L28">	private static final String FOUNTAIN_PATH = &quot;fountain&quot; + File.separator;</span>
+
+<span class="nc" id="L30">	private static final String STUDY_LOG_PATH = &quot;.&quot; + File.separator + &quot;study&quot; + File.separator + &quot;dependency_eval_02&quot;;</span>
+<span class="nc" id="L31">	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + &quot;evolutions&quot;;</span>
+	
+	private static final String FILE_PREFIX = &quot;dependency_evolution-HOME&quot;;
+<span class="nc" id="L34">	private static final String EVOLUTION_SUMMARY_CSV = STUDY_LOG_PATH + File.separator + FILE_PREFIX + &quot;.csv&quot;; </span>
+	
+<span class="nc" id="L36">	private static final File GITHUB_DONE_FILE = new File(FOUNTAIN_PATH+&quot;done-github_evolution-HOME.txt&quot;);</span>
+<span class="nc" id="L37">	private static File EXCEPTION_FILE = new File(FOUNTAIN_PATH+&quot;exceptions-evolution-HOME.log&quot;);</span>
+	
+<span class="nc" id="L39">	private static Logger log;</span>
+	
+	public static void main(String[] args) throws Exception {
+<span class="nc" id="L42">		System.setProperty(&quot;git.maxfiles&quot;, &quot;2000&quot;);</span>
+<span class="nc" id="L43">		System.setProperty(&quot;logfilename&quot;, FILE_PREFIX + &quot;_run01&quot;);</span>
+<span class="nc" id="L44">		log = Logger.getLogger(RepositoryMining.class);</span>
+<span class="nc" id="L45">		DependencyEvolutionVisitor.setLogger(log);</span>
+		
+<span class="nc" id="L47">		checkRequiredLogFilesAndDirectories();</span>
+		
+<span class="nc" id="L49">		new RepoDriller().start(new MavenDependencyVersionEvolutionStudy());</span>
+		
+<span class="nc" id="L51">		new JoinSummaryCSVPostProcessor().process(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + &quot;_joined.csv&quot;));</span>
+		
+<span class="nc" id="L53">		System.out.println(&quot;Finish!&quot;);</span>
+<span class="nc" id="L54">	}</span>
+	
+	public void execute() {
+		try {
+			
+<span class="nc" id="L59">			String rootRepositoriesPath = &quot;E:\\metricminer2_studies_top20&quot;;</span>
+<span class="nc" id="L60">			List&lt;String&gt; gitRepoDirs = getRepositoryExceptDoneDirs(rootRepositoriesPath);</span>
+
+<span class="nc" id="L62">			ExecutorService execRepos = Executors.newFixedThreadPool(THREADS_FOR_REPOSITORIES);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">			for(String repo : gitRepoDirs) {</span>
+<span class="nc" id="L64">				execRepos.submit(() -&gt; </span>
+<span class="nc" id="L65">					doMining(repo));</span>
+			}
+		
+<span class="nc" id="L68">			execRepos.shutdown();</span>
+<span class="nc" id="L69">			execRepos.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);</span>
+			
+<span class="nc" id="L71">		} catch (Exception e) {</span>
+			try {
+<span class="nc" id="L73">				String causeMessage = &quot;&quot;;</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">				if(e.getCause() != null)</span>
+<span class="nc" id="L75">					causeMessage = e.getCause().getMessage();</span>
+<span class="nc" id="L76">				FileUtils.writeStringToFile(EXCEPTION_FILE, e.getMessage() + &quot;. Cause: &quot; + causeMessage +&quot;\n&quot;, true);</span>
+<span class="nc" id="L77">				System.gc();</span>
+<span class="nc" id="L78">			} catch (IOException e1) {</span>
+<span class="nc" id="L79">				e1.printStackTrace();</span>
+			}
+		}
+<span class="nc" id="L82">	}</span>
+
+	private void doMining(String gitReposDir) {
+		try {
+<span class="nc" id="L86">			String gitReposLogSubDir = gitReposDir.substring(gitReposDir.lastIndexOf(File.separator)+1, gitReposDir.length());</span>
+<span class="nc" id="L87">			new RepositoryMining()</span>
+<span class="nc" id="L88">				.in(GitRepository.singleProject(gitReposDir))</span>
+<span class="nc" id="L89">				.through(Commits.all())</span>
+//			.withThreads(3)
+<span class="nc" id="L91">				.process(new DependencyEvolutionVisitor(EVOLUTION_LOG_PATH, gitReposLogSubDir), new MultipleCSVFile(</span>
+<span class="nc" id="L92">						new CSVFile(EVOLUTION_SUMMARY_CSV, true)</span>
+						,
+<span class="nc" id="L94">						new CSVFile(EVOLUTION_LOG_PATH</span>
+<span class="nc" id="L95">							+ File.separator</span>
+<span class="nc" id="L96">							+ &quot;dependency-evolution-'&quot;</span>
+<span class="nc" id="L97">							+ gitReposLogSubDir</span>
+<span class="nc" id="L98">							+ &quot;'.csv&quot;)))</span>
+<span class="nc" id="L99">				.mine();</span>
+<span class="nc" id="L100">		} catch (RuntimeException re) {</span>
+<span class="nc" id="L101">			log.error(re.getMessage());</span>
+		}
+<span class="nc" id="L103">		markDone(gitReposDir);</span>
+<span class="nc" id="L104">		System.gc();</span>
+<span class="nc" id="L105">	}</span>
+	
+	private List&lt;String&gt; getRepositoryExceptDoneDirs(String rootRepositoriesPath) throws IOException {
+<span class="nc" id="L108">		List&lt;String&gt; allDirsIn = org.repodriller.util.FileUtils.getAllDirsIn(rootRepositoriesPath);</span>
+		
+<span class="nc" id="L110">		FileReader arquivo = new FileReader(GITHUB_DONE_FILE);</span>
+<span class="nc" id="L111">		BufferedReader reader = new BufferedReader(arquivo);</span>
+
+<span class="nc" id="L113">		String linha = reader.readLine();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		while (linha != null) {</span>
+<span class="nc" id="L115">			allDirsIn.remove(linha);</span>
+<span class="nc" id="L116">			linha = reader.readLine();</span>
+		}
+
+<span class="nc" id="L119">		reader.close();</span>
+<span class="nc" id="L120">		arquivo.close();</span>
+<span class="nc" id="L121">		return allDirsIn;</span>
+	}
+		
+	private void markDone(String gitUrl) {
+		try {
+<span class="nc" id="L126">			FileUtils.writeStringToFile(GITHUB_DONE_FILE, gitUrl + &quot;\n&quot;, true);</span>
+<span class="nc" id="L127">		} catch (IOException e) {</span>
+<span class="nc" id="L128">			e.printStackTrace();</span>
+		}
+<span class="nc" id="L130">	}</span>
+		
+	private static void checkRequiredLogFilesAndDirectories() throws IOException {
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		if(!GITHUB_DONE_FILE.exists()) {</span>
+<span class="nc" id="L134">			GITHUB_DONE_FILE.createNewFile();</span>
+		}
+		
+<span class="nc" id="L137">		File studyPathDir = new File(STUDY_LOG_PATH);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		if(!studyPathDir.exists()) {</span>
+<span class="nc" id="L139">			studyPathDir.mkdir();</span>
+		}
+		
+<span class="nc" id="L142">		File evolutionPathDir = new File(EVOLUTION_LOG_PATH);</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">		if(!evolutionPathDir.exists()) {</span>
+<span class="nc" id="L144">			evolutionPathDir.mkdir();</span>
+		}
+<span class="nc" id="L146">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

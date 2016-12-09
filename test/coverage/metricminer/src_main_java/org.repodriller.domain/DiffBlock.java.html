@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>DiffBlock.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.domain</a> &gt; <span class="el_source">DiffBlock.java</span></div><h1>DiffBlock.java</h1><pre class="source lang-java linenums">package org.repodriller.domain;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.repodriller.RepoDrillerException;
+
+public class DiffBlock {
+
+	private int d1;
+	private int d2;
+	private int d3;
+	private int d4;
+	
+	private String[] lines;
+	private String diffBlock;
+
+<span class="nc" id="L21">	public DiffBlock(String diffBlock) {</span>
+<span class="nc" id="L22">		this.diffBlock = diffBlock;</span>
+<span class="nc" id="L23">		this.lines = diffBlock.replace(&quot;\r&quot;, &quot;&quot;).split(&quot;\n&quot;);</span>
+		
+<span class="nc" id="L25">		getLinePositions();</span>
+<span class="nc" id="L26">	}</span>
+	
+	private void getLinePositions() {
+<span class="nc" id="L29">		String positions = lines[0];</span>
+<span class="nc" id="L30">		Pattern p = Pattern.compile(&quot;@@ -(\\d*),(\\d*) \\+(\\d*),(\\d*) @@.*&quot;);</span>
+<span class="nc" id="L31">		Matcher matcher = p.matcher(positions);</span>
+		
+<span class="nc bnc" id="L33" title="All 2 branches missed.">		if(matcher.matches()) {</span>
+<span class="nc" id="L34">			d1 = Integer.parseInt(matcher.group(1));</span>
+<span class="nc" id="L35">			d2 = Integer.parseInt(matcher.group(2));</span>
+<span class="nc" id="L36">			d3 = Integer.parseInt(matcher.group(3));</span>
+<span class="nc" id="L37">			d4 = Integer.parseInt(matcher.group(4));</span>
+<span class="nc" id="L38">		} else {</span>
+<span class="nc" id="L39">			throw new RepoDrillerException(&quot;Impossible to get line positions in this diff: &quot; + diffBlock);</span>
+		}
+<span class="nc" id="L41">	}</span>
+
+	public String[] getLines() {
+<span class="nc" id="L44">		return lines;</span>
+	}
+
+	private List&lt;DiffLine&gt; getLines(int start, int qtyLines, String ch) {
+<span class="nc" id="L48">		List&lt;DiffLine&gt; oldLines = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L49">		int counter = start; </span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		for(String line : lines) {</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">			if(line.startsWith(ch) || line.startsWith(&quot; &quot;)) {</span>
+<span class="nc" id="L52">				oldLines.add(new DiffLine(counter, line.substring(1), typeOf(line)));</span>
+<span class="nc" id="L53">				counter++;</span>
+			}
+		}
+<span class="nc bnc" id="L56" title="All 2 branches missed.">		if(counter!=start+qtyLines) throw new RepoDrillerException(&quot;malformed diff&quot;);</span>
+		
+<span class="nc" id="L58">		return oldLines;</span>
+		
+	}
+	
+	private DiffLineType typeOf(String line) {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		if(line.startsWith(&quot; &quot;)) return DiffLineType.KEPT;</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		if(line.startsWith(&quot;+&quot;)) return DiffLineType.ADDED;</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">		if(line.startsWith(&quot;-&quot;)) return DiffLineType.REMOVED;</span>
+<span class="nc" id="L66">		throw new RepoDrillerException(&quot;type of diff line not recognized: &quot; + line);</span>
+	}
+
+	public List&lt;DiffLine&gt; getLinesInOldFile() {
+<span class="nc" id="L70">		return getLines(d1, d2, &quot;-&quot;);</span>
+	}
+	
+	public Optional&lt;DiffLine&gt; getLineInOldFile(int line) {
+<span class="nc bnc" id="L74" title="All 2 branches missed.">		return getLinesInOldFile().stream().filter(x -&gt; x.getLineNumber() == line).findFirst();</span>
+	}
+
+	public Optional&lt;DiffLine&gt; getLineInNewFile(int line) {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		return getLinesInNewFile().stream().filter(x -&gt; x.getLineNumber() == line).findFirst();</span>
+	}
+
+	public List&lt;DiffLine&gt; getLinesInNewFile() {
+<span class="nc" id="L82">		return getLines(d3, d4, &quot;+&quot;);</span>
+	}
+	
+	public String getDiffBlock() {
+<span class="nc" id="L86">		return diffBlock;</span>
+	}
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

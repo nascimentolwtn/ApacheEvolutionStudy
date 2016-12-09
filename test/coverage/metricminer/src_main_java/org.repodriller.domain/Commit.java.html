@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>Commit.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.domain</a> &gt; <span class="el_source">Commit.java</span></div><h1>Commit.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2014 Maurício Aniche
+
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.repodriller.domain;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+
+
+public class Commit {
+
+	private String hash;
+	private Developer author;
+	private Developer committer;
+	private String msg;
+	private List&lt;Modification&gt; modifications;
+	private String parent;
+	private Calendar date;
+	private Set&lt;String&gt; branches;
+	private boolean merge;
+	private boolean inMainBranch;
+	private TimeZone authorTimeZone;
+	private TimeZone committerTimeZone;
+	private Calendar committerDate;
+
+	public Commit(String hash, Developer author, Developer committer, Calendar authorDate, Calendar committerDate, String msg, String parent) {
+<span class="nc" id="L45">		this(hash, author, committer, authorDate, TimeZone.getDefault(), committerDate, TimeZone.getDefault(), msg, parent, false, new HashSet&lt;&gt;(), false);</span>
+<span class="nc" id="L46">	}</span>
+
+<span class="nc" id="L48">	public Commit(String hash, Developer author, Developer committer, Calendar authorDate, TimeZone authorTimeZone, Calendar committerDate, TimeZone committerTimeZone, String msg, String parent, boolean merge, Set&lt;String&gt; branches, boolean isCommitInMainBranch) {</span>
+<span class="nc" id="L49">		this.hash = hash;</span>
+<span class="nc" id="L50">		this.author = author;</span>
+<span class="nc" id="L51">		this.committer = committer;</span>
+<span class="nc" id="L52">		this.date = authorDate;</span>
+<span class="nc" id="L53">		this.committerDate = committerDate;</span>
+<span class="nc" id="L54">		this.msg = msg;</span>
+<span class="nc" id="L55">		this.parent = parent;</span>
+<span class="nc" id="L56">		this.merge = merge;</span>
+<span class="nc" id="L57">		this.authorTimeZone = authorTimeZone;</span>
+<span class="nc" id="L58">		this.committerTimeZone = committerTimeZone;</span>
+<span class="nc" id="L59">		this.modifications = new ArrayList&lt;Modification&gt;();</span>
+<span class="nc" id="L60">		this.branches = branches;</span>
+<span class="nc" id="L61">		this.inMainBranch = isCommitInMainBranch;</span>
+<span class="nc" id="L62">	}</span>
+
+	public boolean isMerge() {
+<span class="nc" id="L65">		return merge;</span>
+	}
+	
+	public String getHash() {
+<span class="nc" id="L69">		return hash;</span>
+	}
+
+	public Developer getAuthor() {
+<span class="nc" id="L73">		return author;</span>
+	}
+
+	public String getMsg() {
+<span class="nc" id="L77">		return msg;</span>
+	}
+	
+	public Developer getCommitter() {
+<span class="nc" id="L81">		return committer;</span>
+	}
+
+	public String getParent() {
+<span class="nc" id="L85">		return parent;</span>
+	}
+	
+	public void addModification(String oldPath, String newPath, ModificationType change, String diff, String sc) {
+<span class="nc" id="L89">		Modification m = new Modification(oldPath, newPath, change, diff, sc);</span>
+<span class="nc" id="L90">		modifications.add(m);</span>
+		
+<span class="nc" id="L92">	}</span>
+	
+	public void addModifications(List&lt;Modification&gt; modifications) {
+<span class="nc" id="L95">		this.modifications.addAll(modifications);</span>
+<span class="nc" id="L96">	}</span>
+	
+	public List&lt;Modification&gt; getModifications() {
+<span class="nc" id="L99">		return Collections.unmodifiableList(modifications);</span>
+	}
+	
+	public Calendar getCommitterDate() {
+<span class="nc" id="L103">		return committerDate;</span>
+	}
+
+	@Override
+	public String toString() {
+<span class="nc" id="L108">		return &quot;Commit [hash=&quot; + hash + &quot;, parent=&quot; + parent + &quot;, author=&quot; + author + &quot;, msg=&quot; + msg + &quot;, modifications=&quot;</span>
+<span class="nc" id="L109">				+ modifications + &quot;]&quot;;</span>
+	}
+	
+	public TimeZone getAuthorTimeZone() {
+<span class="nc" id="L113">		return authorTimeZone;</span>
+	}
+	
+	public TimeZone getCommitterTimeZone() {
+<span class="nc" id="L117">		return committerTimeZone;</span>
+	}
+
+	@Override
+	public boolean equals(Object other) {
+<span class="nc bnc" id="L122" title="All 4 branches missed.">		if (other == null || !(other instanceof Commit)) {</span>
+<span class="nc" id="L123">			return false;</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">		} else if (other == this) {</span>
+<span class="nc" id="L125">			return true;</span>
+		} else {
+<span class="nc" id="L127">			Commit c = (Commit) other;</span>
+<span class="nc" id="L128">			return this.getHash().equals(c.getHash());</span>
+		}
+	}
+	
+	public Calendar getDate() {
+<span class="nc" id="L133">		return date;</span>
+	}
+
+	public Set&lt;String&gt; getBranches() {
+<span class="nc" id="L137">		return Collections.unmodifiableSet(branches);</span>
+	}
+	
+	public boolean isInMainBranch() {
+<span class="nc" id="L141">		return inMainBranch;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

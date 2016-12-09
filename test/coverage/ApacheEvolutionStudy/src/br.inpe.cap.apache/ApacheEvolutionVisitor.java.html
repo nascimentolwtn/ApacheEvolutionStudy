@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ApacheEvolutionVisitor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.apache</a> &gt; <span class="el_source">ApacheEvolutionVisitor.java</span></div><h1>ApacheEvolutionVisitor.java</h1><pre class="source lang-java linenums">package br.inpe.cap.apache;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.log4j.Logger;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.domain.Modification;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
+
+import br.inpe.cap.evolution.parser.StringMavenParser;
+
+<span class="nc" id="L17">public class ApacheEvolutionVisitor implements CommitVisitor {</span>
+	
+<span class="nc" id="L19">	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(&quot;dd/MM/yyyy HH:mm:ss&quot;);</span>
+
+<span class="nc" id="L21">	private static Logger logger;</span>
+
+	private String repositoryName;
+	private List&lt;String&gt; hashes;
+	
+<span class="nc" id="L26">	public StringMavenParser parser = new StringMavenParser();</span>
+
+	@Override
+	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">		if(this.hashes == null) {</span>
+<span class="nc" id="L31">			repositoryName = repo.getLastDir();</span>
+<span class="nc" id="L32">			List&lt;ChangeSet&gt; changeSets = repo.getScm().getChangeSets();</span>
+<span class="nc" id="L33">			hashes = changeSets.stream().map((cs)-&gt;cs.getId()).collect(Collectors.toList());</span>
+		}
+		
+<span class="nc bnc" id="L36" title="All 4 branches missed.">		if(commit.isMerge() || !commit.isInMainBranch()) {</span>
+<span class="nc" id="L37">			String message = &quot;SKIPPED Commit &quot; + commit.getHash() + &quot; by &quot; + this.name() + &quot; - &quot; +</span>
+<span class="nc" id="L38">							   &quot;isMerge=&quot; + commit.isMerge() +</span>
+<span class="nc" id="L39">							   &quot;/isInMainBranch=&quot; + commit.isInMainBranch();</span>
+<span class="nc" id="L40">			logger.info(message);</span>
+<span class="nc" id="L41">			return;</span>
+		}
+		
+<span class="nc" id="L44">		int totalCommits = hashes.size();</span>
+<span class="nc" id="L45">		int currentHashPosition = totalCommits - hashes.indexOf(commit.getHash()) + 1;</span>
+		
+<span class="nc" id="L47">		float percent = 100 - ((currentHashPosition*100)/(float)totalCommits);</span>
+		
+<span class="nc" id="L49">		List&lt;Modification&gt; modifications = commit.getModifications();</span>
+<span class="nc" id="L50">		modifications.parallelStream()</span>
+<span class="nc" id="L51">			.filter(</span>
+<span class="nc" id="L52">				(m)-&gt; m.fileNameEndsWith(&quot;pom.xml&quot;))</span>
+<span class="nc" id="L53">			.forEach( </span>
+<span class="nc" id="L54">				(m) -&gt;	{</span>
+<span class="nc" id="L55">					String sourceCode = m.getSourceCode();</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">					if(sourceCode.contains(&quot;&lt;groupId&gt;org.apache&quot;)) {</span>
+<span class="nc" id="L57">						String apacheLib = parser.extractApacheLib(sourceCode);</span>
+<span class="nc" id="L58">						String apacheLibVersion = parser.extractApacheLibVersion(sourceCode);</span>
+<span class="nc" id="L59">						writer.write(</span>
+<span class="nc" id="L60">								commit.getHash(),</span>
+<span class="nc" id="L61">								DATE_FORMAT.format(commit.getDate().getTime()),</span>
+<span class="nc" id="L62">								repositoryName,</span>
+<span class="nc" id="L63">								m.getFileName(),</span>
+<span class="nc" id="L64">								currentHashPosition,</span>
+<span class="nc" id="L65">								totalCommits,</span>
+<span class="nc" id="L66">								percent,</span>
+<span class="nc" id="L67">								apacheLib,</span>
+<span class="nc" id="L68">								apacheLibVersion,</span>
+<span class="nc" id="L69">								commit.getMsg().replace(&quot;\n&quot;, &quot;&quot;).replace(&quot;,&quot;,&quot;&quot;).replace(&quot;\r&quot;, &quot;&quot;)</span>
+						);
+<span class="nc" id="L71">						String foundMessage = &quot;FOUND: &quot; + repositoryName + &quot; - &quot; + apacheLib + &quot; at version &quot; + apacheLibVersion;</span>
+<span class="nc" id="L72">						System.err.println(foundMessage);</span>
+<span class="nc" id="L73">						logger.info(foundMessage);</span>
+<span class="nc" id="L74">						System.gc();</span>
+					}
+<span class="nc" id="L76">				}</span>
+		);
+	
+<span class="nc" id="L79">		String percentMessage = repositoryName</span>
+<span class="nc" id="L80">				+ &quot; progress: commit #&quot;</span>
+<span class="nc" id="L81">				+ currentHashPosition</span>
+<span class="nc" id="L82">				+ &quot;/&quot;</span>
+<span class="nc" id="L83">				+ totalCommits</span>
+<span class="nc" id="L84">				+ &quot; - &quot;</span>
+<span class="nc" id="L85">				+ percent</span>
+<span class="nc" id="L86">				+ &quot;%&quot;;</span>
+<span class="nc" id="L87">		System.err.println(percentMessage);</span>
+<span class="nc" id="L88">	}</span>
+
+	@Override
+	public String name() {
+<span class="nc" id="L92">		return &quot;apache-evolution_&quot; + this.repositoryName;</span>
+	}
+
+	public static void setLogger(Logger logger) {
+<span class="nc" id="L96">		ApacheEvolutionVisitor.logger = logger;</span>
+<span class="nc" id="L97">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

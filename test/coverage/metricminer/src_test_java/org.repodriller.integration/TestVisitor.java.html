@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>TestVisitor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.integration</a> &gt; <span class="el_source">TestVisitor.java</span></div><h1>TestVisitor.java</h1><pre class="source lang-java linenums">package org.repodriller.integration;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import org.repodriller.domain.Commit;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
+
+public class TestVisitor implements CommitVisitor {
+
+	private List&lt;String&gt; visitedHashes;
+	private List&lt;Calendar&gt; visitedTimes;
+	private List&lt;Commit&gt; visitedCommits;
+	
+<span class="nc" id="L18">	public TestVisitor() {</span>
+<span class="nc" id="L19">		visitedHashes = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L20">		visitedTimes = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L21">		visitedCommits = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L22">	}</span>
+	
+	@Override
+	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
+<span class="nc" id="L26">		visitedHashes.add(commit.getHash());</span>
+<span class="nc" id="L27">		visitedTimes.add(commit.getDate());</span>
+<span class="nc" id="L28">		visitedCommits.add(commit);</span>
+<span class="nc" id="L29">	}</span>
+
+	@Override
+	public String name() {
+<span class="nc" id="L33">		return &quot;test&quot;;</span>
+	}
+
+	public List&lt;String&gt; getVisitedHashes() {
+<span class="nc" id="L37">		return visitedHashes;</span>
+	}
+	
+	public List&lt;Calendar&gt; getVisitedTimes() {
+<span class="nc" id="L41">		return visitedTimes;</span>
+	}
+	
+	public List&lt;Commit&gt; getVisitedCommits() {
+<span class="nc" id="L45">		return visitedCommits;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

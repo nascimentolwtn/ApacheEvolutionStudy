@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>VersionEvolutionDetectorPostProcessorTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.processor</a> &gt; <span class="el_source">VersionEvolutionDetectorPostProcessorTest.java</span></div><h1>VersionEvolutionDetectorPostProcessorTest.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.processor;
+
+import static br.inpe.cap.evolution.maven.CommitLine.INITIAL_VERSION;
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.repodriller.persistence.csv.CSVFile;
+
+import com.google.common.io.Resources;
+
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.maven.CommitLine;
+import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
+
+<span class="fc" id="L31">public class VersionEvolutionDetectorPostProcessorTest {</span>
+	
+<span class="fc" id="L33">	public static final String RESOURCE_OUTPUT_DIRECTORY = </span>
+<span class="fc" id="L34">			&quot;test&quot; 		+ File.separator +</span>
+<span class="fc" id="L35">			&quot;resources&quot;	+ File.separator +</span>
+<span class="fc" id="L36">			&quot;output&quot;	+ File.separator;</span>
+<span class="fc" id="L37">	private VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();</span>
+	private List&lt;String&gt; listCsvLines;
+	private String outputFileName;
+	private CSVFile csvOutput;
+	private File fileOutput;
+	
+	@BeforeClass
+	public static void checkResourceOutputDirectory() {
+<span class="fc" id="L45">		File outputDir = new File(RESOURCE_OUTPUT_DIRECTORY);</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">		if(!outputDir.exists()) {</span>
+<span class="nc" id="L47">			outputDir.mkdirs();</span>
+		}
+<span class="fc" id="L49">	}</span>
+	
+	@Before
+	public void setUpFiles() throws IOException, URISyntaxException {
+<span class="fc" id="L53">		listCsvLines = FileUtils.readLines(new File(Resources.getResource(&quot;all-dependency-'disconf'-input.csv&quot;).toURI()));</span>
+<span class="fc" id="L54">		outputFileName = RESOURCE_OUTPUT_DIRECTORY + &quot;test-version-detector-'disconf'.csv&quot;;</span>
+<span class="fc" id="L55">		csvOutput = new CSVFile(outputFileName, false);</span>
+<span class="fc" id="L56">		fileOutput = new File(outputFileName);</span>
+<span class="fc" id="L57">	}</span>
+	
+	@Test
+	public void escritaDoHeader() throws IOException {
+<span class="fc" id="L61">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L62">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L63">		assertEquals(CommitLine.HEADER, outputLines.get(0));</span>
+<span class="fc" id="L64">	}</span>
+	
+	@Test
+	public void leituraDaPrimeiraDependencia() throws IOException {
+<span class="fc" id="L68">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L69">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L70">		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(1), OUTPUT);</span>
+<span class="fc" id="L71">		MavenDependency actualDependency = postProcessor.getMavenDependencyFromCSVLine(parsedOutputCommitLine);</span>
+		
+<span class="fc" id="L73">		MavenDependency expectedDependency = new MavenDependency();</span>
+<span class="fc" id="L74">		expectedDependency.setGroupId(&quot;org.reflections&quot;);</span>
+<span class="fc" id="L75">		expectedDependency.setArtifactId(&quot;reflections&quot;);</span>
+<span class="fc" id="L76">		expectedDependency.setVersion(&quot;0.9.9-RC1&quot;);</span>
+		
+<span class="fc" id="L78">		assertEquals(expectedDependency, actualDependency);</span>
+		
+<span class="fc" id="L80">		boolean expectedVersionHasChanged = false;</span>
+<span class="fc" id="L81">		assertEquals(INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());</span>
+<span class="fc" id="L82">		assertEquals(expectedVersionHasChanged, parsedOutputCommitLine.versionHasChanged());</span>
+<span class="fc" id="L83">	}</span>
+	
+	@Test
+	public void leituraDoPrimeiroCommit() throws IOException {
+<span class="fc" id="L87">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L88">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L89">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L91">		String firstHash = CommitLine.parseCommitLine(outputLines.get(0), OUTPUT).getHash();</span>
+<span class="fc" id="L92">		int firstCommitCount = 0;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">		for (String line : outputLines) {</span>
+<span class="fc" id="L94">			CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(line, OUTPUT);</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">			if(parsedOutputCommitLine.getHash().equals(firstHash)) {</span>
+<span class="fc" id="L96">				assertEquals(INITIAL_VERSION, parsedOutputCommitLine.getPreviousVersion());</span>
+<span class="fc" id="L97">				firstCommitCount++;</span>
+			}
+		}
+<span class="fc" id="L100">		assertEquals(9, firstCommitCount);</span>
+
+<span class="fc" id="L102">	}</span>
+	
+	@Test
+	public void contagemDeTodosCommitsESubmodulosDoTerceiroCommit() throws IOException {
+<span class="fc" id="L106">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L107">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L108">		CommitLine.removeHeader(outputLines);</span>
+<span class="fc" id="L109">		assertEquals(35727, outputLines.size());</span>
+		
+<span class="fc" id="L111">		String thirdHash = CommitLine.parseCommitLine(outputLines.get(19), OUTPUT).getHash();</span>
+<span class="fc" id="L112">		int thirdCommitCount = 0;</span>
+<span class="fc" id="L113">		int submodulesCount = 0;</span>
+<span class="fc" id="L114">		int[] submodulesDependencyCount = {0,0,0};</span>
+<span class="fc" id="L115">		int submoduleIndex = 0;</span>
+<span class="fc" id="L116">		String lastModule = null;</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">		for (String line : outputLines) {</span>
+<span class="fc" id="L118">			CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(line, CommitLineType.OUTPUT);</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">			if(parsedOutputCommitLine.getHash().equals(thirdHash)) {</span>
+<span class="fc" id="L120">				thirdCommitCount++;</span>
+
+<span class="fc" id="L122">				String currentModule = parsedOutputCommitLine.getFile();</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">				if(lastModule == null) {</span>
+<span class="fc" id="L124">					lastModule = currentModule;</span>
+<span class="fc" id="L125">					submodulesCount++;</span>
+				}
+<span class="fc bfc" id="L127" title="All 2 branches covered.">				if(currentModule.equals(lastModule)) {</span>
+<span class="fc" id="L128">					submodulesDependencyCount[submoduleIndex]++;</span>
+<span class="fc" id="L129">				} else {</span>
+<span class="fc" id="L130">					lastModule = currentModule;</span>
+<span class="fc" id="L131">					submodulesCount++;</span>
+<span class="fc" id="L132">					submoduleIndex++;</span>
+<span class="fc" id="L133">					submodulesDependencyCount[submoduleIndex]++;</span>
+				}
+			}
+		}
+<span class="fc" id="L137">		assertEquals(27, thirdCommitCount);</span>
+<span class="fc" id="L138">		assertEquals(3, submodulesCount);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">		for (int submoduleCount : submodulesDependencyCount) {</span>
+<span class="fc" id="L140">			assertEquals(9, submoduleCount);</span>
+		}
+<span class="fc" id="L142">	}</span>
+	
+	@Test
+	public void dependenciasDosSubmodulosDoTerceiroCommit() throws IOException {
+<span class="fc" id="L146">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L147">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L148">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L150">		int thirdCommitIndex = 18;</span>
+<span class="fc" id="L151">		int submoduleIndex = 0;</span>
+<span class="fc" id="L152">		String lastModule = null;</span>
+		
+<span class="fc" id="L154">		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(thirdCommitIndex), OUTPUT);</span>
+<span class="fc" id="L155">		String thirdHash = parsedOutputCommitLine.getHash();</span>
+		do {
+<span class="fc" id="L157">			String currentModule = parsedOutputCommitLine.getFile();</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">			if(lastModule == null) {</span>
+<span class="fc" id="L159">				lastModule = currentModule;</span>
+			}
+<span class="fc bfc" id="L161" title="All 2 branches covered.">			if(currentModule.equals(lastModule)) {</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">				if(submoduleIndex == 0) {</span>
+<span class="fc" id="L163">					assertFalse(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));</span>
+<span class="fc" id="L164">				} else {</span>
+<span class="fc" id="L165">					assertTrue(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));</span>
+				}
+<span class="fc" id="L167">			} else {</span>
+<span class="fc" id="L168">				lastModule = currentModule;</span>
+<span class="fc" id="L169">				submoduleIndex++;</span>
+			}
+<span class="fc" id="L171">			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++thirdCommitIndex), OUTPUT);</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">		} while (parsedOutputCommitLine.getHash().equals(thirdHash));</span>
+<span class="fc" id="L173">	}</span>
+	
+	@Test
+	public void dependenciasDosSubmodulosDoQuartoCommit() throws IOException {
+<span class="fc" id="L177">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L178">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L179">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L181">		int forthCommitIndex = 45;</span>
+<span class="fc" id="L182">		int submoduleIndex = 0;</span>
+<span class="fc" id="L183">		String lastModule = null;</span>
+		
+<span class="fc" id="L185">		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(forthCommitIndex), OUTPUT);</span>
+<span class="fc" id="L186">		String forthHash = parsedOutputCommitLine.getHash();</span>
+		do {
+<span class="fc" id="L188">			String currentModule = parsedOutputCommitLine.getFile();</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">			if(lastModule == null) {</span>
+<span class="fc" id="L190">				lastModule = currentModule;</span>
+			}
+<span class="fc bfc" id="L192" title="All 2 branches covered.">			if(currentModule.equals(lastModule)) {</span>
+<span class="fc bfc" id="L193" title="All 4 branches covered.">				if(submoduleIndex == 0 || submoduleIndex == 2) {</span>
+<span class="fc" id="L194">					assertTrue(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));</span>
+<span class="fc" id="L195">				} else {</span>
+<span class="fc" id="L196">					assertFalse(INITIAL_VERSION.equals(parsedOutputCommitLine.getPreviousVersion()));</span>
+				}
+<span class="fc" id="L198">			} else {</span>
+<span class="fc" id="L199">				lastModule = currentModule;</span>
+<span class="fc" id="L200">				submoduleIndex++;</span>
+			}
+<span class="fc" id="L202">			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++forthCommitIndex), OUTPUT);</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">		} while (parsedOutputCommitLine.getHash().equals(forthHash));</span>
+<span class="fc" id="L204">	}</span>
+	
+	@Test
+	public void registroDeAlteracaoDeVersoesCommit33() throws IOException {
+<span class="fc" id="L208">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L209">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L210">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L212">		int commitIndex = 343;</span>
+<span class="fc" id="L213">		List&lt;Integer&gt; changedRange1 = IntStream.rangeClosed(349, 354).boxed().collect(Collectors.toList());</span>
+<span class="fc" id="L214">		List&lt;Integer&gt; changedRange2 = IntStream.rangeClosed(358, 362).boxed().collect(Collectors.toList());</span>
+<span class="fc" id="L215">		List&lt;Integer&gt; changedRange3 = Arrays.asList(368);</span>
+<span class="fc" id="L216">		List&lt;Integer&gt; changedVersionIndexes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L217">		changedVersionIndexes.addAll(changedRange1);</span>
+<span class="fc" id="L218">		changedVersionIndexes.addAll(changedRange2);</span>
+<span class="fc" id="L219">		changedVersionIndexes.addAll(changedRange3);</span>
+		
+<span class="fc" id="L221">		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);</span>
+<span class="fc" id="L222">		String initialHash = parsedOutputCommitLine.getHash();</span>
+		do {
+<span class="fc bfc" id="L224" title="All 2 branches covered.">			if(changedVersionIndexes.contains(commitIndex)) {</span>
+<span class="fc" id="L225">				assertTrue(parsedOutputCommitLine.versionHasChanged());</span>
+<span class="fc" id="L226">			} else {</span>
+<span class="fc" id="L227">				assertFalse(parsedOutputCommitLine.versionHasChanged());</span>
+			}
+<span class="fc" id="L229">			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++commitIndex), OUTPUT);</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">		} while (parsedOutputCommitLine.getHash().equals(initialHash));</span>
+<span class="fc" id="L231">	}</span>
+	
+	@Test
+	public void retornoDaVersaoAnteriorAposRegistroDeAlteracaoDeVersao() throws IOException {
+<span class="fc" id="L235">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L236">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L237">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L239">		int commitIndex = 418;</span>
+<span class="fc" id="L240">		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);</span>
+<span class="fc" id="L241">		assertEquals(&quot;82c54267948a7182657c4cf11299bf4897b94836&quot;, parsedOutputCommitLine.getHash());</span>
+<span class="fc" id="L242">		assertEquals(&quot;E:\\metricminer-evolution-stars\\disconf\\disconf-client\\pom.xml&quot;, parsedOutputCommitLine.getFile());</span>
+<span class="fc" id="L243">		assertEquals(&quot;commons-lang&quot;, parsedOutputCommitLine.getArtifactId());</span>
+<span class="fc" id="L244">		assertEquals(&quot;2.4&quot;, parsedOutputCommitLine.getPreviousVersion());</span>
+<span class="fc" id="L245">		assertFalse(parsedOutputCommitLine.versionHasChanged());</span>
+<span class="fc" id="L246">	}</span>
+	
+	@Test
+	public void alteracaoDeVersoesComValorCommitAnterior() throws IOException {
+<span class="fc" id="L250">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L251">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L252">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L254">		int commitIndex = 343;</span>
+<span class="fc" id="L255">		List&lt;Integer&gt; changedRange1 = IntStream.rangeClosed(349, 354).boxed().collect(Collectors.toList());</span>
+<span class="fc" id="L256">		List&lt;Integer&gt; changedRange2 = IntStream.rangeClosed(358, 362).boxed().collect(Collectors.toList());</span>
+<span class="fc" id="L257">		List&lt;Integer&gt; changedRange3 = Arrays.asList(368);</span>
+<span class="fc" id="L258">		List&lt;Integer&gt; changedVersionIndexes = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L259">		changedVersionIndexes.addAll(changedRange1);</span>
+<span class="fc" id="L260">		changedVersionIndexes.addAll(changedRange2);</span>
+<span class="fc" id="L261">		changedVersionIndexes.addAll(changedRange3);</span>
+		
+<span class="fc" id="L263">		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);</span>
+<span class="fc" id="L264">		String initialHash = parsedOutputCommitLine.getHash();</span>
+		do {
+<span class="fc bfc" id="L266" title="All 2 branches covered.">			if(changedVersionIndexes.contains(commitIndex)) {</span>
+<span class="fc" id="L267">				assertTrue(parsedOutputCommitLine.versionHasChanged());</span>
+<span class="fc" id="L268">			} else {</span>
+<span class="fc" id="L269">				assertFalse(parsedOutputCommitLine.versionHasChanged());</span>
+			}
+<span class="fc" id="L271">			parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(++commitIndex), OUTPUT);</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">		} while (parsedOutputCommitLine.getHash().equals(initialHash));</span>
+<span class="fc" id="L273">	}</span>
+	
+	@Test
+	public void registroDeVersaoQueJaFoiAlterada() throws IOException {
+<span class="fc" id="L277">		postProcessor.processCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L278">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L279">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L281">		int commitIndex = 34763;</span>
+<span class="fc" id="L282">		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(commitIndex), OUTPUT);</span>
+<span class="fc" id="L283">		assertEquals(&quot;2f704555f92c7e6b10404278cf3203cad63fe389&quot;, parsedOutputCommitLine.getHash());</span>
+<span class="fc" id="L284">		assertEquals(&quot;E:\\metricminer-evolution-stars\\disconf\\disconf-client\\pom.xml&quot;, parsedOutputCommitLine.getFile());</span>
+<span class="fc" id="L285">		assertEquals(&quot;commons-lang&quot;, parsedOutputCommitLine.getArtifactId());</span>
+<span class="fc" id="L286">		assertEquals(&quot;2.4&quot;, parsedOutputCommitLine.getPreviousVersion());</span>
+<span class="fc" id="L287">		assertFalse(parsedOutputCommitLine.versionHasChanged());</span>
+<span class="fc" id="L288">		assertTrue(parsedOutputCommitLine.versionHasEverChanged());</span>
+<span class="fc" id="L289">	}</span>
+	
+	@Test
+	public void comparacaoStudyVsVersionEvolutionDetectorMain() throws IOException, URISyntaxException {
+<span class="fc" id="L293">		List&lt;String&gt; studyOutput = FileUtils.readLines(new File(Resources.getResource(&quot;all-dependency-detector-'blueprints'.csv&quot;).toURI()));</span>
+<span class="fc" id="L294">		List&lt;String&gt; versionEvolutionMainOutput = FileUtils.readLines(new File(Resources.getResource(&quot;version-detector-'blueprints'.csv&quot;).toURI()));</span>
+<span class="fc" id="L295">		assertTrue(studyOutput.removeAll(versionEvolutionMainOutput));</span>
+<span class="fc" id="L296">		assertEquals(0, studyOutput.size());</span>
+<span class="fc" id="L297">	}</span>
+	
+	@Test
+	public void recalculoDaPosicaoRelativaDosCommits() throws IOException, URISyntaxException {
+<span class="fc" id="L301">		listCsvLines = FileUtils.readLines(new File(Resources.getResource(&quot;all-dependency-reprocess-'blueprints'.csv&quot;).toURI()));</span>
+<span class="fc" id="L302">		outputFileName = RESOURCE_OUTPUT_DIRECTORY + &quot;all-dependency-reprocess-'blueprints'-recalculated.csv&quot;;</span>
+<span class="fc" id="L303">		csvOutput = new CSVFile(outputFileName, false);</span>
+<span class="fc" id="L304">		fileOutput = new File(outputFileName);</span>
+
+<span class="fc" id="L306">		postProcessor.reprocessVersionDetectorOutputCsvLines(csvOutput, listCsvLines);</span>
+<span class="fc" id="L307">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L308">		CommitLine.removeHeader(outputLines);</span>
+		
+<span class="fc" id="L310">		CommitLine firstCommitLine = CommitLine.parseCommitLine(outputLines.get(0), OUTPUT);</span>
+<span class="fc" id="L311">		assertEquals(1865, firstCommitLine.getTotalCommits());</span>
+<span class="fc" id="L312">		assertEquals(0.21448f, firstCommitLine.getPercent(), 0.000001f);</span>
+		
+<span class="fc" id="L314">		CommitLine secondCommitLine = CommitLine.parseCommitLine(outputLines.get(18), OUTPUT);</span>
+<span class="fc" id="L315">		assertEquals(1865, secondCommitLine.getTotalCommits());</span>
+<span class="fc" id="L316">		assertEquals(10.99196f, secondCommitLine.getPercent(), 0.000001f);</span>
+		
+<span class="fc" id="L318">		CommitLine lastCommitLine = CommitLine.parseCommitLine(outputLines.get(77), OUTPUT);</span>
+<span class="fc" id="L319">		assertEquals(1865, lastCommitLine.getTotalCommits());</span>
+<span class="fc" id="L320">		assertEquals(94.26273f, lastCommitLine.getPercent(), 0.000001f);</span>
+<span class="fc" id="L321">	}</span>
+	
+	@After
+	public void clearTempFiles() throws IOException {
+		// Arquivo &quot;temporário&quot; deveria ser deletado.
+		// Entretanto, a independência dos testes é garantida com o argumento do csvOutput append = false 
+<span class="fc" id="L327">		FileUtils.forceDeleteOnExit(fileOutput);</span>
+<span class="fc" id="L328">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

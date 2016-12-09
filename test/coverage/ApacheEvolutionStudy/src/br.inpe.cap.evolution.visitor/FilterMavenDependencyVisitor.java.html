@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>FilterMavenDependencyVisitor.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.visitor</a> &gt; <span class="el_source">FilterMavenDependencyVisitor.java</span></div><h1>FilterMavenDependencyVisitor.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.visitor;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+
+import org.apache.commons.io.FileUtils;
+import org.repodriller.domain.Commit;
+import org.repodriller.persistence.PersistenceMechanism;
+import org.repodriller.scm.CommitVisitor;
+import org.repodriller.scm.SCMRepository;
+
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.parser.XmlMavenParser;
+
+public class FilterMavenDependencyVisitor implements CommitVisitor {
+	
+<span class="nc" id="L19">	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(&quot;dd/MM/yyyy HH:mm:ss&quot;);</span>
+	
+	private File pomDir;
+	
+<span class="nc" id="L23">	public XmlMavenParser parser = new XmlMavenParser();</span>
+
+	private String repositoryName;
+
+<span class="nc" id="L27">	public FilterMavenDependencyVisitor(String evolutionLogPath, String gitReposLogSubDir) {</span>
+<span class="nc" id="L28">		this.repositoryName = gitReposLogSubDir;</span>
+//		evolutionLogPath = &quot;..\\..\\..\\..\\..\\&quot; + evolutionLogPath; // comente esta linha para manter pom's dentro do diretório do estudo
+<span class="nc" id="L30">		this.pomDir = new File(evolutionLogPath + File.separator + gitReposLogSubDir);</span>
+<span class="nc" id="L31">	}</span>
+
+	@Override
+	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
+
+<span class="nc" id="L36">		repo.getScm().files().stream()</span>
+<span class="nc" id="L37">			.filter(</span>
+<span class="nc" id="L38">				(file) -&gt; file.fileNameEndsWith(&quot;pom.xml&quot;))</span>
+<span class="nc" id="L39">			.forEach( </span>
+<span class="nc" id="L40">				(file) -&gt;	{</span>
+<span class="nc" id="L41">					String sourceCode = file.getSourceCode();</span>
+<span class="nc" id="L42">					MavenProject pom = parser.readPOM(sourceCode);</span>
+<span class="nc" id="L43">					pom.getDependencies().forEach(</span>
+<span class="nc" id="L44">						(dependency) -&gt; </span>
+<span class="nc" id="L45">							writeCsvLine(writer, commit, file.getFullName(), dependency)</span>
+						);
+
+					try {
+<span class="nc" id="L49">						FileUtils.writeStringToFile(new File(&quot;fountain&quot; + File.separator + &quot;stars-maven.urls&quot;), repo.getOrigin() + &quot;\n&quot;, true);</span>
+						
+<span class="nc" id="L51">						String pomFileName = pomDir.getAbsolutePath() + File.separator + file.getFile().getName();</span>
+<span class="nc" id="L52">						FileUtils.writeStringToFile(new File(pomFileName), sourceCode);</span>
+<span class="nc" id="L53">					} catch (IOException e) {</span>
+<span class="nc" id="L54">						e.printStackTrace();</span>
+					}
+<span class="nc" id="L56">				}</span>
+		);
+	
+<span class="nc" id="L59">	}</span>
+
+	private void writeCsvLine(PersistenceMechanism writer, Commit commit, String fileName, MavenDependency mavenDependency) {
+<span class="nc" id="L62">		writer.write(</span>
+<span class="nc" id="L63">				commit.getHash(),</span>
+<span class="nc" id="L64">				DATE_FORMAT.format(commit.getDate().getTime()),</span>
+<span class="nc" id="L65">				this.repositoryName,</span>
+<span class="nc" id="L66">				fileName,</span>
+<span class="nc" id="L67">				mavenDependency.getGroupId(),</span>
+<span class="nc" id="L68">				mavenDependency.getArtifactId(),</span>
+<span class="nc" id="L69">				mavenDependency.getVersion(),</span>
+<span class="nc" id="L70">				XmlMavenParser.replaceLineFeedAndComma(commit.getMsg())</span>
+		);
+<span class="nc" id="L72">	}</span>
+
+	@Override
+	public String name() {
+<span class="nc" id="L76">		return &quot;dependency-filter_&quot; + this.repositoryName;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

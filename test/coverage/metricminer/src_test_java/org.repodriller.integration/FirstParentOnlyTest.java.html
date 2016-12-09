@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>FirstParentOnlyTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.integration</a> &gt; <span class="el_source">FirstParentOnlyTest.java</span></div><h1>FirstParentOnlyTest.java</h1><pre class="source lang-java linenums">package org.repodriller.integration;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.repodriller.RepositoryMining;
+import org.repodriller.filter.range.Commits;
+import org.repodriller.scm.GitRepository;
+
+<span class="nc" id="L10">public class FirstParentOnlyTest {</span>
+
+	private String path;
+
+	@Before
+	public void setUp() {
+<span class="nc" id="L16">		this.path = this.getClass().getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-6&quot;;</span>
+<span class="nc" id="L17">	}</span>
+	
+	@Test
+	public void firstParentsOnly() {
+<span class="nc" id="L21">		TestVisitor visitor = new TestVisitor();</span>
+		
+<span class="nc" id="L23">		new RepositoryMining()</span>
+<span class="nc" id="L24">		.in(GitRepository.singleProject(path, true))</span>
+<span class="nc" id="L25">		.through(Commits.all())</span>
+<span class="nc" id="L26">		.process(visitor)</span>
+<span class="nc" id="L27">		.mine();</span>
+		
+<span class="nc" id="L29">		Assert.assertEquals(3, visitor.getVisitedHashes().size());</span>
+<span class="nc" id="L30">		System.out.println(visitor.getVisitedHashes());</span>
+<span class="nc" id="L31">		Assert.assertTrue(visitor.getVisitedHashes().get(2).equals(&quot;ca4a534368fd04f8de76dcfbb1fa6a1b50a63887&quot;));</span>
+<span class="nc" id="L32">		Assert.assertTrue(visitor.getVisitedHashes().get(1).equals(&quot;80c6a1123d60a021c41d2581f8fbf6cfc2e38977&quot;));</span>
+<span class="nc" id="L33">		Assert.assertTrue(visitor.getVisitedHashes().get(0).equals(&quot;7a58b021f41b96a73d1383bb5e4e0feab1861327&quot;));</span>
+<span class="nc" id="L34">	}</span>
+	
+	
+	
+	@Test
+	public void firstParentsOnlyInReverseOrder() {
+<span class="nc" id="L40">		TestVisitor visitor = new TestVisitor();</span>
+		
+<span class="nc" id="L42">		new RepositoryMining()</span>
+<span class="nc" id="L43">		.in(GitRepository.singleProject(path, true))</span>
+<span class="nc" id="L44">		.through(Commits.all())</span>
+<span class="nc" id="L45">		.reverseOrder()</span>
+<span class="nc" id="L46">		.process(visitor)</span>
+<span class="nc" id="L47">		.mine();</span>
+		
+<span class="nc" id="L49">		Assert.assertEquals(3, visitor.getVisitedHashes().size());</span>
+<span class="nc" id="L50">		System.out.println(visitor.getVisitedHashes());</span>
+<span class="nc" id="L51">		Assert.assertTrue(visitor.getVisitedHashes().get(0).equals(&quot;ca4a534368fd04f8de76dcfbb1fa6a1b50a63887&quot;));</span>
+<span class="nc" id="L52">		Assert.assertTrue(visitor.getVisitedHashes().get(1).equals(&quot;80c6a1123d60a021c41d2581f8fbf6cfc2e38977&quot;));</span>
+<span class="nc" id="L53">		Assert.assertTrue(visitor.getVisitedHashes().get(2).equals(&quot;7a58b021f41b96a73d1383bb5e4e0feab1861327&quot;));</span>
+<span class="nc" id="L54">	}</span>
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

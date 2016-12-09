@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>XmlMavenParserTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.parser</a> &gt; <span class="el_source">XmlMavenParserTest.java</span></div><h1>XmlMavenParserTest.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.parser;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.List;
+
+import org.junit.Test;
+
+import br.inpe.cap.evolution.domain.MavenDependency;
+import br.inpe.cap.evolution.domain.MavenDependencyManagement;
+import br.inpe.cap.evolution.domain.MavenProject;
+import br.inpe.cap.evolution.domain.MavenProjectProperty;
+
+
+<span class="fc" id="L21">public class XmlMavenParserTest extends MavenParserAbstractTest {</span>
+
+<span class="fc" id="L23">	private static XmlMavenParser parser = new XmlMavenParser();</span>
+	
+	@Test
+	public void leituraDasDependenciasDoMaven() {
+<span class="fc" id="L27">		MavenProject projectFromPOM = parser.readPOM(pom);</span>
+<span class="fc" id="L28">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L29">		assertTrue(Collection.class.isAssignableFrom(dependencies.getClass()));</span>
+<span class="fc" id="L30">		assertNotNull(dependencies);</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">		assertTrue(dependencies.size() &gt; 0);</span>
+<span class="fc" id="L32">		assertEquals(6, dependencies.size());</span>
+<span class="fc" id="L33">	}</span>
+	
+	@Test
+	public void lerPrimeiraDependenciaDoMaven() {
+<span class="fc" id="L37">		MavenProject projectFromPOM = parser.readPOM(pom);</span>
+<span class="fc" id="L38">		MavenDependency dependency = projectFromPOM.getDependencies().get(0);</span>
+<span class="fc" id="L39">		assertEquals(&quot;org.eclipse.tycho&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L40">		assertEquals(&quot;org.eclipse.jdt.core&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L41">		assertEquals(&quot;3.10.0.v20140604-1726&quot;, dependency.getVersion());</span>
+<span class="fc" id="L42">	}</span>
+	
+	@Test
+	public void dependenciasIguais() {
+<span class="fc" id="L46">		MavenProject projectFromPOM = parser.readPOM(pom);</span>
+<span class="fc" id="L47">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L48">		MavenDependency dependency1 = dependencies.get(0);</span>
+<span class="fc" id="L49">		MavenDependency dependency2 = dependencies.get(1);</span>
+<span class="fc" id="L50">		assertEquals(dependency1, dependency2);</span>
+<span class="fc" id="L51">		assertNotSame(dependency1, dependency2);</span>
+<span class="fc" id="L52">	}</span>
+	
+	@Test
+	public void dependenciaSemVersao() {
+<span class="fc" id="L56">		MavenProject projectFromPOM = parser.readPOM(pom);</span>
+<span class="fc" id="L57">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L58">		MavenDependency dependency = dependencies.get(3);</span>
+<span class="fc" id="L59">		assertEquals(&quot;org.apache.velocity&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L60">		assertEquals(&quot;velocity-tools&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L61">		assertNull(dependency.getVersion());</span>
+<span class="fc" id="L62">	}</span>
+	
+	@Test
+	public void lerVariaveisDefinidasNoPOMdoMaven() {
+<span class="fc" id="L66">		MavenProject projectFromPOM = parser.readPOM(pom);</span>
+<span class="fc" id="L67">		List&lt;MavenProjectProperty&gt; properties = projectFromPOM.getProperties();</span>
+
+<span class="fc" id="L69">		MavenProjectProperty property1 = properties.get(0);</span>
+<span class="fc" id="L70">		assertEquals(&quot;neo4j.version&quot;, property1.getName());</span>
+<span class="fc" id="L71">		assertEquals(&quot;3.0.4&quot;, property1.getValue());</span>
+
+<span class="fc" id="L73">		MavenProjectProperty property2 = properties.get(1);</span>
+<span class="fc" id="L74">		assertEquals(&quot;project.build.sourceEncoding&quot;, property2.getName());</span>
+<span class="fc" id="L75">		assertEquals(&quot;UTF-8&quot;, property2.getValue());</span>
+<span class="fc" id="L76">	}</span>
+	
+	@Test
+	public void versaoDeDepenciaPorVariavel() {
+<span class="fc" id="L80">		MavenProject projectFromPOM = parser.readPOM(pom);</span>
+<span class="fc" id="L81">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L82">		MavenDependency dependency = dependencies.get(4);</span>
+<span class="fc" id="L83">		assertEquals(&quot;3.0.4&quot;, dependency.getVersion());</span>
+<span class="fc" id="L84">	}</span>
+	
+	@Test
+	public void retirandoLineFeedCarriageReturnDasDependencias() {
+<span class="fc" id="L88">		MavenProject projectFromPOM = parser.readPOM(pom);</span>
+<span class="fc" id="L89">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L90">		MavenDependency dependency = dependencies.get(5);</span>
+<span class="fc" id="L91">		assertEquals(&quot;de.tudarmstadt.ukp.dkpro.core&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L92">		assertEquals(&quot;de.tudarmstadt.ukp.dkpro.core.opennlp-model-tagger-en-maxent&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L93">		assertEquals(&quot;20120616.0&quot;, dependency.getVersion());</span>
+<span class="fc" id="L94">	}</span>
+	
+	@Test
+	public void pomSemNenhumaDependencia() {
+<span class="fc" id="L98">		MavenProject projectFromPOM = parser.readPOM(pomNoDependencies);</span>
+<span class="fc" id="L99">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L100">		assertEquals(0, dependencies.size());</span>
+<span class="fc" id="L101">	}</span>
+	
+	@Test
+	public void versaoDeDepenciaPorVariavelSemDefinicaoDeProperties() {
+<span class="fc" id="L105">		MavenProject projectFromPOM = parser.readPOM(pomNoPropertiesDefined);</span>
+<span class="fc" id="L106">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L107">		MavenDependency dependency = dependencies.get(0);</span>
+<span class="fc" id="L108">		assertEquals(&quot;${neo4j.version}&quot;, dependency.getVersion());</span>
+<span class="fc" id="L109">	}</span>
+	
+	@Test
+	public void versaoDeDepenciaSemDefinicaoDeVariavel() {
+<span class="fc" id="L113">		MavenProject projectFromPOM = parser.readPOM(pomNoVersionDefined);</span>
+<span class="fc" id="L114">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L115">		MavenDependency dependency = dependencies.get(0);</span>
+<span class="fc" id="L116">		assertNull(dependency.getVersion());</span>
+<span class="fc" id="L117">	}</span>
+	
+	@Test
+	public void variaveisProject() {
+<span class="fc" id="L121">		MavenProject projectFromPOM = parser.readPOM(pomProjectVariables);</span>
+<span class="fc" id="L122">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L123">		MavenDependency dependency = dependencies.get(0);</span>
+<span class="fc" id="L124">		assertEquals(&quot;org.apache.river&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L125">		assertEquals(&quot;river-lib&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L126">		assertEquals(&quot;3.0-SNAPSHOT&quot;, dependency.getVersion());</span>
+<span class="fc" id="L127">	}</span>
+	
+	@Test
+	public void variaveisProjectDefinidasNoParent() {
+<span class="fc" id="L131">		MavenProject projectFromPOM = parser.readPOM(pomProjectParentVariables);</span>
+<span class="fc" id="L132">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L133">		MavenDependency dependency = dependencies.get(0);</span>
+<span class="fc" id="L134">		assertEquals(&quot;org.apache.river&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L135">		assertEquals(&quot;reggie&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L136">		assertEquals(&quot;3.0-SNAPSHOT&quot;, dependency.getVersion());</span>
+<span class="fc" id="L137">	}</span>
+	
+	@Test
+	public void lerModules() {
+<span class="fc" id="L141">		MavenProject projectFromPOM = parser.readPOM(pom8290_startOfDependencyManagement);</span>
+<span class="fc" id="L142">		List&lt;String&gt; modules = projectFromPOM.getModules();</span>
+<span class="fc" id="L143">		assertTrue(Collection.class.isAssignableFrom(modules.getClass()));</span>
+<span class="fc" id="L144">		assertNotNull(modules);</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">		assertTrue(modules.size() &gt; 0);</span>
+<span class="fc" id="L146">		assertEquals(6, modules.size());</span>
+<span class="fc" id="L147">		assertEquals(&quot;graylog2-plugin-interfaces&quot;, modules.get(0));</span>
+<span class="fc" id="L148">		assertEquals(&quot;graylog2-shared&quot;, modules.get(1));</span>
+<span class="fc" id="L149">		assertEquals(&quot;graylog2-server&quot;, modules.get(2));</span>
+<span class="fc" id="L150">		assertEquals(&quot;graylog2-inputs&quot;, modules.get(3));</span>
+<span class="fc" id="L151">		assertEquals(&quot;graylog2-radio&quot;, modules.get(4));</span>
+<span class="fc" id="L152">		assertEquals(&quot;graylog2-rest-routes&quot;, modules.get(5));</span>
+<span class="fc" id="L153">	}</span>
+
+	
+	@Test
+	public void lerDependencyManagement() {
+<span class="fc" id="L158">		MavenProject projectFromPOM = parser.readPOM(pom8290_startOfDependencyManagement);</span>
+<span class="fc" id="L159">		MavenDependencyManagement dependencyManagement = projectFromPOM.getDependencyManagement();</span>
+<span class="fc" id="L160">		assertNotNull(dependencyManagement);</span>
+		
+<span class="fc" id="L162">		List&lt;MavenDependency&gt; dependencies = dependencyManagement.getDependencies();</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">		assertTrue(dependencies.size() &gt; 0);</span>
+<span class="fc" id="L164">		assertEquals(57, dependencies.size());</span>
+
+<span class="fc" id="L166">		MavenDependency dependency = dependencies.get(0);</span>
+<span class="fc" id="L167">		assertEquals(&quot;org.graylog2&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L168">		assertEquals(&quot;graylog2-plugin&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L169">		assertEquals(&quot;0.21.0-SNAPSHOT&quot;, dependency.getVersion());</span>
+<span class="fc" id="L170">		assertTrue(dependency.isDependencyManaged());</span>
+		
+<span class="fc" id="L172">		dependency = dependencies.get(9);</span>
+<span class="fc" id="L173">		assertEquals(&quot;com.codahale.metrics&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L174">		assertEquals(&quot;metrics-core&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L175">		assertEquals(&quot;3.0.0&quot;, dependency.getVersion());</span>
+<span class="fc" id="L176">		assertTrue(dependency.isDependencyManaged());</span>
+<span class="fc" id="L177">	}</span>
+	
+	@Test
+	public void lerTodasDependenciasInclusiveDependencyManagement() {
+<span class="fc" id="L181">		MavenProject projectFromPOM = parser.readPOM(pom8290_startOfDependencyManagement);</span>
+<span class="fc" id="L182">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getAllDependencies();</span>
+<span class="fc" id="L183">		assertNotNull(dependencies);</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">		assertTrue(dependencies.size() &gt; 0);</span>
+<span class="fc" id="L185">		assertEquals(62, dependencies.size());</span>
+
+<span class="fc" id="L187">		MavenDependency dependency = dependencies.get(0);</span>
+<span class="fc" id="L188">		assertEquals(&quot;org.graylog2&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L189">		assertEquals(&quot;graylog2-plugin&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L190">		assertEquals(&quot;0.21.0-SNAPSHOT&quot;, dependency.getVersion());</span>
+<span class="fc" id="L191">		assertTrue(dependency.isDependencyManaged());</span>
+
+<span class="fc" id="L193">		dependency = dependencies.get(57);</span>
+<span class="fc" id="L194">		assertEquals(&quot;org.slf4j&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L195">		assertEquals(&quot;slf4j-api&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L196">		assertNull(dependency.getVersion());</span>
+<span class="fc" id="L197">		assertFalse(dependency.isDependencyManaged());</span>
+<span class="fc" id="L198">	}</span>
+	
+	@Test
+	public void invalidPOMvariaveisProjectNaoDefinidasNoParent() {
+<span class="fc" id="L202">		MavenProject projectFromPOM = parser.readPOM(pomProjectParentInvalidVariables);</span>
+<span class="fc" id="L203">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L204">		MavenDependency dependency = dependencies.get(0);</span>
+<span class="fc" id="L205">		assertEquals(&quot;${project.groupId}&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L206">		assertEquals(&quot;${project.artifactId}&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L207">		assertEquals(&quot;${project.version}&quot;, dependency.getVersion());</span>
+<span class="fc" id="L208">	}</span>
+	
+	@Test
+	public void invalidPOMRetirarCaracteresIndesejadosProCSVDoMeioDosValores() {
+<span class="fc" id="L212">		MavenProject projectFromPOM = parser.readPOM(pomProjectParentInvalidVariables);</span>
+<span class="fc" id="L213">		List&lt;MavenDependency&gt; dependencies = projectFromPOM.getDependencies();</span>
+<span class="fc" id="L214">		MavenDependency dependency = dependencies.get(1);</span>
+<span class="fc" id="L215">		assertEquals(&quot;LineFeedIsValid but undesirable for CSV&quot;, dependency.getGroupId());</span>
+<span class="fc" id="L216">		assertEquals(&quot;Comma is not expected here but it'd scramble CSV also!&quot;, dependency.getArtifactId());</span>
+<span class="fc" id="L217">		assertEquals(&quot;10.0&quot;, dependency.getVersion());</span>
+<span class="fc" id="L218">	}</span>
+	
+	@Test
+	public void invalidPOMstringNulaOuBranco() {
+<span class="fc" id="L222">		MavenProject projectFromPOM = parser.readPOM(null);</span>
+<span class="fc" id="L223">		assertEquals(0, projectFromPOM.getModules().size());</span>
+<span class="fc" id="L224">		assertEquals(0, projectFromPOM.getProperties().size());</span>
+<span class="fc" id="L225">		assertEquals(0, projectFromPOM.getAllDependencies().size());</span>
+
+<span class="fc" id="L227">		projectFromPOM = parser.readPOM(&quot;&quot;);</span>
+<span class="fc" id="L228">		assertEquals(0, projectFromPOM.getModules().size());</span>
+<span class="fc" id="L229">		assertEquals(0, projectFromPOM.getProperties().size());</span>
+<span class="fc" id="L230">		assertEquals(0, projectFromPOM.getAllDependencies().size());</span>
+<span class="fc" id="L231">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

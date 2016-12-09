@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>SubversionRepository.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.scm</a> &gt; <span class="el_source">SubversionRepository.java</span></div><h1>SubversionRepository.java</h1><pre class="source lang-java linenums">package org.repodriller.scm;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.apache.log4j.Logger;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.domain.Developer;
+import org.repodriller.domain.Modification;
+import org.repodriller.domain.ModificationType;
+import org.repodriller.util.FileUtils;
+import org.tmatesoft.svn.core.SVNDepth;
+import org.tmatesoft.svn.core.SVNDirEntry;
+import org.tmatesoft.svn.core.SVNException;
+import org.tmatesoft.svn.core.SVNLogEntry;
+import org.tmatesoft.svn.core.SVNLogEntryPath;
+import org.tmatesoft.svn.core.SVNURL;
+import org.tmatesoft.svn.core.auth.BasicAuthenticationManager;
+import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+import org.tmatesoft.svn.core.io.SVNRepository;
+import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
+import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNDiffClient;
+import org.tmatesoft.svn.core.wc.SVNLogClient;
+import org.tmatesoft.svn.core.wc.SVNRevision;
+import org.tmatesoft.svn.core.wc.SVNUpdateClient;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+/**
+ * @author Juliano Silva
+ *
+ */
+public class SubversionRepository implements SCM {
+
+	private static final int MAX_SIZE_OF_A_DIFF = 100000;
+	private static final int DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT = 50;
+
+<span class="nc" id="L50">	private static Logger log = Logger.getLogger(SubversionRepository.class);</span>
+	private String path;
+	private String username;
+	private String password;
+	private String workingCopyPath;
+	private Integer maxNumberFilesInACommit;
+
+	public SubversionRepository(String path, String username, String password) {
+<span class="nc" id="L58">		this(path, username, password, DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT);</span>
+<span class="nc" id="L59">	}</span>
+
+<span class="nc" id="L61">	public SubversionRepository(String path, String username, String password, Integer maxNumberOfFilesInACommit) {</span>
+<span class="nc" id="L62">		this.path = path;</span>
+<span class="nc" id="L63">		this.username = username;</span>
+<span class="nc" id="L64">		this.password = password;</span>
+<span class="nc" id="L65">		maxNumberOfFilesInACommit = checkMaxNumber(maxNumberOfFilesInACommit);</span>
+<span class="nc" id="L66">		this.maxNumberFilesInACommit = maxNumberOfFilesInACommit;</span>
+
+<span class="nc" id="L68">		workingCopyPath = createWorkingCopy();</span>
+<span class="nc" id="L69">	}</span>
+
+	private Integer checkMaxNumber(Integer maxNumberOfFilesInACommit) {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		if(maxNumberOfFilesInACommit == null) {</span>
+<span class="nc" id="L73">			maxNumberOfFilesInACommit = DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT;</span>
+		}
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		if(maxNumberOfFilesInACommit &lt;= 0){</span>
+<span class="nc" id="L76">			throw new IllegalArgumentException(&quot;Max number of files in a commit should be 0 or greater.&quot;</span>
+					+ &quot;Default value is &quot; + DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT);
+		}
+<span class="nc" id="L79">		return maxNumberOfFilesInACommit;</span>
+	}
+
+	public SubversionRepository(String repositoryPath) {
+<span class="nc" id="L83">		this(repositoryPath, null, null, DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT);</span>
+<span class="nc" id="L84">	}</span>
+
+	public SubversionRepository(String repositoryPath, Integer maxNumberOfFilesInACommit) {
+<span class="nc" id="L87">		this(repositoryPath, null, null, maxNumberOfFilesInACommit);</span>
+<span class="nc" id="L88">	}</span>
+
+	public static SCMRepository singleProject(String path) {
+<span class="nc" id="L91">		return singleProject(path, DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT);</span>
+	}
+
+	public static SCMRepository singleProject(String path, Integer maxNumberOfFilesInACommit) {
+<span class="nc" id="L95">		return new SubversionRepository(path, maxNumberOfFilesInACommit).info();</span>
+	}
+
+	public static SCMRepository[] allProjectsIn(String path) {
+<span class="nc" id="L99">		return allProjectsIn(path, DEFAULT_MAX_NUMBER_OF_FILES_IN_A_COMMIT);</span>
+	}
+
+	public static SCMRepository[] allProjectsIn(String path, Integer maxNumberOfFilesInACommit) {
+<span class="nc" id="L103">		List&lt;SCMRepository&gt; repos = new ArrayList&lt;SCMRepository&gt;();</span>
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (String dir : FileUtils.getAllDirsIn(path)) {</span>
+<span class="nc" id="L106">			repos.add(singleProject(dir, maxNumberOfFilesInACommit));</span>
+		}
+
+<span class="nc" id="L109">		return repos.toArray(new SCMRepository[repos.size()]);</span>
+	}
+
+	public SCMRepository info() {
+<span class="nc" id="L113">		SVNRepository repository = null;</span>
+		try {
+<span class="nc" id="L115">			SVNURL url = SVNURL.parseURIEncoded(path);</span>
+<span class="nc" id="L116">			repository = SVNRepositoryFactory.create(url);</span>
+
+<span class="nc" id="L118">			authenticateIfNecessary(repository);</span>
+
+<span class="nc" id="L120">			SVNDirEntry firstRevision = repository.info(&quot;/&quot;, 0);</span>
+<span class="nc" id="L121">			SVNDirEntry lastRevision = repository.info(&quot;/&quot;, SVNRevision.HEAD.getNumber());</span>
+
+<span class="nc" id="L123">			return new SCMRepository(this, lastRevision.getURL().getPath(), path, String.valueOf(lastRevision.getRevision()), String.valueOf(firstRevision</span>
+<span class="nc" id="L124">					.getRevision()));</span>
+
+<span class="nc" id="L126">		} catch (SVNException e) {</span>
+<span class="nc" id="L127">			throw new RuntimeException(&quot;error in getHead() for &quot; + path, e);</span>
+<span class="nc" id="L128">		} finally {</span>
+<span class="nc bnc" id="L129" title="All 4 branches missed.">			if (repository != null)</span>
+<span class="nc" id="L130">				repository.closeSession();</span>
+<span class="nc" id="L131">		}</span>
+
+	}
+
+	@SuppressWarnings(&quot;rawtypes&quot;)
+	@Override
+	public List&lt;ChangeSet&gt; getChangeSets() {
+<span class="nc" id="L138">		SVNRepository repository = null;</span>
+
+		try {
+<span class="nc" id="L141">			SVNURL url = SVNURL.parseURIEncoded(path);</span>
+<span class="nc" id="L142">			repository = SVNRepositoryFactory.create(url);</span>
+
+<span class="nc" id="L144">			authenticateIfNecessary(repository);</span>
+
+<span class="nc" id="L146">			List&lt;ChangeSet&gt; allCs = new ArrayList&lt;ChangeSet&gt;();</span>
+
+<span class="nc" id="L148">			long startRevision = 0;</span>
+<span class="nc" id="L149">			long endRevision = -1; // HEAD (the latest) revision</span>
+<span class="nc" id="L150">			Collection log = repository.log(new String[] { &quot;&quot; }, null, startRevision, endRevision, true, true);</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">			for (Iterator iterator = log.iterator(); iterator.hasNext();) {</span>
+<span class="nc" id="L152">				SVNLogEntry entry = (SVNLogEntry) iterator.next();</span>
+<span class="nc" id="L153">				allCs.add(new ChangeSet(String.valueOf(entry.getRevision()), convertToCalendar(entry.getDate())));</span>
+			}
+
+<span class="nc" id="L156">			return allCs;</span>
+
+<span class="nc" id="L158">		} catch (SVNException e) {</span>
+<span class="nc" id="L159">			throw new RuntimeException(&quot;error in getHead() for &quot; + path, e);</span>
+<span class="nc" id="L160">		} finally {</span>
+<span class="nc bnc" id="L161" title="All 4 branches missed.">			if (repository != null)</span>
+<span class="nc" id="L162">				repository.closeSession();</span>
+<span class="nc" id="L163">		}</span>
+	}
+
+	@SuppressWarnings(&quot;rawtypes&quot;)
+	@Override
+	public Commit getCommit(String id) {
+<span class="nc" id="L169">		SVNRepository repository = null;</span>
+
+		try {
+<span class="nc" id="L172">			SVNURL url = SVNURL.parseURIEncoded(path);</span>
+<span class="nc" id="L173">			repository = SVNRepositoryFactory.create(url);</span>
+
+<span class="nc" id="L175">			authenticateIfNecessary(repository);</span>
+
+<span class="nc" id="L177">			long revision = Long.parseLong(id);</span>
+<span class="nc" id="L178">			long startRevision = revision;</span>
+<span class="nc" id="L179">			long endRevision = revision;</span>
+
+<span class="nc" id="L181">			Collection repositoryLog = repository.log(new String[] { &quot;&quot; }, null, startRevision, endRevision, true, true);</span>
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">			for (Iterator iterator = repositoryLog.iterator(); iterator.hasNext();) {</span>
+<span class="nc" id="L184">				SVNLogEntry logEntry = (SVNLogEntry) iterator.next();</span>
+
+<span class="nc" id="L186">				Commit commit = createCommit(logEntry);</span>
+
+<span class="nc" id="L188">				List&lt;Modification&gt; modifications = getModifications(repository, url, revision, logEntry);</span>
+
+<span class="nc bnc" id="L190" title="All 2 branches missed.">				if (modifications.size() &gt; this.maxNumberFilesInACommit) {</span>
+<span class="nc" id="L191">					log.error(&quot;commit &quot; + id + &quot; has more than files than the limit&quot;);</span>
+<span class="nc" id="L192">					throw new RuntimeException(&quot;commit &quot; + id + &quot; too big, sorry&quot;);</span>
+				}
+
+<span class="nc" id="L195">				commit.addModifications(modifications);</span>
+
+<span class="nc" id="L197">				return commit;</span>
+			}
+
+<span class="nc" id="L200">		} catch (Exception e) {</span>
+<span class="nc" id="L201">			throw new RuntimeException(&quot;error in getCommit() for &quot; + path, e);</span>
+<span class="nc" id="L202">		} finally {</span>
+<span class="nc bnc" id="L203" title="All 6 branches missed.">			if (repository != null)</span>
+<span class="nc" id="L204">				repository.closeSession();</span>
+<span class="nc" id="L205">		}</span>
+<span class="nc" id="L206">		return null;</span>
+	}
+
+	private Commit createCommit(SVNLogEntry logEntry) {
+<span class="nc" id="L210">		Developer committer = new Developer(logEntry.getAuthor(), null);</span>
+<span class="nc" id="L211">		Calendar date = convertToCalendar(logEntry.getDate());</span>
+<span class="nc" id="L212">		Commit commit = new Commit(String.valueOf(logEntry.getRevision()), null, committer, date, date, logEntry.getMessage(),</span>
+<span class="nc" id="L213">				&quot;&quot;);</span>
+<span class="nc" id="L214">		return commit;</span>
+	}
+
+	private List&lt;Modification&gt; getModifications(SVNRepository repository, SVNURL url, long revision, SVNLogEntry logEntry) throws SVNException,
+			UnsupportedEncodingException {
+
+<span class="nc" id="L220">		List&lt;Modification&gt; modifications = new ArrayList&lt;Modification&gt;();</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">		for (Entry&lt;String, SVNLogEntryPath&gt; entry : logEntry.getChangedPaths().entrySet()) {</span>
+<span class="nc" id="L222">			SVNLogEntryPath e = entry.getValue();</span>
+
+<span class="nc" id="L224">			String diffText = getDiffText(repository, url, e, revision);</span>
+
+<span class="nc" id="L226">			String sc = getSourceCode(repository, revision, e);</span>
+
+<span class="nc" id="L228">			Modification modification = new Modification(e.getCopyPath(), e.getPath(), getModificationType(e), diffText, sc);</span>
+<span class="nc" id="L229">			modifications.add(modification);</span>
+		}
+
+<span class="nc" id="L232">		return modifications;</span>
+	}
+
+	private String getSourceCode(SVNRepository repository, long endRevision, SVNLogEntryPath e) throws SVNException, UnsupportedEncodingException {
+<span class="nc bnc" id="L236" title="All 2 branches missed.">		if (e.getType() == 'D')</span>
+<span class="nc" id="L237">			return &quot;&quot;;</span>
+
+<span class="nc" id="L239">		ByteArrayOutputStream out = new ByteArrayOutputStream();</span>
+<span class="nc" id="L240">		repository.getFile(e.getPath(), endRevision, null, out);</span>
+
+<span class="nc" id="L242">		String sc = out.toString(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L243">		return sc;</span>
+	}
+
+	private String getDiffText(SVNRepository repository, SVNURL url, SVNLogEntryPath entry, long revision) {
+		try {
+<span class="nc" id="L248">			SVNClientManager clientManager = SVNClientManager.newInstance(null, repository.getAuthenticationManager());</span>
+<span class="nc" id="L249">			SVNDiffClient diffClient = clientManager.getDiffClient();</span>
+
+<span class="nc" id="L251">			ByteArrayOutputStream out = new ByteArrayOutputStream();</span>
+
+<span class="nc" id="L253">			SVNRevision startRevision = SVNRevision.create(revision - 1);</span>
+<span class="nc" id="L254">			SVNRevision endRevision = SVNRevision.create(revision);</span>
+
+<span class="nc" id="L256">			diffClient.doDiff(url, startRevision, startRevision, endRevision, SVNDepth.FILES, true, out);</span>
+
+<span class="nc" id="L258">			String diffText = out.toString(&quot;UTF-8&quot;);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">			if (diffText.length() &gt; MAX_SIZE_OF_A_DIFF) {</span>
+<span class="nc" id="L260">				log.error(&quot;diff for &quot; + entry.getPath() + &quot; too big&quot;);</span>
+<span class="nc" id="L261">				diffText = &quot;-- TOO BIG --&quot;;</span>
+			}
+<span class="nc" id="L263">			return diffText;</span>
+
+<span class="nc" id="L265">		} catch (Exception e) {</span>
+<span class="nc" id="L266">			return &quot;&quot;;</span>
+		}
+	}
+
+	private ModificationType getModificationType(SVNLogEntryPath e) {
+<span class="nc bnc" id="L271" title="All 2 branches missed.">		if (e.getType() == 'A') {</span>
+<span class="nc" id="L272">			return ModificationType.ADD;</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">		} else if (e.getType() == 'D') {</span>
+<span class="nc" id="L274">			return ModificationType.DELETE;</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">		} else if (e.getType() == 'M') {</span>
+<span class="nc" id="L276">			return ModificationType.MODIFY;</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">		} else if (e.getType() == 'R') {</span>
+<span class="nc" id="L278">			return ModificationType.COPY;</span>
+		}
+<span class="nc" id="L280">		return null;</span>
+	}
+
+	@Override
+	public ChangeSet getHead() {
+<span class="nc" id="L285">		SVNRepository repository = null;</span>
+
+		try {
+<span class="nc" id="L288">			SVNURL url = SVNURL.parseURIEncoded(path);</span>
+<span class="nc" id="L289">			repository = SVNRepositoryFactory.create(url);</span>
+
+<span class="nc" id="L291">			authenticateIfNecessary(repository);</span>
+
+<span class="nc" id="L293">			SVNDirEntry entry = repository.info(&quot;/&quot;, -1);</span>
+<span class="nc" id="L294">			return new ChangeSet(String.valueOf(entry.getRevision()), convertToCalendar(entry.getDate()));</span>
+
+<span class="nc" id="L296">		} catch (SVNException e) {</span>
+<span class="nc" id="L297">			throw new RuntimeException(&quot;error in getHead() for &quot; + path, e);</span>
+<span class="nc" id="L298">		} finally {</span>
+<span class="nc bnc" id="L299" title="All 4 branches missed.">			if (repository != null)</span>
+<span class="nc" id="L300">				repository.closeSession();</span>
+<span class="nc" id="L301">		}</span>
+	}
+
+	private GregorianCalendar convertToCalendar(Date date) {
+<span class="nc" id="L305">		GregorianCalendar calendar = new GregorianCalendar();</span>
+<span class="nc" id="L306">		calendar.setTime(date);</span>
+<span class="nc" id="L307">		return calendar;</span>
+	}
+
+	@Override
+	public List&lt;RepositoryFile&gt; files() {
+<span class="nc" id="L312">		List&lt;RepositoryFile&gt; all = new ArrayList&lt;RepositoryFile&gt;();</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">		for (File f : getAllFilesInPath()) {</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">			if (isNotAnImportantFile(f))</span>
+<span class="nc" id="L315">				continue;</span>
+<span class="nc" id="L316">			all.add(new RepositoryFile(f));</span>
+		}
+
+<span class="nc" id="L319">		return all;</span>
+	}
+
+	private List&lt;File&gt; getAllFilesInPath() {
+<span class="nc" id="L323">		return FileUtils.getAllFilesInPath(workingCopyPath);</span>
+	}
+
+	private boolean isNotAnImportantFile(File f) {
+<span class="nc" id="L327">		return f.getName().equals(&quot;.DS_Store&quot;);</span>
+	}
+
+	@Override
+	public long totalCommits() {
+<span class="nc" id="L332">		return getChangeSets().size();</span>
+	}
+
+	@Override
+	public void reset() {
+<span class="nc" id="L337">		SVNRepository repository = null;</span>
+		try {
+<span class="nc" id="L339">			SVNRevision revision = SVNRevision.HEAD;</span>
+
+<span class="nc" id="L341">			SVNURL url = SVNURL.parseURIEncoded(path);</span>
+<span class="nc" id="L342">			repository = SVNRepositoryFactory.create(url);</span>
+
+<span class="nc" id="L344">			authenticateIfNecessary(repository);</span>
+
+<span class="nc" id="L346">			SVNClientManager ourClientManager = SVNClientManager.newInstance(null, repository.getAuthenticationManager());</span>
+<span class="nc" id="L347">			SVNUpdateClient updateClient = ourClientManager.getUpdateClient();</span>
+<span class="nc" id="L348">			updateClient.setIgnoreExternals(false);</span>
+<span class="nc" id="L349">			updateClient.doCheckout(url, new File(workingCopyPath), revision, revision, SVNDepth.INFINITY, true);</span>
+<span class="nc" id="L350">		} catch (Exception e) {</span>
+<span class="nc" id="L351">			throw new RuntimeException(e);</span>
+<span class="nc" id="L352">		} finally {</span>
+<span class="nc bnc" id="L353" title="All 4 branches missed.">			if (repository != null)</span>
+<span class="nc" id="L354">				repository.closeSession();</span>
+<span class="nc" id="L355">		}</span>
+<span class="nc" id="L356">	}</span>
+
+	@Override
+	public void checkout(String id) {
+<span class="nc" id="L360">		SVNRepository repository = null;</span>
+		try {
+<span class="nc" id="L362">			clearWorkingCopy();</span>
+
+<span class="nc" id="L364">			SVNRevision revision = SVNRevision.create(Integer.parseInt(id));</span>
+
+<span class="nc" id="L366">			SVNURL url = SVNURL.parseURIEncoded(path);</span>
+<span class="nc" id="L367">			repository = SVNRepositoryFactory.create(url);</span>
+
+<span class="nc" id="L369">			authenticateIfNecessary(repository);</span>
+
+<span class="nc" id="L371">			SVNClientManager ourClientManager = SVNClientManager.newInstance(null, repository.getAuthenticationManager());</span>
+<span class="nc" id="L372">			SVNUpdateClient updateClient = ourClientManager.getUpdateClient();</span>
+<span class="nc" id="L373">			updateClient.setIgnoreExternals(false);</span>
+<span class="nc" id="L374">			updateClient.doCheckout(url, new File(workingCopyPath), revision, revision, SVNDepth.INFINITY, true);</span>
+<span class="nc" id="L375">		} catch (Exception e) {</span>
+<span class="nc" id="L376">			throw new RuntimeException(e);</span>
+<span class="nc" id="L377">		} finally {</span>
+<span class="nc bnc" id="L378" title="All 4 branches missed.">			if (repository != null)</span>
+<span class="nc" id="L379">				repository.closeSession();</span>
+<span class="nc" id="L380">		}</span>
+<span class="nc" id="L381">	}</span>
+
+	private void clearWorkingCopy() {
+		try {
+<span class="nc" id="L385">			org.apache.commons.io.FileUtils.cleanDirectory(new File(workingCopyPath));</span>
+<span class="nc" id="L386">		} catch (IOException e) {</span>
+<span class="nc" id="L387">			throw new RuntimeException(&quot;Unable to clean working copy path&quot;, e);</span>
+		}
+<span class="nc" id="L389">	}</span>
+
+	@Override
+	@Deprecated
+	public String blame(String file, String currentCommit, Integer line) {
+		try {
+<span class="nc" id="L395">			SVNURL url = SVNURL.parseURIEncoded(path + File.separator + file);</span>
+
+<span class="nc" id="L397">			ISVNAuthenticationManager authManager = getAuthenticationManager();</span>
+
+<span class="nc" id="L399">			SVNLogClient logClient = SVNClientManager.newInstance(null, authManager).getLogClient();</span>
+<span class="nc" id="L400">			boolean ignoreMimeType = false;</span>
+<span class="nc" id="L401">			boolean includeMergedRevisions = false;</span>
+
+<span class="nc" id="L403">			logClient.doAnnotate(url, SVNRevision.UNDEFINED, SVNRevision.create(Integer.parseInt(currentCommit)), SVNRevision.HEAD, ignoreMimeType,</span>
+<span class="nc" id="L404">					includeMergedRevisions, null, null);</span>
+
+<span class="nc" id="L406">			return String.valueOf(SVNRevision.create(Integer.parseInt(currentCommit)).getNumber());</span>
+
+<span class="nc" id="L408">		} catch (SVNException e) {</span>
+<span class="nc" id="L409">			throw new RuntimeException(e);</span>
+		}
+	}
+
+	private void authenticateIfNecessary(SVNRepository repository) {
+<span class="nc" id="L414">		ISVNAuthenticationManager authManager = getAuthenticationManager();</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">		if (authManager != null)</span>
+<span class="nc" id="L416">			repository.setAuthenticationManager(authManager);</span>
+<span class="nc" id="L417">	}</span>
+
+	private BasicAuthenticationManager getAuthenticationManager() {
+<span class="nc bnc" id="L420" title="All 4 branches missed.">		if (username != null &amp;&amp; password != null) {</span>
+<span class="nc" id="L421">			return BasicAuthenticationManager.newInstance(username, password.toCharArray());</span>
+		}
+<span class="nc" id="L423">		return null;</span>
+	}
+
+	private String createWorkingCopy() {
+<span class="nc" id="L427">		String tmpDirPath = System.getProperty(&quot;java.io.tmpdir&quot;);</span>
+<span class="nc" id="L428">		File tmpDir = new File(tmpDirPath + File.separator + &quot;metricminer&quot;);</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">		if (!tmpDir.exists()) {</span>
+<span class="nc" id="L430">			boolean created = tmpDir.mkdirs();</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">			if (!created) {</span>
+<span class="nc" id="L432">				throw new RuntimeException(&quot;Unable to create temporary folder for working copy in &quot; + tmpDir);</span>
+			}
+		}
+
+<span class="nc" id="L436">		return tmpDir.getPath();</span>
+	}
+
+	public String getPath() {
+<span class="nc" id="L440">		return path;</span>
+	}
+
+	@Override
+	public List&lt;BlamedLine&gt; blame(String file, String currentCommit, boolean priorCommit) {
+		// pull request me!
+<span class="nc" id="L446">		throw new NotImplementedException();</span>
+	}
+	
+	public Integer getMaxNumberFilesInACommit() {
+<span class="nc" id="L450">		return maxNumberFilesInACommit;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

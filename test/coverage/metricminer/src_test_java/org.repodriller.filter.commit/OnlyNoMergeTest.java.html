@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>OnlyNoMergeTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.filter.commit</a> &gt; <span class="el_source">OnlyNoMergeTest.java</span></div><h1>OnlyNoMergeTest.java</h1><pre class="source lang-java linenums">package org.repodriller.filter.commit;
+
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TimeZone;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.repodriller.domain.Commit;
+import org.repodriller.domain.Developer;
+import org.repodriller.filter.commit.OnlyNoMerge;
+
+<span class="nc" id="L14">public class OnlyNoMergeTest {</span>
+
+	@Test
+	public void shouldAcceptIfCommitIsNotAMergeCommit() {
+<span class="nc" id="L18">		Set&lt;String&gt; branches = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L19">		branches.add(&quot;master&quot;);</span>
+		
+<span class="nc" id="L21">		Calendar d = Calendar.getInstance();</span>
+<span class="nc" id="L22">		Commit regularCommit = new Commit(&quot;123&quot;, new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), d,TimeZone.getDefault(), d, TimeZone.getDefault(), &quot;x&quot;, null, false, branches, true);</span>
+<span class="nc" id="L23">		Commit mergeCommit = new Commit(&quot;123&quot;, new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), new Developer(&quot;Mau&quot;, &quot;mau@mau.com&quot;), d, TimeZone.getDefault(), d, TimeZone.getDefault(), &quot;x&quot;, null, true, branches, true);</span>
+
+<span class="nc" id="L25">		Assert.assertTrue(new OnlyNoMerge().accept(regularCommit));</span>
+<span class="nc" id="L26">		Assert.assertFalse(new OnlyNoMerge().accept(mergeCommit));</span>
+<span class="nc" id="L27">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

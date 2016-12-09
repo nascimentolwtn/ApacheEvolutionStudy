@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>DiffParser.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.domain</a> &gt; <span class="el_source">DiffParser.java</span></div><h1>DiffParser.java</h1><pre class="source lang-java linenums">package org.repodriller.domain;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class DiffParser {
+
+	private List&lt;DiffBlock&gt; diffBlocks;
+
+	private String fullDiff;
+	
+<span class="nc" id="L13">	public DiffParser(String fullDiff) {</span>
+<span class="nc" id="L14">		this.fullDiff = fullDiff;</span>
+<span class="nc" id="L15">		diffBlocks = new ArrayList&lt;&gt;();</span>
+		
+<span class="nc" id="L17">		extractDiffBlocks();</span>
+<span class="nc" id="L18">	}</span>
+
+	private void extractDiffBlocks() {
+<span class="nc" id="L21">		String[] lines = fullDiff.replace(&quot;\r&quot;, &quot;&quot;).split(&quot;\n&quot;);</span>
+<span class="nc" id="L22">		String[] linesNoHeader = Arrays.copyOfRange(lines, 4, lines.length);</span>
+
+<span class="nc" id="L24">		StringBuilder currentDiff = new StringBuilder();</span>
+<span class="nc" id="L25">		boolean currentInADiff = false;</span>
+		
+<span class="nc bnc" id="L27" title="All 2 branches missed.">		for(int i = 0; i &lt; linesNoHeader.length; i++) {</span>
+<span class="nc" id="L28">			String currentLine = linesNoHeader[i];</span>
+<span class="nc bnc" id="L29" title="All 4 branches missed.">			if(currentLine.startsWith(&quot;@@ -&quot;) &amp;&amp; !currentInADiff) {</span>
+<span class="nc" id="L30">				currentInADiff = true;</span>
+<span class="nc" id="L31">			}</span>
+<span class="nc bnc" id="L32" title="All 4 branches missed.">			else if(currentLine.startsWith(&quot;@@ -&quot;) &amp;&amp; currentInADiff) {</span>
+<span class="nc" id="L33">				diffBlocks.add(new DiffBlock(currentDiff.toString()));</span>
+<span class="nc" id="L34">				currentDiff = new StringBuilder();</span>
+<span class="nc" id="L35">				currentInADiff = false;</span>
+<span class="nc" id="L36">				i--;</span>
+			}
+
+<span class="nc bnc" id="L39" title="All 2 branches missed.">			if(currentInADiff) currentDiff.append(currentLine + &quot;\n&quot;);</span>
+		}
+<span class="nc" id="L41">		diffBlocks.add(new DiffBlock(currentDiff.toString()));</span>
+
+<span class="nc" id="L43">	}</span>
+	
+	public List&lt;DiffBlock&gt; getBlocks() {
+<span class="nc" id="L46">		return diffBlocks;</span>
+	}
+
+	public String getFullDiff() {
+<span class="nc" id="L50">		return fullDiff;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

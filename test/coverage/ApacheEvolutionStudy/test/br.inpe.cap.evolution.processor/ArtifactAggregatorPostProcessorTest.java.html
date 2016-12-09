@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ArtifactAggregatorPostProcessorTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.processor</a> &gt; <span class="el_source">ArtifactAggregatorPostProcessorTest.java</span></div><h1>ArtifactAggregatorPostProcessorTest.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.processor;
+
+import static br.inpe.cap.evolution.processor.VersionEvolutionDetectorPostProcessorTest.RESOURCE_OUTPUT_DIRECTORY;
+import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.repodriller.persistence.csv.CSVFile;
+
+import com.google.common.io.Resources;
+
+import br.inpe.cap.evolution.maven.CommitLine;
+
+<span class="fc" id="L24">public class ArtifactAggregatorPostProcessorTest {</span>
+	
+	private ArtifactAggregatorPostProcessor processor;
+	private List&lt;String&gt; linesCsvInput;
+	private String outputFileName;
+	private CSVFile csvOutput;
+	private File fileOutput;
+	
+	@BeforeClass
+	public static void checkResourceOutputDirectory() {
+<span class="fc" id="L34">		File outputDir = new File(RESOURCE_OUTPUT_DIRECTORY);</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">		if(!outputDir.exists()) {</span>
+<span class="nc" id="L36">			outputDir.mkdirs();</span>
+		}
+<span class="fc" id="L38">	}</span>
+	
+	@Before
+	public void setUp() throws URISyntaxException, IOException {
+<span class="fc" id="L42">		processor = new ArtifactAggregatorPostProcessor();</span>
+<span class="fc" id="L43">		File csvFile = new File(Resources.getResource(&quot;all-dependency-'disconf'.csv&quot;).toURI());</span>
+<span class="fc" id="L44">		linesCsvInput = FileUtils.readLines(csvFile);</span>
+<span class="fc" id="L45">		outputFileName = RESOURCE_OUTPUT_DIRECTORY + &quot;test-all-dependency-'disconf'-aggregated.csv&quot;;</span>
+<span class="fc" id="L46">		csvOutput = new CSVFile(outputFileName, false);</span>
+<span class="fc" id="L47">		fileOutput = new File(outputFileName);</span>
+<span class="fc" id="L48">	}</span>
+
+	@Test
+	public void leituraDoUltimoCommit() {
+<span class="fc" id="L52">		CommitLine parseLastCommitLine = processor.parseLastCommitLine(linesCsvInput);</span>
+<span class="fc" id="L53">		assertEquals(&quot;54c69f25cd46541d0cea7b1730c198fba4e4ac71&quot;, parseLastCommitLine.getHash());</span>
+<span class="fc" id="L54">	}</span>
+	
+	@Test
+	public void leituraDosSubmodulos() throws IOException {
+<span class="fc" id="L58">		CommitLine parseLastCommitLine = processor.parseLastCommitLine(linesCsvInput);</span>
+<span class="fc" id="L59">		processor.process(csvOutput, linesCsvInput, parseLastCommitLine.getHash());</span>
+		
+<span class="fc" id="L61">		List&lt;String&gt; outputLines = FileUtils.readLines(fileOutput);</span>
+<span class="fc" id="L62">		assertEquals(ArtifactAggregatorPostProcessor.HEADER, outputLines.get(0));</span>
+<span class="fc" id="L63">		CommitLine.removeHeader(outputLines);</span>
+<span class="fc" id="L64">		assertEquals(3, outputLines.size());</span>
+<span class="fc" id="L65">		Assert.assertTrue(outputLines.get(0).contains(ArtifactAggregatorPostProcessor.AGGREGATE_SEPARATOR));</span>
+<span class="fc" id="L66">	}</span>
+
+	@Test(expected = RuntimeException.class)
+	public void processarCsvVazio() {
+<span class="nc" id="L70">		processor.parseLastCommitLine(Collections.emptyList());</span>
+<span class="nc" id="L71">	}</span>
+	
+	@After
+	public void clearTempFiles() throws IOException {
+		// Arquivo &quot;temporário&quot; deveria ser deletado.
+		// Entretanto, a independência dos testes é garantida com o argumento do csvOutput append = false 
+<span class="fc" id="L77">		FileUtils.forceDeleteOnExit(fileOutput);</span>
+<span class="fc" id="L78">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

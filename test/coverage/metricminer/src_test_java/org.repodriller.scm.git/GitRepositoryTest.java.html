@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>GitRepositoryTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.scm.git</a> &gt; <span class="el_source">GitRepositoryTest.java</span></div><h1>GitRepositoryTest.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2014 Maurício Aniche
+
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.repodriller.scm.git;
+
+import java.io.FileNotFoundException;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.repodriller.domain.ChangeSet;
+import org.repodriller.domain.Commit;
+import org.repodriller.domain.ModificationType;
+import org.repodriller.scm.BlamedLine;
+import org.repodriller.scm.GitRepository;
+import org.repodriller.scm.RepositoryFile;
+import org.repodriller.scm.SCMRepository;
+
+<span class="nc" id="L34">public class GitRepositoryTest {</span>
+
+	private GitRepository git1;
+	private GitRepository git2;
+	private GitRepository git3;
+	private GitRepository git6;
+	private static String path1;
+	private static String path2;
+	private static String path3;
+	private static String path6;
+
+	@BeforeClass
+	public static void readPath() throws FileNotFoundException {
+<span class="nc" id="L47">		path1 = GitRepositoryTest.class.getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-1&quot;;</span>
+<span class="nc" id="L48">		path2 = GitRepositoryTest.class.getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-2&quot;;</span>
+<span class="nc" id="L49">		path3 = GitRepositoryTest.class.getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-3&quot;;</span>
+<span class="nc" id="L50">		path6 = GitRepositoryTest.class.getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-6&quot;;</span>
+<span class="nc" id="L51">	}</span>
+	
+	@Before
+	public void setUp() {
+<span class="nc" id="L55">		git1 = new GitRepository(path1);</span>
+<span class="nc" id="L56">		git2 = new GitRepository(path2);</span>
+<span class="nc" id="L57">		git3 = new GitRepository(path3);</span>
+<span class="nc" id="L58">		git6 = new GitRepository(path6, true);</span>
+<span class="nc" id="L59">	}</span>
+	
+	@SuppressWarnings(&quot;deprecation&quot;)
+	@Test
+	public void deprecatedBlame() {
+<span class="nc" id="L64">		String hash = git1.blame(&quot;Arquivo.java&quot;, &quot;e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2&quot;, 3);</span>
+		
+<span class="nc" id="L66">		Assert.assertEquals(&quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;, hash);</span>
+<span class="nc" id="L67">	}</span>
+
+	@Test
+	public void blameFullFile() {
+<span class="nc" id="L71">		List&lt;BlamedLine&gt; blame = git3.blame(&quot;Arquivo.java&quot;, &quot;112fd6787a9b0ffedab5e36fbbd6f014859a9d6d&quot;, false);</span>
+		
+<span class="nc" id="L73">		Assert.assertEquals(</span>
+<span class="nc" id="L74">				new BlamedLine(0, &quot;class Arquivo {&quot;, &quot;Maurício Aniche&quot;, &quot;Maurício Aniche&quot;, &quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;),</span>
+<span class="nc" id="L75">				blame.get(0));</span>
+<span class="nc" id="L76">		Assert.assertEquals(</span>
+<span class="nc" id="L77">				new BlamedLine(1, &quot;  void a() {&quot;, &quot;Maurício Aniche&quot;, &quot;Maurício Aniche&quot;, &quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;),</span>
+<span class="nc" id="L78">				blame.get(1));</span>
+<span class="nc" id="L79">		Assert.assertEquals(</span>
+<span class="nc" id="L80">				new BlamedLine(2, &quot;   b();&quot;, &quot;Maurício Aniche&quot;, &quot;Maurício Aniche&quot;, &quot;e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2&quot;),</span>
+<span class="nc" id="L81">				blame.get(2));</span>
+<span class="nc" id="L82">		Assert.assertEquals(</span>
+<span class="nc" id="L83">				new BlamedLine(3, &quot;   c();&quot;, &quot;John Doe&quot;, &quot;Maurício Aniche&quot;, &quot;112fd6787a9b0ffedab5e36fbbd6f014859a9d6d&quot;),</span>
+<span class="nc" id="L84">				blame.get(3));</span>
+<span class="nc" id="L85">		Assert.assertEquals(</span>
+<span class="nc" id="L86">				new BlamedLine(4, &quot;   d();&quot;, &quot;John Doe&quot;, &quot;Maurício Aniche&quot;, &quot;112fd6787a9b0ffedab5e36fbbd6f014859a9d6d&quot;),</span>
+<span class="nc" id="L87">				blame.get(4));</span>
+<span class="nc" id="L88">		Assert.assertEquals(</span>
+<span class="nc" id="L89">				new BlamedLine(5, &quot;  }&quot;, &quot;Maurício Aniche&quot;, &quot;Maurício Aniche&quot;, &quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;),</span>
+<span class="nc" id="L90">				blame.get(5));</span>
+<span class="nc" id="L91">		Assert.assertEquals(</span>
+<span class="nc" id="L92">				new BlamedLine(6, &quot;   int a;&quot;, &quot;John Doe&quot;, &quot;Maurício Aniche&quot;, &quot;112fd6787a9b0ffedab5e36fbbd6f014859a9d6d&quot;),</span>
+<span class="nc" id="L93">				blame.get(6));</span>
+<span class="nc" id="L94">		Assert.assertEquals(</span>
+<span class="nc" id="L95">				new BlamedLine(7, &quot;&quot;, &quot;Maurício Aniche&quot;, &quot;Maurício Aniche&quot;, &quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;),</span>
+<span class="nc" id="L96">				blame.get(7));</span>
+<span class="nc" id="L97">		Assert.assertEquals(</span>
+<span class="nc" id="L98">				new BlamedLine(8, &quot;}&quot;, &quot;Maurício Aniche&quot;, &quot;Maurício Aniche&quot;, &quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;),</span>
+<span class="nc" id="L99">				blame.get(8));</span>
+				
+
+<span class="nc" id="L102">		List&lt;BlamedLine&gt; blame2 = git3.blame(&quot;Arquivo.java&quot;, &quot;e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2&quot;, false);</span>
+<span class="nc" id="L103">		List&lt;BlamedLine&gt; blame3 = git3.blame(&quot;Arquivo.java&quot;, &quot;112fd6787a9b0ffedab5e36fbbd6f014859a9d6d&quot;, true);</span>
+		
+<span class="nc" id="L105">		Assert.assertEquals(blame2, blame3);</span>
+		
+<span class="nc" id="L107">	}</span>
+	
+	@Test 
+	public void shouldListAllFilesInACommit() {
+<span class="nc" id="L111">		git1.checkout(&quot;a7053a4dcd627f5f4f213dc9aa002eb1caf926f8&quot;);</span>
+<span class="nc" id="L112">		List&lt;RepositoryFile&gt; files1 = git1.files();</span>
+<span class="nc" id="L113">		Assert.assertEquals(3, files1.size());</span>
+<span class="nc" id="L114">		git1.reset();</span>
+		
+<span class="nc" id="L116">		git1.checkout(&quot;f0dd1308bd904a9b108a6a40865166ee962af3d4&quot;);</span>
+<span class="nc" id="L117">		List&lt;RepositoryFile&gt; files2 = git1.files();</span>
+<span class="nc" id="L118">		Assert.assertEquals(2, files2.size());</span>
+<span class="nc" id="L119">		git1.reset();</span>
+		
+<span class="nc" id="L121">		git1.checkout(&quot;9e71dd5726d775fb4a5f08506a539216e878adbb&quot;);</span>
+<span class="nc" id="L122">		List&lt;RepositoryFile&gt; files3 = git1.files();</span>
+<span class="nc" id="L123">		Assert.assertEquals(3, files3.size());</span>
+<span class="nc" id="L124">		git1.reset();</span>
+		
+<span class="nc" id="L126">	}</span>
+	
+	@Test 
+	public void shouldGetHead() {
+<span class="nc" id="L130">		ChangeSet head = git1.getHead();</span>
+		
+<span class="nc" id="L132">		Assert.assertEquals(&quot;e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2&quot;, head.getId());</span>
+<span class="nc" id="L133">	}</span>
+	
+	@Test 
+	public void shouldGetAllCommits() {
+<span class="nc" id="L137">		List&lt;ChangeSet&gt; cs = git1.getChangeSets();</span>
+		
+<span class="nc" id="L139">		Assert.assertEquals(14, cs.size());</span>
+<span class="nc" id="L140">		Assert.assertEquals(&quot;a997e9d400f742003dea601bb05a9315d14d1124&quot;, cs.get(0).getId());</span>
+<span class="nc" id="L141">		Assert.assertEquals(&quot;866e997a9e44cb4ddd9e00efe49361420aff2559&quot;, cs.get(13).getId());</span>
+<span class="nc" id="L142">	}</span>
+	
+	@Test
+	public void getBranchesFromCommit() {
+<span class="nc" id="L146">		Commit commit = git1.getCommit(&quot;a997e9d400f742003dea601bb05a9315d14d1124&quot;);</span>
+<span class="nc" id="L147">		Assert.assertEquals(1, commit.getBranches().size());</span>
+<span class="nc" id="L148">		Assert.assertTrue(commit.getBranches().contains(&quot;b2&quot;));</span>
+
+<span class="nc" id="L150">		commit = git1.getCommit(&quot;866e997a9e44cb4ddd9e00efe49361420aff2559&quot;);</span>
+<span class="nc" id="L151">		Assert.assertEquals(2, commit.getBranches().size());</span>
+<span class="nc" id="L152">		Assert.assertTrue(commit.getBranches().contains(&quot;master&quot;));</span>
+<span class="nc" id="L153">		Assert.assertTrue(commit.getBranches().contains(&quot;b2&quot;));</span>
+<span class="nc" id="L154">	}</span>
+	
+	@Test
+	public void isCommitInMasterBranch() {
+<span class="nc" id="L158">		Assert.assertEquals(&quot;29e929fbc5dc6a2e9c620069b24e2a143af4285f&quot;, git2.getHead().getId());</span>
+
+<span class="nc" id="L160">		git2.checkout(&quot;8986af2a679759e5a15794f6d56e6d46c3f302f1&quot;);</span>
+<span class="nc" id="L161">		GitRepository gitToChangeHead = new GitRepository(path2);</span>
+
+<span class="nc" id="L163">		Commit commit = gitToChangeHead.getCommit(&quot;8169f76a3d7add54b4fc7bca7160d1f1eede6eda&quot;);</span>
+<span class="nc" id="L164">		Assert.assertFalse(commit.isInMainBranch());</span>
+
+<span class="nc" id="L166">		commit = gitToChangeHead.getCommit(&quot;168b3aab057ed61a769acf336a4ef5e64f76c9fd&quot;);</span>
+<span class="nc" id="L167">		Assert.assertTrue(commit.isInMainBranch());</span>
+		
+<span class="nc" id="L169">		git2.reset();</span>
+<span class="nc" id="L170">		Assert.assertEquals(&quot;29e929fbc5dc6a2e9c620069b24e2a143af4285f&quot;, git2.getHead().getId());</span>
+<span class="nc" id="L171">	}</span>
+	
+	@Test 
+	public void shouldDetailACommit() {
+		
+<span class="nc" id="L176">		Commit commit = git1.getCommit(&quot;866e997a9e44cb4ddd9e00efe49361420aff2559&quot;);</span>
+		
+<span class="nc" id="L178">		Assert.assertEquals(&quot;Maurício Aniche&quot;, commit.getAuthor().getName());</span>
+<span class="nc" id="L179">		Assert.assertEquals(&quot;mauricioaniche@gmail.com&quot;, commit.getAuthor().getEmail());</span>
+		
+<span class="nc" id="L181">		Assert.assertEquals(&quot;Matricula adicionada&quot;, commit.getMsg());</span>
+<span class="nc" id="L182">		Assert.assertEquals(1, commit.getModifications().size());</span>
+		
+<span class="nc" id="L184">		Assert.assertEquals(&quot;Matricula.java&quot;, commit.getModifications().get(0).getNewPath());</span>
+<span class="nc" id="L185">		Assert.assertTrue(commit.getModifications().get(0).getDiff().startsWith(&quot;diff --git a/Matricula.java b/Matricula.java&quot;));</span>
+<span class="nc" id="L186">		Assert.assertTrue(commit.getModifications().get(0).getSourceCode().startsWith(&quot;package model;&quot;));</span>
+		
+<span class="nc" id="L188">	}</span>
+
+	
+	@Test 
+	public void mergeCommits() {
+<span class="nc" id="L193">		Commit commit = git2.getCommit(&quot;168b3aab057ed61a769acf336a4ef5e64f76c9fd&quot;);</span>
+<span class="nc" id="L194">		Assert.assertFalse(commit.isMerge());</span>
+
+<span class="nc" id="L196">		commit = git2.getCommit(&quot;8169f76a3d7add54b4fc7bca7160d1f1eede6eda&quot;);</span>
+<span class="nc" id="L197">		Assert.assertFalse(commit.isMerge());</span>
+
+<span class="nc" id="L199">		commit = git2.getCommit(&quot;29e929fbc5dc6a2e9c620069b24e2a143af4285f&quot;);</span>
+<span class="nc" id="L200">		Assert.assertTrue(commit.isMerge());</span>
+<span class="nc" id="L201">	}</span>
+
+	@Test 
+	public void shouldGetNumberOfModifications() {
+		
+<span class="nc" id="L206">		Commit commit = git1.getCommit(&quot;866e997a9e44cb4ddd9e00efe49361420aff2559&quot;);</span>
+		
+<span class="nc" id="L208">		Assert.assertEquals(62, commit.getModifications().get(0).getAdded());</span>
+<span class="nc" id="L209">		Assert.assertEquals(0, commit.getModifications().get(0).getRemoved());</span>
+
+<span class="nc" id="L211">		commit = git1.getCommit(&quot;d11dd6734ff4e60cac3a7b58d9267f138c9e05c7&quot;);</span>
+		
+<span class="nc" id="L213">		Assert.assertEquals(1, commit.getModifications().get(0).getAdded());</span>
+<span class="nc" id="L214">		Assert.assertEquals(1, commit.getModifications().get(0).getRemoved());</span>
+		
+<span class="nc" id="L216">	}</span>
+	
+	@Test 
+	public void shouldGetModificationStatus() {
+		
+<span class="nc" id="L221">		Commit commit = git1.getCommit(&quot;866e997a9e44cb4ddd9e00efe49361420aff2559&quot;);</span>
+<span class="nc" id="L222">		Assert.assertEquals(ModificationType.ADD, commit.getModifications().get(0).getType());</span>
+		
+<span class="nc" id="L224">		commit = git1.getCommit(&quot;57dbd017d1a744b949e7ca0b1c1a3b3dd4c1cbc1&quot;);</span>
+<span class="nc" id="L225">		Assert.assertEquals(ModificationType.MODIFY, commit.getModifications().get(0).getType());</span>
+		
+<span class="nc" id="L227">		commit = git1.getCommit(&quot;ffccf1e7497eb8136fd66ed5e42bef29677c4b71&quot;);</span>
+<span class="nc" id="L228">		Assert.assertEquals(ModificationType.DELETE, commit.getModifications().get(0).getType());</span>
+		
+		
+<span class="nc" id="L231">	}</span>
+	
+
+	@Test 
+	public void shouldDetailARename() {
+		
+<span class="nc" id="L237">		Commit commit = git1.getCommit(&quot;f0dd1308bd904a9b108a6a40865166ee962af3d4&quot;);</span>
+		
+<span class="nc" id="L239">		Assert.assertEquals(&quot;Maurício Aniche&quot;, commit.getAuthor().getName());</span>
+<span class="nc" id="L240">		Assert.assertEquals(&quot;mauricioaniche@gmail.com&quot;, commit.getAuthor().getEmail());</span>
+		
+<span class="nc" id="L242">		Assert.assertEquals(&quot;Matricula.javax&quot;, commit.getModifications().get(0).getNewPath());</span>
+<span class="nc" id="L243">		Assert.assertEquals(&quot;Matricula.java&quot;, commit.getModifications().get(0).getOldPath());</span>
+		
+<span class="nc" id="L245">	}</span>
+	
+	@Test 
+	public void shouldGetInfoFromARepo() {
+<span class="nc" id="L249">		SCMRepository repo = git1.info();</span>
+		
+<span class="nc" id="L251">		Assert.assertEquals(path1, repo.getPath());</span>
+<span class="nc" id="L252">		Assert.assertEquals(&quot;866e997a9e44cb4ddd9e00efe49361420aff2559&quot;, repo.getFirstCommit());</span>
+<span class="nc" id="L253">		Assert.assertEquals(&quot;e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2&quot;, repo.getHeadCommit());</span>
+<span class="nc" id="L254">	}</span>
+	
+	@Test 
+	public void firstParentOnly() {
+		
+<span class="nc" id="L259">		List&lt;ChangeSet&gt; changeSets = git6.getChangeSets();</span>
+		
+<span class="nc" id="L261">		Assert.assertEquals(3, changeSets.size());</span>
+<span class="nc" id="L262">		Assert.assertTrue(changeSets.stream().anyMatch(x -&gt; x.getId().equals(&quot;ca4a534368fd04f8de76dcfbb1fa6a1b50a63887&quot;)));</span>
+<span class="nc" id="L263">		Assert.assertTrue(changeSets.stream().anyMatch(x -&gt; x.getId().equals(&quot;80c6a1123d60a021c41d2581f8fbf6cfc2e38977&quot;)));</span>
+<span class="nc" id="L264">		Assert.assertTrue(changeSets.stream().anyMatch(x -&gt; x.getId().equals(&quot;7a58b021f41b96a73d1383bb5e4e0feab1861327&quot;)));</span>
+		
+<span class="nc" id="L266">		git6 = new GitRepository(path6, false);</span>
+<span class="nc" id="L267">		changeSets = git6.getChangeSets();</span>
+		
+<span class="nc" id="L269">		Assert.assertEquals(4, changeSets.size());</span>
+<span class="nc" id="L270">		Assert.assertTrue(changeSets.stream().anyMatch(x -&gt; x.getId().equals(&quot;ca4a534368fd04f8de76dcfbb1fa6a1b50a63887&quot;)));</span>
+<span class="nc" id="L271">		Assert.assertTrue(changeSets.stream().anyMatch(x -&gt; x.getId().equals(&quot;80c6a1123d60a021c41d2581f8fbf6cfc2e38977&quot;)));</span>
+<span class="nc" id="L272">		Assert.assertTrue(changeSets.stream().anyMatch(x -&gt; x.getId().equals(&quot;7a58b021f41b96a73d1383bb5e4e0feab1861327&quot;)));</span>
+<span class="nc" id="L273">		Assert.assertTrue(changeSets.stream().anyMatch(x -&gt; x.getId().equals(&quot;933b2c6a6be916546d13b684d3201de6d3bc4058&quot;)));</span>
+<span class="nc" id="L274">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

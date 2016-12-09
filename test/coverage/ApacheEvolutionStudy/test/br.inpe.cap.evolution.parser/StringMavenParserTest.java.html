@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>StringMavenParserTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">ApacheEvolutionStudy</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">br.inpe.cap.evolution.parser</a> &gt; <span class="el_source">StringMavenParserTest.java</span></div><h1>StringMavenParserTest.java</h1><pre class="source lang-java linenums">package br.inpe.cap.evolution.parser;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
+<span class="fc" id="L9">public class StringMavenParserTest extends MavenParserAbstractTest {</span>
+	
+<span class="fc" id="L11">	private StringMavenParser parser = new StringMavenParser();</span>
+	
+	@Test
+	public void testExtractLib() {
+<span class="fc" id="L15">		assertEquals(&quot;org.apache.commons&quot;, parser.extractApacheLib(pom));</span>
+<span class="fc" id="L16">	}</span>
+	
+	@Test
+	public void testExtractLibVersion() {
+<span class="fc" id="L20">		assertEquals(&quot;3.3.2&quot;, parser.extractApacheLibVersion(pom));</span>
+<span class="fc" id="L21">	}</span>
+	
+	@Test
+	public void testExtractLibWithoutVersion() {
+<span class="fc" id="L25">		assertEquals(&quot;no version&quot;, parser.extractApacheLibVersion(pomNoVersionDefined));</span>
+<span class="fc" id="L26">	}</span>
+	
+	@Test
+	@Ignore
+	public void testExtractCommonsIO() {
+		// FIXME Tratar casos especiais 1 a 1? Ex.: commons-io
+<span class="nc" id="L32">		fail(&quot;&lt;groupId&gt; da biblioteca Commons.io não é org.apache. É &lt;groupId&gt;commons-io&lt;/groupId&gt;&quot;);</span>
+<span class="nc" id="L33">	}</span>
+	
+	@Test
+	@Ignore
+	public void testParsePomDeProjetoDaPropriaApacheOuFork() {
+		// FIXME Verificar como ficará o parsing das versões dos projetos da própria Apache (talvez verificar &lt;parent&gt;?)
+<span class="nc" id="L39">		fail(&quot;indexOf('&lt;version&gt;') de projetos Apache pegam o primeiro version, referente ao &lt;parent&gt; da própria Apache.&quot;);</span>
+<span class="nc" id="L40">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

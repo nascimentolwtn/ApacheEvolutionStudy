@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>CSVFile.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/main/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.persistence.csv</a> &gt; <span class="el_source">CSVFile.java</span></div><h1>CSVFile.java</h1><pre class="source lang-java linenums">/**
+ * Copyright 2014 Maurício Aniche
+
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+ * http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.repodriller.persistence.csv;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.Arrays;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+
+import org.repodriller.persistence.PersistenceMechanism;
+
+public class CSVFile implements PersistenceMechanism {
+
+	private PrintStream ps;
+
+<span class="pc" id="L32">	private String[] header = null;</span>
+	
+	
+	public CSVFile(String fileName) {
+<span class="nc" id="L36">		this(fileName, false);</span>
+<span class="nc" id="L37">	}</span>
+
+<span class="fc" id="L39">	public CSVFile(String fileName, boolean append) {</span>
+		try {
+<span class="fc" id="L41">			ps = new PrintStream(new FileOutputStream(fileName, append));</span>
+<span class="pc" id="L42">		} catch (Exception e) {</span>
+<span class="nc" id="L43">			throw new RuntimeException(e);</span>
+		}
+<span class="fc" id="L45">	}</span>
+	
+	public CSVFile(String path, String name) {
+<span class="nc" id="L48">		this(path, name, false);</span>
+<span class="nc" id="L49">	}</span>
+
+	public CSVFile(String path, String name, boolean append) {
+<span class="nc" id="L52">		this(verifyPath(path) + name, append);</span>
+<span class="nc" id="L53">	}		</span>
+	
+	public CSVFile (String path, String name , String [] header) {
+<span class="nc" id="L56">		this(verifyPath(path) + name, header);</span>
+<span class="nc" id="L57">	}</span>
+	
+	public CSVFile (String fileName, String [] header) {
+<span class="nc" id="L60">		this(fileName,header,false);</span>
+<span class="nc" id="L61">	}</span>
+
+<span class="nc" id="L63">	public CSVFile(String fileName, String[] header, boolean append ){</span>
+<span class="nc" id="L64">		this.header = header;</span>
+		try {
+<span class="nc" id="L66">			ps = new PrintStream(new FileOutputStream(fileName, append));</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			if (header != null)	{</span>
+<span class="nc" id="L68">				String headers = Arrays.toString(header);</span>
+<span class="nc" id="L69">				headers = headers.substring(1, headers.length()-1);</span>
+<span class="nc" id="L70">				ps.println(headers);	</span>
+			}
+<span class="nc" id="L72">		} catch (Exception e) {</span>
+<span class="nc" id="L73">			throw new RuntimeException(e);</span>
+		}
+<span class="nc" id="L75">	}</span>
+	
+	@Override
+	public synchronized void write(Object... line) throws CSVFileFormatException {
+<span class="pc bpc" id="L79" title="3 of 4 branches missed.">		if (header != null &amp;&amp; header.length != line.length)</span>
+<span class="nc" id="L80">			throw new CSVFileFormatException(&quot;CSV Header Columns Number Differs From Writer Columns Number.&quot;);</span>
+		
+<span class="fc" id="L82">		boolean first = true;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">		for(Object o : line) {</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">			if(!first) ps.print(&quot;,&quot;);</span>
+
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">			if(o == null) ps.print(&quot;null&quot;);</span>
+			else {
+<span class="fc" id="L88">				String field = o.toString();</span>
+<span class="fc" id="L89">				field = StringEscapeUtils.escapeCsv(field);</span>
+<span class="fc" id="L90">				ps.print(field);</span>
+			}
+<span class="fc" id="L92">			first=false;</span>
+		}
+		
+<span class="fc" id="L95">		ps.println();</span>
+<span class="fc" id="L96">		ps.flush();</span>
+
+<span class="fc" id="L98">	}</span>
+	
+	public void close() {
+<span class="nc" id="L101">		ps.close();</span>
+<span class="nc" id="L102">	}</span>
+	
+	private static String verifyPath(String path) {
+<span class="nc" id="L105">		char lastchar = path.charAt(path.length()-1);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if (lastchar != File.separatorChar)</span>
+<span class="nc" id="L107">			path = path + File.separator;</span>
+<span class="nc" id="L108">		return path;		</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>

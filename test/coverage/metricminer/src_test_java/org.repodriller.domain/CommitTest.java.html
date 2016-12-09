@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>CommitTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ApacheEvolutionStudy (09/12/2016 21:14:32)</a> &gt; <a href="../../index.html" class="el_group">metricminer</a> &gt; <a href="../index.html" class="el_bundle">src/test/java</a> &gt; <a href="index.source.html" class="el_package">org.repodriller.domain</a> &gt; <span class="el_source">CommitTest.java</span></div><h1>CommitTest.java</h1><pre class="source lang-java linenums">package org.repodriller.domain;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.repodriller.domain.Commit;
+import org.repodriller.scm.GitRepository;
+import org.repodriller.scm.git.GitRepositoryTest;
+
+import java.io.FileNotFoundException;
+
+<span class="nc" id="L13">public class CommitTest {</span>
+
+    private static String path;
+    private GitRepository git;
+
+    private Commit c1;
+    private Commit c2;
+    private Commit c3;
+
+    @BeforeClass
+    public static void readPath() throws FileNotFoundException {
+<span class="nc" id="L24">        path = GitRepositoryTest.class.getResource(&quot;/&quot;).getPath() + &quot;../../test-repos/git-1&quot;;</span>
+
+<span class="nc" id="L26">    }</span>
+
+    @Before
+    public void setUp() {
+<span class="nc" id="L30">        git = new GitRepository(path);</span>
+<span class="nc" id="L31">        c1 = git.getCommit(&quot;e7d13b0511f8a176284ce4f92ed8c6e8d09c77f2&quot;);</span>
+<span class="nc" id="L32">        c2 = git.getCommit(c1.getParent());</span>
+<span class="nc" id="L33">        c3 = git.getCommit(&quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;);</span>
+<span class="nc" id="L34">    }</span>
+
+    @Test
+    public void shouldBeEqual() {
+<span class="nc" id="L38">        Assert.assertEquals(c1.getParent(), &quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;);</span>
+<span class="nc" id="L39">        Assert.assertEquals(c2, c3);</span>
+<span class="nc" id="L40">    }</span>
+
+    @Test
+    public void shouldNotBeEqual() {
+<span class="nc" id="L44">        Assert.assertEquals(c1.getParent(), &quot;a4ece0762e797d2e2dcbd471115108dd6e05ff58&quot;);</span>
+<span class="nc" id="L45">        Assert.assertNotEquals(c1, c3);</span>
+<span class="nc" id="L46">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.6.201602180812</span>ApacheEvolutionStudy (09/12/2016 21:14:32)</div></body></html>
