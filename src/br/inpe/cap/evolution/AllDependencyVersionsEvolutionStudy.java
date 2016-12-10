@@ -43,17 +43,19 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static final File GITHUB_DONE_FILE = new File(STUDY_LOG_PATH+"done-github_" + FILE_PREFIX + ".txt");
 	private static final File CONTINUE_COMMIT_FILE = new File(STUDY_LOG_PATH + FILE_PREFIX + "-continue.properties");
 	private static final File EXCEPTION_FILE = new File(STUDY_LOG_PATH + "exceptions-all_dependency-HOME.log");
+	private static final Properties properties = new Properties();
 	
 	private static Logger log;
 	
 	public static void main(final String[] args) throws Exception {
 		System.setProperty("git.maxfiles", "2000");
-		System.setProperty("logfilename", FILE_PREFIX + "_run09");
+		System.setProperty("logfilename", FILE_PREFIX + "_run11");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);
 		
 		checkRequiredLogFilesAndDirectories();
+		AllDependenciesEvolutionVisitor.setContinueProperties(CONTINUE_COMMIT_FILE);
 		
 		new RepoDriller().start(new AllDependencyVersionsEvolutionStudy());
 		
@@ -70,6 +72,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 			final List<String> gitRepoUrl = getRepositoryExceptDoneUrls();
 
 			final ExecutorService execRepos = Executors.newFixedThreadPool(THREADS_FOR_REPOSITORIES);
+
 
 			final List<String> fileExtensions = Arrays.asList("pom.xml");
 			for(final String url : gitRepoUrl) {
@@ -123,12 +126,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	}
 
 	private CommitRange startOrContinueCommits(final String gitReposLogSubDir, final GitRemoteRepository gitRepository) throws IOException {
-		if(!CONTINUE_COMMIT_FILE.exists()) {
-			return Commits.all();
-		}
-		final Properties prop = new Properties();
-		prop.load(new FileInputStream(CONTINUE_COMMIT_FILE));
-		final String startCommit = prop.getProperty(gitReposLogSubDir);
+		final String startCommit = properties.getProperty(gitReposLogSubDir);
 		if(startCommit == null) {
 			return Commits.all();
 		} else {
@@ -137,6 +135,11 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	}
 	
 	private static void checkRequiredLogFilesAndDirectories() throws IOException {
+		if(!CONTINUE_COMMIT_FILE.exists()) {
+			CONTINUE_COMMIT_FILE.createNewFile();
+		}
+		properties.load(new FileInputStream(CONTINUE_COMMIT_FILE));
+		
 		if(!GITHUB_DONE_FILE.exists()) {
 			GITHUB_DONE_FILE.createNewFile();
 		}
