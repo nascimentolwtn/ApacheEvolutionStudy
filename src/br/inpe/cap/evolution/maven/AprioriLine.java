@@ -10,7 +10,7 @@ public class AprioriLine {
 
 	public static final String FIRST_CELL = "SUBPROJECT";
 	public static final String CONTAINS_ARTIFACT = "T";
-	public static final String NOT_CONTAINS_ARTIFACT = "F";
+	public static final String NOT_CONTAINS_ARTIFACT = "?";
 	
 	private static final String GIT_REPOSITORY_PATH = "E:\\metricminer-evolution-stars\\";
 

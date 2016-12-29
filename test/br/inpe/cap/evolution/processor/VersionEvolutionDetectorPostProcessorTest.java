@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -35,7 +36,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 			"resources"	+ File.separator +
 			"output"	+ File.separator;
 	private VersionEvolutionDetectorPostProcessor postProcessor = new VersionEvolutionDetectorPostProcessor();
-	private List<String> listCsvLines;
+	private Stream<String> listCsvLines;
 	private String outputFileName;
 	private CSVFile csvOutput;
 	private File fileOutput;
@@ -50,7 +51,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	
 	@Before
 	public void setUpFiles() throws IOException, URISyntaxException {
-		listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-'disconf'-input.csv").toURI()));
+		listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-'disconf'-input.csv").toURI())).stream();
 		outputFileName = RESOURCE_OUTPUT_DIRECTORY + "test-version-detector-'disconf'.csv";
 		csvOutput = new CSVFile(outputFileName, false);
 		fileOutput = new File(outputFileName);
@@ -60,7 +61,7 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	public void escritaDoHeader() throws IOException {
 		postProcessor.processCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);
-		assertEquals(CommitLine.HEADER, outputLines.get(0));
+		assertEquals(CommitLine.OUTPUT_HEADER, outputLines.get(0));
 	}
 	
 	@Test
@@ -298,10 +299,11 @@ public class VersionEvolutionDetectorPostProcessorTest {
 	
 	@Test
 	public void recalculoDaPosicaoRelativaDosCommits() throws IOException, URISyntaxException {
-		listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-reprocess-'blueprints'.csv").toURI()));
+		List<String> listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-reprocess-'blueprints'.csv").toURI()));
 		outputFileName = RESOURCE_OUTPUT_DIRECTORY + "all-dependency-reprocess-'blueprints'-recalculated.csv";
 		csvOutput = new CSVFile(outputFileName, false);
 		fileOutput = new File(outputFileName);
+		CommitLine.removeHeader(listCsvLines);
 
 		postProcessor.reprocessVersionDetectorOutputCsvLines(csvOutput, listCsvLines);
 		List<String> outputLines = FileUtils.readLines(fileOutput);

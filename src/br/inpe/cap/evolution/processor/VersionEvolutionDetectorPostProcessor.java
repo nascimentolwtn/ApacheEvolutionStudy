@@ -6,6 +6,7 @@ import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.repodriller.persistence.PersistenceMechanism;
 
@@ -13,6 +14,7 @@ import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.maven.CommitLine;
 import br.inpe.cap.evolution.maven.CommitLine.CommitLineType;
+import br.inpe.cap.evolution.maven.NonParseableCommitLineException;
 
 public class VersionEvolutionDetectorPostProcessor {
 	
@@ -21,19 +23,18 @@ public class VersionEvolutionDetectorPostProcessor {
 	private final Map<String, MavenProject> currentMavenProjects = new HashMap<>();
 	private int lastTotalCommits;
 
-	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
-		processCsvLines(writer, listCsvLines, true, INPUT);
+	public void processCsvLines(final PersistenceMechanism writer, final Stream<String> listCsvLines) {
+		processCsvLines(writer, listCsvLines, INPUT);
 	}
 
 	public void reprocessVersionDetectorOutputCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
 		final CommitLine lastCommit = CommitLine.parseCommitLine(listCsvLines.get(listCsvLines.size()-1), OUTPUT);
 		lastTotalCommits = lastCommit.getTotalCommits();
-		processCsvLines(writer, listCsvLines, true, OUTPUT);
+		processCsvLines(writer, listCsvLines.stream(), OUTPUT);
 	}
 
-	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines, final boolean removeHeader, final CommitLineType commitLineType) {
+	public void processCsvLines(final PersistenceMechanism writer, final Stream<String> listCsvLines, final CommitLineType commitLineType) {
 		writeCsvHeader(writer);
-		if(removeHeader) CommitLine.removeHeader(listCsvLines);
 		listCsvLines.forEach((line) -> processLine(writer, line, commitLineType));
 	}
 
@@ -42,21 +43,25 @@ public class VersionEvolutionDetectorPostProcessor {
 	}
 	
 	public void processLine(final PersistenceMechanism writer, final String line, final CommitLineType commitLineType) {
-		final CommitLine currentCommit = CommitLine.parseCommitLine(line, commitLineType);
-		final MavenProject currentProject = startProject(currentCommit);
+		try {
+			final CommitLine currentCommit = CommitLine.parseCommitLine(line, commitLineType);
+			final MavenProject currentProject = startProject(currentCommit);
 
-		final MavenDependency mavenDependencyByArtifactId = findPreviousVersionAndSetVersionChanged(currentCommit);
-		if(mavenDependencyByArtifactId == null) {
-			currentProject.getDependencies().add(getMavenDependencyFromCSVLine(currentCommit));
-		} else {
-			mavenDependencyByArtifactId.setVersion(currentCommit.getVersion());
+			final MavenDependency mavenDependencyByArtifactId = findPreviousVersionAndSetVersionChanged(currentCommit);
+			if(mavenDependencyByArtifactId == null) {
+				currentProject.getDependencies().add(getMavenDependencyFromCSVLine(currentCommit));
+			} else {
+				mavenDependencyByArtifactId.setVersion(currentCommit.getVersion());
+			}
+			
+			if(commitLineType == OUTPUT) {
+				currentCommit.recalculatePosition(lastTotalCommits);
+			}
+			
+			writeCsvLine(writer, currentCommit);
+		} catch (NonParseableCommitLineException e) {
+			// Silenced in order to remove if(removeHeader) check
 		}
-		
-		if(commitLineType == OUTPUT) {
-			currentCommit.recalculatePosition(lastTotalCommits);
-		}
-		
-		writeCsvLine(writer, currentCommit);
 	}
 
 	private MavenDependency findPreviousVersionAndSetVersionChanged(final CommitLine currentCommit) {
@@ -96,7 +101,7 @@ public class VersionEvolutionDetectorPostProcessor {
 	}
 
 	public void writeCsvHeader(final PersistenceMechanism writer) {
-		final String[] header = CommitLine.HEADER.split(",");
+		final String[] header = CommitLine.OUTPUT_HEADER.split(",");
 		writer.write(header[0], header[1], header[2], header[3],
 					 header[4], header[5], header[6], header[7],
 					 header[8], header[9], header[10],header[11],

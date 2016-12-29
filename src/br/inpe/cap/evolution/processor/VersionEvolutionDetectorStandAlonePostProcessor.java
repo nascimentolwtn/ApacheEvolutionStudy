@@ -26,15 +26,17 @@ public class VersionEvolutionDetectorStandAlonePostProcessor {
 			final CSVFile csvOutput = new CSVFile(outputPath + File.separator + name);
 			
 			try {
-				List<String> listCsvLines = FileUtils.readLines(csvInput);
+				final List<String> listCsvLines = FileUtils.readLines(csvInput);
 				postProcessor.reprocessVersionDetectorOutputCsvLines(csvOutput, listCsvLines);
 			} catch (RuntimeException | IOException e) {
 				e.printStackTrace();
 			}
 			
+			System.gc();
+			System.out.println("Done "+name);
+			
 		});
 
-		
 		System.out.println("Finish!");
 	
 	}

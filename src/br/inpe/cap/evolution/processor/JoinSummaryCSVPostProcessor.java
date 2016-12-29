@@ -21,7 +21,7 @@ public class JoinSummaryCSVPostProcessor {
 	
 	public static void main(String[] args) throws Exception {
 		System.out.println("Starting...");
-		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, OUTPUT, CommitLine.HEADER);
+		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, OUTPUT, CommitLine.OUTPUT_HEADER);
 		System.out.println("Finish!");
 	}
 
@@ -55,7 +55,7 @@ public class JoinSummaryCSVPostProcessor {
 	}
 
 	public void process(String evolutionLogPath, File file) throws Exception {
-		process(evolutionLogPath, file, CommitLine.HEADER);
+		process(evolutionLogPath, file, CommitLine.OUTPUT_HEADER);
 	}
 
 }

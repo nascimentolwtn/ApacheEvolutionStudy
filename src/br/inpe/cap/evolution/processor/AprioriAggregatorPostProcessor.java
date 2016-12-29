@@ -1,12 +1,15 @@
 package br.inpe.cap.evolution.processor;
 
-import static br.inpe.cap.evolution.maven.CommitLine.lastLine;
-
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.repodriller.persistence.PersistenceMechanism;
 import org.repodriller.persistence.csv.CSVFile;
@@ -21,69 +24,68 @@ public class AprioriAggregatorPostProcessor {
 
 	public static final String FIRST_CELL = "SUBPROJECT";
 	
-	private Set<String> allSubProjectArtifacts = new TreeSet<>();
+	private final Set<String> allSubProjectArtifacts = new TreeSet<>();
 
 	private MavenProject currentProject;
 	private final Map<String, MavenProject> currentMavenProjects = new TreeMap<>();
 
-	private static CommitLine parseLastCommitLine(List<String> linesCsvInput) {
-		return CommitLine.parseCommitLine(lastLine(linesCsvInput), CommitLineType.OUTPUT);
+	private String parseLastCommitHash(final File csvInput) throws IOException {
+		final Object[] lines = Files.lines(csvInput.toPath()).toArray();
+		final String lastLine = (String) lines[lines.length-1];
+		return lastLine.substring(0, lastLine.indexOf(","));
 	}
-	
-	private static Set<String> extractLastCommitSubProjectArtifacts(List<String> linesCsvInput, String lastCommitHash) {
-		Set<String> artifacts = new TreeSet<>();
-		linesCsvInput.stream()
+
+	private static Set<String> extractLastCommitSubProjectArtifacts(final Stream<String> linesCsvInput, final String lastCommitHash) {
+		final Set<String> artifacts = new TreeSet<>();
+		linesCsvInput
 			.filter((csvLine) -> csvLine.contains(lastCommitHash))
 			.forEach((csvLine) -> {
-				final CommitLine commitLine = CommitLine.parseCommitLine(csvLine, CommitLineType.OUTPUT);
-				artifacts.add(commitLine.getArtifactId());
+				artifacts.add(CommitLine.parseArtifactId(csvLine));
 			});
 		return artifacts;
 	}
 
-	public void process(CSVFile writer, List<List<String>> linesCsvInputs) {
-		extractAllArtifactsFromAllSubProjects(linesCsvInputs);
-				
-		linesCsvInputs.forEach((linesCsvInput) -> {
+	public void process(final CSVFile writer, final List<File> csvInputs) {
+		final Map<String, String> projectsLastHashes = extractAllArtifactsFromAllSubProjects(csvInputs);
+		csvInputs.forEach((csv) -> {
 			try {
-				CommitLine lastCommitLine = parseLastCommitLine(linesCsvInput);
-				String lastCommitHash = lastCommitLine.getHash();
-				CommitLine.removeHeader(linesCsvInput);
+				final String fileName = csv.getName();
+				final String lastCommitHash = projectsLastHashes.get(fileName);
 		
-				System.out.println("Processing artifacts from " + lastCommitLine.getFile());
-				linesCsvInput.stream()
+				System.out.println("Processing artifacts from " + fileName);
+				Files.lines(csv.toPath())
 					.filter((csvLine) -> csvLine.contains(lastCommitHash))
 					.forEach((line) -> processLine(line));
-			} catch (RuntimeException e) {
+			} catch (final RuntimeException | IOException e) {
 				System.err.println(e.getMessage());
 			}
 		});
 		
 		writeHeader(writer, AprioriLine.createHeader(allSubProjectArtifacts));
-		for (MavenProject mavenProject : this.currentMavenProjects.values()) {
-			AprioriLine aprioriLine = AprioriLine.parseMavenProject(mavenProject, this.allSubProjectArtifacts);
+		for (final MavenProject mavenProject : this.currentMavenProjects.values()) {
+			final AprioriLine aprioriLine = AprioriLine.parseMavenProject(mavenProject, this.allSubProjectArtifacts);
 			writer.write(aprioriLine.toCSVLine());
 		}
 		
 	}
 
-	private void extractAllArtifactsFromAllSubProjects(List<List<String>> linesCsvInputs) {
-		linesCsvInputs.forEach((linesCsvInput) -> {
+	private Map<String, String> extractAllArtifactsFromAllSubProjects(final List<File> csvInputs) {
+		final Map<String, String> mapa = new HashMap<>();
+		csvInputs.forEach((csv) -> {
 			try {
-				CommitLine lastCommitLine = parseLastCommitLine(linesCsvInput);
-				String lastCommitHash = lastCommitLine.getHash();
-				CommitLine.removeHeader(linesCsvInput);
-				
-				System.out.println("Extracting artifiacts from " + lastCommitLine.getFile());
-				this.allSubProjectArtifacts.addAll(extractLastCommitSubProjectArtifacts(linesCsvInput, lastCommitHash));
-			} catch (RuntimeException e) {
+				final String lastCommitHash = parseLastCommitHash(csv);
+				mapa.put(csv.getName(), lastCommitHash);
+				System.out.println("Extracting artifiacts from " + csv.getName());
+				this.allSubProjectArtifacts.addAll(extractLastCommitSubProjectArtifacts(Files.lines(csv.toPath()), lastCommitHash));
+			} catch (final Exception e) {
 				System.err.println(e.getMessage());
 			}
 		});
+		return mapa;
 	}
 
-	private void writeHeader(PersistenceMechanism writer, String aprioriHeader) {
-		Object[] headerTokens = aprioriHeader.split(",");
+	private void writeHeader(final PersistenceMechanism writer, final String aprioriHeader) {
+		final Object[] headerTokens = aprioriHeader.split(",");
 		writer.write(headerTokens);
 	}
 	
@@ -91,7 +93,7 @@ public class AprioriAggregatorPostProcessor {
 		return allSubProjectArtifacts;
 	}
 
-	private void processLine(String line) {
+	private void processLine(final String line) {
 		final CommitLine currentCommit = CommitLine.parseCommitLine(line, CommitLineType.OUTPUT);
 		final MavenProject currentProject = projectRegardCurrentCommit(currentCommit);
 		

@@ -27,7 +27,7 @@ import br.inpe.cap.evolution.maven.CommitLine;
 
 public class AprioriAggregatorPostProcessorTest {
 	
-	private List<List<String>> linesCsvInputs = new ArrayList<>();
+	private List<File> linesCsvInputs = new ArrayList<>();
 	private AprioriAggregatorPostProcessor processor;
 	private String outputFileName;
 	private CSVFile csvOutput;
@@ -46,8 +46,8 @@ public class AprioriAggregatorPostProcessorTest {
 		processor = new AprioriAggregatorPostProcessor();
 		File csvFile1 = new File(Resources.getResource("apriori\\all-dependency-'blueprints'.csv").toURI());
 		File csvFile2 = new File(Resources.getResource("apriori\\all-dependency-'disconf'.csv").toURI());
-		linesCsvInputs.add(FileUtils.readLines(csvFile1));
-		linesCsvInputs.add(FileUtils.readLines(csvFile2));
+		linesCsvInputs.add(csvFile1);
+		linesCsvInputs.add(csvFile2);
 		outputFileName = RESOURCE_OUTPUT_DIRECTORY + "test-all-dependency-apriori.csv";
 		csvOutput = new CSVFile(outputFileName, false);
 		fileOutput = new File(outputFileName);

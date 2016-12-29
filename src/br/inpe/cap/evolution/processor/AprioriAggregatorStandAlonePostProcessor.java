@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.repodriller.persistence.csv.CSVFile;
+import org.repodriller.util.FileUtils;
 
 public class AprioriAggregatorStandAlonePostProcessor {
 
@@ -14,17 +14,16 @@ public class AprioriAggregatorStandAlonePostProcessor {
 		System.out.println("Starting...");
 		
 		String pathToLook = "D:\\apriori";
-		List<List<String>> linesCsvInputs = new ArrayList<>();
-		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);
-		for (File csvInput : arquivos) {
+		List<File> linesCsvInputs = new ArrayList<>(160);
+		for (File csvInput : FileUtils.getAllFilesInPath(pathToLook)) {
 			System.out.println("Reading lines from " + csvInput.getName());
-			linesCsvInputs.add(FileUtils.readLines(csvInput));
+			linesCsvInputs.add(csvInput);
 		}
 		
 		AprioriAggregatorPostProcessor processor = new AprioriAggregatorPostProcessor();
-		String csvOutput = "study\\artifact_aggregation\\all-dependency-first35+next10_04-apriori.csv";
+		String csvOutput = "D:\\all-dependency-first35+next10_12-run12-apriori(QuestionMark).csv";
 		processor.process(new CSVFile(csvOutput), linesCsvInputs);
-			
+		
 		System.out.println("Finished.");
 
 	}

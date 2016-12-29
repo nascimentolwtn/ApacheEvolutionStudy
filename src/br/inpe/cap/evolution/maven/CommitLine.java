@@ -9,8 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class CommitLine {
 
-	public static final String HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
+	public static final String INPUT_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,IS_MANAGED,GROUP_ID,ARTIFACT_ID,VERSION,MESSAGE";
+	public static final String OUTPUT_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
 	public static final String INITIAL_VERSION = "initial_version";
+	static final int ARTIFACT_ID_OUTPUT_INDEX = 8;
 
 	private String hash;
 	private String date;
@@ -35,9 +37,9 @@ public class CommitLine {
 	 */
 	private CommitLine() {}
 
-	public static CommitLine parseCommitLine(String line, CommitLineType type) {
-		String[] tokens = validateAndTokenizeLine(line);
-		CommitLine commitLine = new CommitLine();
+	public static CommitLine parseCommitLine(final String line, final CommitLineType type) throws NonParseableCommitLineException {
+		final String[] tokens = validateAndTokenizeLine(line);
+		final CommitLine commitLine = new CommitLine();
 		int tokenIndex = 0;
 		commitLine.setHash(tokens[tokenIndex++]);
 		commitLine.setDate(tokens[tokenIndex++]);
@@ -57,25 +59,25 @@ public class CommitLine {
 		return commitLine;
 	}
 
-	private static String[] validateAndTokenizeLine(String line) {
-		if(HEADER.equals(line)) {
-			throw new RuntimeException("Should not parse the CSV header.");
+	private static String[] validateAndTokenizeLine(String line) throws NonParseableCommitLineException {
+		if(INPUT_HEADER.equals(line) || OUTPUT_HEADER.equals(line)) {
+			throw new NonParseableCommitLineException("Should not parse the CSV header.");
 		}
 		if(StringUtils.isEmpty(line)) {
-			throw new RuntimeException("CSV line is empty or null.");
+			throw new NonParseableCommitLineException("CSV line is empty or null.");
 		}
 		line = validateCommitMessage(line);
-		String[] tokens = line.split(",");
-		boolean isInputTokens = tokens.length == 12;
-		boolean isOutputTokens = tokens.length == 14;
+		final String[] tokens = line.split(",");
+		final boolean isInputTokens = tokens.length == 12;
+		final boolean isOutputTokens = tokens.length == 14;
 		if(!(isInputTokens || isOutputTokens)) {
-			throw new RuntimeException("Line cannot be parsed:\n"+line);
+			throw new NonParseableCommitLineException("Line cannot be parsed:\n"+line);
 		}
 		return tokens;
 	}
 
 	private static String validateCommitMessage(String line) {
-		boolean commitLineHasntMessage = line.endsWith(",");
+		final boolean commitLineHasntMessage = line.endsWith(",");
 		if(commitLineHasntMessage) line = line + " "; // add space that will be trimmed later
 		return line;
 	}
@@ -98,7 +100,7 @@ public class CommitLine {
 		return hash;
 	}
 
-	public void setHash(String hash) {
+	public void setHash(final String hash) {
 		this.hash = hash;
 	}
 
@@ -106,7 +108,7 @@ public class CommitLine {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(final String date) {
 		this.date = date;
 	}
 
@@ -114,7 +116,7 @@ public class CommitLine {
 		return repository;
 	}
 
-	public void setRepository(String repository) {
+	public void setRepository(final String repository) {
 		this.repository = repository;
 	}
 
@@ -122,7 +124,7 @@ public class CommitLine {
 		return file;
 	}
 
-	public void setFile(String file) {
+	public void setFile(final String file) {
 		this.file = file;
 	}
 
@@ -130,7 +132,7 @@ public class CommitLine {
 		return commitPosition;
 	}
 
-	public void setCommitPosition(int commitPosition) {
+	public void setCommitPosition(final int commitPosition) {
 		this.commitPosition = commitPosition;
 	}
 
@@ -138,7 +140,7 @@ public class CommitLine {
 		return totalCommits;
 	}
 
-	public void setTotalCommits(int totalCommits) {
+	public void setTotalCommits(final int totalCommits) {
 		this.totalCommits = totalCommits;
 	}
 
@@ -146,7 +148,7 @@ public class CommitLine {
 		return percent;
 	}
 
-	public void setPercent(float porcent) {
+	public void setPercent(final float porcent) {
 		this.percent = porcent;
 	}
 
@@ -154,7 +156,7 @@ public class CommitLine {
 		return groupId;
 	}
 
-	public void setGroupId(String groupId) {
+	public void setGroupId(final String groupId) {
 		this.groupId = groupId;
 	}
 
@@ -162,7 +164,7 @@ public class CommitLine {
 		return artifactId;
 	}
 
-	public void setArtifactId(String artifactId) {
+	public void setArtifactId(final String artifactId) {
 		this.artifactId = artifactId;
 	}
 
@@ -170,7 +172,7 @@ public class CommitLine {
 		return version;
 	}
 
-	public void setVersion(String version) {
+	public void setVersion(final String version) {
 		this.version = version;
 	}
 
@@ -178,7 +180,7 @@ public class CommitLine {
 		return message;
 	}
 
-	public void setMessage(String message) {
+	public void setMessage(final String message) {
 		this.message = message;
 	}
 
@@ -186,7 +188,7 @@ public class CommitLine {
 		return previousVersion;
 	}
 
-	public void setPreviousVersion(String previousVersion) {
+	public void setPreviousVersion(final String previousVersion) {
 		this.previousVersion = previousVersion;
 	}
 
@@ -194,7 +196,7 @@ public class CommitLine {
 		return versionChanged;
 	}
 
-	public void setVersionChanged(boolean versionChanged) {
+	public void setVersionChanged(final boolean versionChanged) {
 		this.versionChanged = versionChanged;
 	}
 
@@ -202,7 +204,7 @@ public class CommitLine {
 		return dependencyManaged;
 	}
 
-	public void setDependencyManaged(boolean dependencyManaged) {
+	public void setDependencyManaged(final boolean dependencyManaged) {
 		this.dependencyManaged = dependencyManaged;
 	}
 
@@ -210,7 +212,7 @@ public class CommitLine {
 		return versionEverChanged;
 	}
 
-	public void setVersionEverChanged(boolean versionEverChanged) {
+	public void setVersionEverChanged(final boolean versionEverChanged) {
 		this.versionEverChanged = versionEverChanged;
 	}
 
@@ -221,6 +223,11 @@ public class CommitLine {
 
 	public static float roundFiveDigits(final float fullPercent) {
 		return Math.round(fullPercent * 100000) / 100000f;
+	}
+
+	public static String parseArtifactId(final String csvLine) {
+		final String[] tokens = validateCommitMessage(csvLine).split(",");
+		return tokens[ARTIFACT_ID_OUTPUT_INDEX];
 	}
 
 }
