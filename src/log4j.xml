@@ -30,13 +30,13 @@
   	<category name="org.repodriller">
         <priority value="INFO"/>
         <appender-ref ref="main"/>
-        <appender-ref ref="roll"/>
+        <appender-ref ref="file"/>
     </category>
 
     <category name="/">
         <priority value="INFO"/>
         <appender-ref ref="main"/>
-        <appender-ref ref="roll"/>
+        <appender-ref ref="file"/>
     </category>
 
 </log4j:configuration>
