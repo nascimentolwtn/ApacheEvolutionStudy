@@ -15,6 +15,7 @@ import org.repodriller.persistence.PersistenceMechanism;
 import org.repodriller.scm.CommitVisitor;
 import org.repodriller.scm.SCMRepository;
 
+import br.inpe.cap.evolution.maven.ConfigurableMavenEffectivePom.OS;
 import br.inpe.cap.evolution.processor.EffectivePomSynchronousCheckoutProcessor;
 import br.inpe.cap.evolution.processor.LoggerCheckoutObserver;
 
@@ -29,6 +30,11 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 	private int totalCommits; 
 	
 	private EffectivePomSynchronousCheckoutProcessor effectivePomProcessor;
+	private final OS osType;
+	
+	public AllDependenciesEvolutionVisitor(final OS osType) {
+		this.osType = osType;
+	}
 	
 	@Override
 	public void initialize(SCMRepository repo, PersistenceMechanism writer) {
@@ -36,7 +42,7 @@ public class AllDependenciesEvolutionVisitor implements CommitVisitor {
 		final List<ChangeSet> changeSets = repo.getScm().getChangeSets();
 		this.hashes = changeSets.stream().map((cs)->cs.getId()).collect(Collectors.toList());
 		this.totalCommits = hashes.size();
-		this.effectivePomProcessor = new EffectivePomSynchronousCheckoutProcessor(new LoggerCheckoutObserver(logger), writer, totalCommits, logger);
+		this.effectivePomProcessor = new EffectivePomSynchronousCheckoutProcessor(new LoggerCheckoutObserver(logger), writer, totalCommits, logger, osType);
 	}
 
 	@Override

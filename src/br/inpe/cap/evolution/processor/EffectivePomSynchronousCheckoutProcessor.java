@@ -4,7 +4,6 @@ import static br.inpe.cap.evolution.parser.XmlMavenParser.replaceLineFeedAndComm
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -16,7 +15,8 @@ import org.repodriller.scm.SCMRepository;
 import br.inpe.cap.evolution.domain.MavenDependency;
 import br.inpe.cap.evolution.domain.MavenProject;
 import br.inpe.cap.evolution.maven.CommitLine;
-import br.inpe.cap.evolution.maven.MavenEffectivePom;
+import br.inpe.cap.evolution.maven.ConfigurableMavenEffectivePom;
+import br.inpe.cap.evolution.maven.ConfigurableMavenEffectivePom.OS;
 import br.inpe.cap.evolution.maven.UnparsableEffectivePomException;
 import br.inpe.cap.evolution.parser.XmlMavenParser;
 
@@ -29,27 +29,27 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 	private int currentHashPosition;
 	private float percent;
 	private final VersionEvolutionDetectorPostProcessor versionEvolutionDetector = new VersionEvolutionDetectorPostProcessor();
-	private final MavenEffectivePom mavenEffectivePom = new MavenEffectivePom();
+	private final ConfigurableMavenEffectivePom mavenEffectivePom;
 	private final XmlMavenParser parser = new XmlMavenParser();
 	private final Logger logger;
 
-	public EffectivePomSynchronousCheckoutProcessor(final CheckoutObserver observer, final PersistenceMechanism writer, final int totalCommits, final Logger logger) {
+	public EffectivePomSynchronousCheckoutProcessor(final CheckoutObserver observer, final PersistenceMechanism writer, final int totalCommits, final Logger logger, final OS osType) {
 		super(observer);
 		this.writer = writer;
 		this.totalCommits = totalCommits;
 		this.logger = logger;
 		this.versionEvolutionDetector.writeCsvHeader(writer);
+		this.mavenEffectivePom = new ConfigurableMavenEffectivePom(osType);
 	}
 
 	@Override
 	protected void processFile(final SCMRepository repo, final Commit commit, final RepositoryFile file) {
-		setupCurrentThread(file.getFullName(), repo.getLastDir());
+//		setupCurrentThread(file.getFullName(), repo.getLastDir());
 		final MavenProject mavenProject = parser.readPOM(getEffectiveOrOriginalPom(file));
-		mavenProject.getDependencies().forEach(
-			(dependency) -> 
-				versionEvolutionDetector.processLine(
-					writer, this.obtainCsvLine(repo.getLastDir(), commit, this.currentHashPosition, this.totalCommits, this.percent, file.getFullName(), dependency))
-			);
+		for (MavenDependency dependency : mavenProject.getDependencies()) {
+			versionEvolutionDetector.processLine(
+				writer, this.obtainCsvLine(repo.getLastDir(), commit, this.currentHashPosition, this.totalCommits, this.percent, file.getFullName(), dependency));
+		}
 	}
 
 	private void setupCurrentThread(final String fileFullName, final String repositoryName) {
@@ -57,7 +57,7 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 			final Thread currentThread = Thread.currentThread();
 			currentThread.setName(fileFullName.substring(fileFullName.indexOf(repositoryName)));
 			currentThread.setPriority(Thread.MIN_PRIORITY);
-			Thread.sleep(TimeUnit.SECONDS.toMillis(10));
+//			Thread.sleep(TimeUnit.SECONDS.toMillis(10));
 		} catch (Exception e) {}
 	}
 
@@ -67,8 +67,10 @@ public class EffectivePomSynchronousCheckoutProcessor extends SynchronousCheckOu
 			effectivePom = mavenEffectivePom.resolveEffectivePom(file.getFile());
 		} catch (final UnparsableEffectivePomException e) {
 			logger.error("Effective POM from file " + file.getFullName()
-						+ " could not be extracted. Proceeding with original POM. See result:\n"
-						+ e.getMessage());
+						+ " could not be extracted. Proceeding with original POM."
+//						+ " See result:\n"
+//						+ e.getMessage()
+						);
 			effectivePom = getOriginalPom(file, effectivePom);
 		}
 		return effectivePom;

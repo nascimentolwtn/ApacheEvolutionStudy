@@ -29,21 +29,21 @@ import org.repodriller.scm.GitRemoteRepository;
 import br.inpe.cap.evolution.maven.ConfigurableMavenEffectivePom.OS;
 import br.inpe.cap.evolution.visitor.AllDependenciesEvolutionVisitor;
 
-public class AllDependencyVersionsEvolutionStudy implements Study {
+public class AllDependencyVersionsEvolutionStudyNOTE implements Study {
 
 	private static final int THREADS_FOR_REPOSITORIES = 5;
-	private static final String STUDY_TEMP_PATH = "E:\\metricminer-evolution-stars"; // System.getenv("STUDY_TEMP_PATH");
+	private static final String STUDY_TEMP_PATH = "C:\\metricminer-evolution-stars"; // System.getenv("STUDY_TEMP_PATH");
 	private static final String FOUNTAIN_PATH = "fountain" + File.separator;
 
 	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "all_dependency_detector" + File.separator;
-	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + "evolutions";
+	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + "evolutions-NOTE";
 	
-	private static final String FILE_PREFIX = "all_dependency_detector_next10-12-HOME";
+	private static final String FILE_PREFIX = "checkout-all_dependency_detector_next10-12-NOTE";
 
-	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_one.urls");
+	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_next10.urls");
 	private static final File GITHUB_DONE_FILE = new File(STUDY_LOG_PATH+"done-github_" + FILE_PREFIX + ".txt");
 	private static final File CONTINUE_COMMIT_FILE = new File(STUDY_LOG_PATH + FILE_PREFIX + "-continue.properties");
-	private static final File EXCEPTION_FILE = new File(STUDY_LOG_PATH + "exceptions-all_dependency-HOME.log");
+	private static final File EXCEPTION_FILE = new File(STUDY_LOG_PATH + "exceptions-all_dependency-NOTE.log");
 	private static final Properties properties = new Properties();
 	
 	private static Logger log;
@@ -58,7 +58,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 		checkRequiredLogFilesAndDirectories();
 		AllDependenciesEvolutionVisitor.setContinueProperties(CONTINUE_COMMIT_FILE);
 		
-		new RepoDriller().start(new AllDependencyVersionsEvolutionStudy());
+		new RepoDriller().start(new AllDependencyVersionsEvolutionStudyNOTE());
 		
 		final String joinCSV = "_01_joined.csv";
 //		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, new File(EVOLUTION_LOG_PATH + joinCSV));
@@ -111,7 +111,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 				.filters(new OnlyInMainBranch(),
 						 new OnlyNoMerge(),
 						 new OnlyModificationsWithFileTypes(fileExtensions))
-				.process(new AllDependenciesEvolutionVisitor(OS.WIN8),
+				.process(new AllDependenciesEvolutionVisitor(OS.WIN7),
 						new CSVFile(EVOLUTION_LOG_PATH
 								+ File.separator
 								+ "all-dependency-detector-'"
