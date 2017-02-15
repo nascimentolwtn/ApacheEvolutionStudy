@@ -20,7 +20,7 @@ public abstract class SynchronousCheckOutRepositoryProcessor {
 
 	private final CheckoutObserver observer;
 	private static long lastThreadByCommitCheck;
-	protected static int threadsByCommit = 2;
+	protected static int threadsByCommit = 4;
 	
 	public SynchronousCheckOutRepositoryProcessor() {
 		this(new CheckoutObserver(){});
