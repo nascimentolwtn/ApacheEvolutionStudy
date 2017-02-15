@@ -39,32 +39,32 @@ public class MavenCentralSearchTest {
 	
 	@Test
 	public void testGetDateOfLibraryVersion(){
-		assertEquals("25/05/2016 11:53:55", MavenCentralSearch.getReleaseDateOfLibraryVersion("org.apache.logging.log4j", "log4j", "2.6"));
+		assertEquals("25/05/2016 11:53:55", MavenCentralSearch.getLibraryVersionReleaseDate("org.apache.logging.log4j", "log4j", "2.6"));
 	}
 
 	@Test
 	public void testGetVersionOfLibraryOnDate(){
 		String myDate = "26/05/2016 00:00:00";
-		String version = MavenCentralSearch.getVersionLibraryOnDate("org.apache.logging.log4j", "log4j", myDate);
+		String version = MavenCentralSearch.getLibraryVersionOnCommitDate("org.apache.logging.log4j", "log4j", myDate);
 		assertEquals("2.6", version);
 
 		myDate = "26/12/2016 00:00:00";
-		version = MavenCentralSearch.getVersionLibraryOnDate("org.apache.logging.log4j", "log4j", myDate);
+		version = MavenCentralSearch.getLibraryVersionOnCommitDate("org.apache.logging.log4j", "log4j", myDate);
 		assertEquals("2.7", version);
 	}
 
 	@Test
 	public void testGetVersionOfLibraryOnDateAsString() throws ParseException{
-		String version = MavenCentralSearch.getVersionLibraryOnDate("org.apache.logging.log4j", "log4j", "20/11/2016 11:53:55");
+		String version = MavenCentralSearch.getLibraryVersionOnCommitDate("org.apache.logging.log4j", "log4j", "20/11/2016 11:53:55");
 		assertEquals("2.7", version);
 
-		version = MavenCentralSearch.getVersionLibraryOnDate("org.apache.logging.log4j", "log4j", "26/05/2016 11:53:55");
+		version = MavenCentralSearch.getLibraryVersionOnCommitDate("org.apache.logging.log4j", "log4j", "26/05/2016 11:53:55");
 		assertEquals("2.6", version);
 	}
 
 	@Test
 	public void testInvalidVersionNumber() throws ParseException{
-		final String releaseDate = MavenCentralSearch.getReleaseDateOfLibraryVersion("org.apache.logging.log4j", "log4j","2.6.3");
+		final String releaseDate = MavenCentralSearch.getLibraryVersionReleaseDate("org.apache.logging.log4j", "log4j","2.6.3");
 		assertEquals("Date Not Found", releaseDate);
 	}
 
@@ -82,10 +82,10 @@ public class MavenCentralSearchTest {
 	
 	@Test
 	public void testGetVersionOfLibraryJUnitOnDateAsString() throws ParseException{
-		String version = MavenCentralSearch.getVersionLibraryOnDate("junit", "junit", "04/01/2008 23:21:20");
+		String version = MavenCentralSearch.getLibraryVersionOnCommitDate("junit", "junit", "04/01/2008 23:21:20");
 		assertEquals("4.4", version);
 
-		version = MavenCentralSearch.getVersionLibraryOnDate("junit", "junit", "09/11/2011 13:00:36");
+		version = MavenCentralSearch.getLibraryVersionOnCommitDate("junit", "junit", "09/11/2011 13:00:36");
 		assertEquals("4.10", version);
 	}
 
@@ -93,7 +93,7 @@ public class MavenCentralSearchTest {
 	public void testExceptionInvalidVersionNumber() throws ParseException{
 		exception.expect(VersionNotFoundException.class);
 		exception.expectMessage("There isn't g:org.apache.logging.log4j a:log4jin version 2.6.3 available in maven central.");
-		MavenCentralSearch.getReleaseDateOfLibraryVersion("org.apache.logging.log4j", "log4j","2.6.3");
+		MavenCentralSearch.getLibraryVersionReleaseDate("org.apache.logging.log4j", "log4j","2.6.3");
 	}
 
 }

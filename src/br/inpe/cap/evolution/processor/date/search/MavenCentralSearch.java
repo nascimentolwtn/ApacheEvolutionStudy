@@ -39,7 +39,7 @@ public class MavenCentralSearch {
 			library = new Library(groupId, artifactId, getAllVersions(groupId, artifactId));
 			libraryCache.put(key, library);
 		} else {
-			System.err.println("Cache hit #" + ++cacheHit + "! size:" + libraryCache.size());
+//			System.err.println("Cache hit #" + ++cacheHit + "! size:" + libraryCache.size());
 		}
 		return library;
 	}
@@ -91,7 +91,7 @@ public class MavenCentralSearch {
 		}
 	}
 	
-	public static String getReleaseDateOfLibraryVersion(String groupId, String artifactId, String versionNumber) {
+	public static String getLibraryVersionReleaseDate(String groupId, String artifactId, String versionNumber) {
 		try {
 			final Library lib = getLibrary(groupId, artifactId);
 			return SIMPLE_DATE_FORMAT.format(lib.getReleaseDateOfLibraryVersionNumber(versionNumber));
@@ -100,7 +100,7 @@ public class MavenCentralSearch {
 		}
 	}
 
-	public static String getVersionLibraryOnDate(String groupId, String artifactId, String date) {
+	public static String getLibraryVersionOnCommitDate(String groupId, String artifactId, String date) {
 		try {
 			final Library lib = getLibrary(groupId, artifactId);
 			return lib.getVersionLibraryOnDate(SIMPLE_DATE_FORMAT.parse(date).getTime());

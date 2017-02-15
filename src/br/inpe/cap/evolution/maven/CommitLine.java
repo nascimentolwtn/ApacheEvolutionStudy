@@ -1,5 +1,6 @@
 package br.inpe.cap.evolution.maven;
 
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.DATE_VERSION;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 
@@ -11,6 +12,7 @@ public class CommitLine {
 
 	public static final String INPUT_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,IS_MANAGED,GROUP_ID,ARTIFACT_ID,VERSION,MESSAGE";
 	public static final String OUTPUT_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
+	public static final String OUTPUT_DATESEARCH_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,VERSION_RELEASE_DATE,NEWER_VERSION_ON_COMMIT_DATE,USING_NEWEST_VERSION,MESSAGE";
 	public static final String INITIAL_VERSION = "initial_version";
 	static final int ARTIFACT_ID_OUTPUT_INDEX = 8;
 
@@ -28,9 +30,12 @@ public class CommitLine {
 	private String previousVersion = INITIAL_VERSION;
 	private boolean versionChanged;
 	private boolean versionEverChanged;
+	private String versionReleaseDate;
+	private String newerVersionOnCommitDate;
+	private boolean usingNewestVersion;
 	private String message;
 	
-	public static enum CommitLineType {INPUT, OUTPUT};
+	public static enum CommitLineType {INPUT, OUTPUT, DATE_VERSION};
 	
 	/**
 	 *"Use Static Factory Method parseCommitLine(String line)!
@@ -52,15 +57,18 @@ public class CommitLine {
 		commitLine.setGroupId(tokens[tokenIndex++]);
 		commitLine.setArtifactId(tokens[tokenIndex++]);
 		commitLine.setVersion(tokens[tokenIndex++]);
-		if(type == OUTPUT) commitLine.setPreviousVersion(tokens[tokenIndex++]);
-		if(type == OUTPUT) commitLine.setVersionChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
-		if(type == OUTPUT) commitLine.setVersionEverChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		if(type == OUTPUT || type == DATE_VERSION) commitLine.setPreviousVersion(tokens[tokenIndex++]);
+		if(type == OUTPUT || type == DATE_VERSION) commitLine.setVersionChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		if(type == OUTPUT || type == DATE_VERSION) commitLine.setVersionEverChanged(Boolean.parseBoolean(tokens[tokenIndex++]));
+		if(type == DATE_VERSION) commitLine.setVersionReleaseDate(tokens[tokenIndex++]);
+		if(type == DATE_VERSION) commitLine.setNewerVersionOnCommitDate(tokens[tokenIndex++]);
+		if(type == DATE_VERSION) commitLine.setUsingNewestVersion(Boolean.parseBoolean(tokens[tokenIndex++]));
 		commitLine.setMessage(tokens[tokenIndex++].trim());
 		return commitLine;
 	}
 
 	private static String[] validateAndTokenizeLine(String line) throws NonParseableCommitLineException {
-		if(INPUT_HEADER.equals(line) || OUTPUT_HEADER.equals(line)) {
+		if(INPUT_HEADER.equals(line) || OUTPUT_HEADER.equals(line) || OUTPUT_DATESEARCH_HEADER.equals(line)) {
 			throw new NonParseableCommitLineException("Should not parse the CSV header.");
 		}
 		if(StringUtils.isEmpty(line)) {
@@ -70,7 +78,8 @@ public class CommitLine {
 		final String[] tokens = line.split(",");
 		final boolean isInputTokens = tokens.length == 12;
 		final boolean isOutputTokens = tokens.length == 14;
-		if(!(isInputTokens || isOutputTokens)) {
+		final boolean isOutputDateSearchTokens = tokens.length == 17;
+		if(!(isInputTokens || isOutputTokens || isOutputDateSearchTokens)) {
 			throw new NonParseableCommitLineException("Line cannot be parsed:\n"+line);
 		}
 		return tokens;
@@ -214,6 +223,30 @@ public class CommitLine {
 
 	public void setVersionEverChanged(final boolean versionEverChanged) {
 		this.versionEverChanged = versionEverChanged;
+	}
+	
+	public String getVersionReleaseDate() {
+		return versionReleaseDate;
+	}
+	
+	public void setVersionReleaseDate(String versionReleaseDate) {
+		this.versionReleaseDate = versionReleaseDate;
+	}
+	
+	public String getNewerVersionOnCommitDate() {
+		return newerVersionOnCommitDate;
+	}
+	
+	public void setNewerVersionOnCommitDate(String newerVersionOnCommitDate) {
+		this.newerVersionOnCommitDate = newerVersionOnCommitDate;
+	}
+	
+	public boolean isUsingNewestVersion() {
+		return usingNewestVersion;
+	}
+
+	public void setUsingNewestVersion(boolean usingNewestVersion) {
+		this.usingNewestVersion = usingNewestVersion;
 	}
 
 	public void recalculatePosition(final int lastTotalCommits) {
