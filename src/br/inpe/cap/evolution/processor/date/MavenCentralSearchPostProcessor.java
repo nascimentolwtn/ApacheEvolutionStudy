@@ -2,7 +2,7 @@ package br.inpe.cap.evolution.processor.date;
 
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 
-import java.util.stream.Stream;
+import java.util.List;
 
 import org.repodriller.persistence.PersistenceMechanism;
 
@@ -13,16 +13,16 @@ import br.inpe.cap.evolution.processor.date.search.MavenCentralSearch;
 
 public class MavenCentralSearchPostProcessor {
 	
-	public void processCsvLines(final PersistenceMechanism writer, final Stream<String> listCsvLines) {
+	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
 		processCsvLines(writer, listCsvLines, OUTPUT);
 	}
 
-	public void processCsvLines(final PersistenceMechanism writer, final Stream<String> listCsvLines, final CommitLineType commitLineType) {
+	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines, final CommitLineType commitLineType) {
 		writeCsvHeader(writer);
 		listCsvLines.forEach((line) -> processLine(writer, line, commitLineType));
 	}
 
-	public void processLine(final PersistenceMechanism writer, final String line, final CommitLineType commitLineType) {
+	public synchronized void processLine(final PersistenceMechanism writer, final String line, final CommitLineType commitLineType) {
 		try {
 			final CommitLine currentCommit = CommitLine.parseCommitLine(line, commitLineType);
 			
@@ -36,7 +36,6 @@ public class MavenCentralSearchPostProcessor {
 			
 			currentCommit.setVersionReleaseDate(releaseDateOfLibraryVersion);
 			currentCommit.setNewerVersionOnCommitDate(newerVersionOnCommitDate);
-			currentCommit.setUsingNewestVersion(commitArtifactVersion.equals(newerVersionOnCommitDate));
 			
 			writeCsvLine(writer, currentCommit);
 		} catch (NonParseableCommitLineException e) {

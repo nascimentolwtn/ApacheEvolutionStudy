@@ -1,4 +1,4 @@
-HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE
+HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE
 bc58a6f95d36798b2b0485596ed7dca89dd2b10a,08/02/2010 20:51:07,blueprints,E:\metricminer-evolution-stars\blueprints\pom.xml,4,1765,0.22663,net.sf.jung,jung-algorithms,2.0,initial_version,false,false,stub of the project structure.
 bc58a6f95d36798b2b0485596ed7dca89dd2b10a,08/02/2010 20:51:07,blueprints,E:\metricminer-evolution-stars\blueprints\pom.xml,4,1765,0.22663,org.neo4j,neo4j-kernel,1.0-rc,initial_version,false,false,stub of the project structure.
 bc58a6f95d36798b2b0485596ed7dca89dd2b10a,08/02/2010 20:51:07,blueprints,E:\metricminer-evolution-stars\blueprints\pom.xml,4,1765,0.22663,org.neo4j,neo4j-index,1.0-b1,initial_version,false,false,stub of the project structure.

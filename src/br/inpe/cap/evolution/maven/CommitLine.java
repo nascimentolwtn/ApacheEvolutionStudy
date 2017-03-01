@@ -12,6 +12,7 @@ public class CommitLine {
 
 	public static final String INPUT_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,IS_MANAGED,GROUP_ID,ARTIFACT_ID,VERSION,MESSAGE";
 	public static final String OUTPUT_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
+	public static final String WRONG_OUTPUT_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSISTION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,MESSAGE";
 	public static final String OUTPUT_DATESEARCH_HEADER = "HASH,DATE,REPOSITORY,FILE,COMMIT_POSITION,TOTAL_COMMITS,%_PROJECT,GROUP_ID,ARTIFACT_ID,VERSION,PREVIOUS_VERSION,VERSION_CHANGED,VERSION_EVER_CHANGED,VERSION_RELEASE_DATE,NEWER_VERSION_ON_COMMIT_DATE,USING_NEWEST_VERSION,MESSAGE";
 	public static final String INITIAL_VERSION = "initial_version";
 	static final int ARTIFACT_ID_OUTPUT_INDEX = 8;
@@ -68,7 +69,7 @@ public class CommitLine {
 	}
 
 	private static String[] validateAndTokenizeLine(String line) throws NonParseableCommitLineException {
-		if(INPUT_HEADER.equals(line) || OUTPUT_HEADER.equals(line) || OUTPUT_DATESEARCH_HEADER.equals(line)) {
+		if(INPUT_HEADER.equals(line) || OUTPUT_HEADER.equals(line) || WRONG_OUTPUT_HEADER.equals(line) || OUTPUT_DATESEARCH_HEADER.equals(line)) {
 			throw new NonParseableCommitLineException("Should not parse the CSV header.");
 		}
 		if(StringUtils.isEmpty(line)) {
@@ -239,6 +240,7 @@ public class CommitLine {
 	
 	public void setNewerVersionOnCommitDate(String newerVersionOnCommitDate) {
 		this.newerVersionOnCommitDate = newerVersionOnCommitDate;
+		this.usingNewestVersion = this.version.equals(newerVersionOnCommitDate);
 	}
 	
 	public boolean isUsingNewestVersion() {
