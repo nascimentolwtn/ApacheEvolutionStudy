@@ -50,7 +50,7 @@ public class AllDependencyVersionsEvolutionStudyNOTE implements Study {
 	
 	public static void main(final String[] args) throws Exception {
 		System.setProperty("git.maxfiles", "2000");
-		System.setProperty("logfilename", FILE_PREFIX + "_run31");
+		System.setProperty("logfilename", FILE_PREFIX + "_run34");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);

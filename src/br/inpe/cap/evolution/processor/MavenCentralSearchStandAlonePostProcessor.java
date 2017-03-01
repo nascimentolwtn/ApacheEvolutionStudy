@@ -16,9 +16,10 @@ public class MavenCentralSearchStandAlonePostProcessor {
 		System.out.println("Starting...");
 		long inicio = System.currentTimeMillis();
 		
-		final File pathToLook = new File("C:\\temp\\detector_first35");
+		final File pathToLook = new File("U:\\temp\\detector_first35");
 		final String outputPath = pathToLook + File.separator + "output";
 		pathToLook.mkdirs();
+		new File(outputPath).mkdirs();
 		Collection<File> arquivos = FileUtils.listFiles(pathToLook, null, false);
 		
 		arquivos.parallelStream().forEach((csvInput) -> {
