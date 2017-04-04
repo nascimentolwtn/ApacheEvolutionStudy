@@ -13,7 +13,7 @@ import br.inpe.cap.evolution.maven.CommitLine;
 public class JoinSummaryCSVPostProcessor {
 	
 	private static final String APACHE_FILE_PREFIX = "all_dependency_detector";
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + APACHE_FILE_PREFIX;
+	private static final String STUDY_LOG_PATH = "C:\\Users\\LuizWagner\\Desktop\\evolutions_joined";
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
 	private static final File OUTPUT = new File(EVOLUTION_LOG_PATH + "_joined.csv");
 

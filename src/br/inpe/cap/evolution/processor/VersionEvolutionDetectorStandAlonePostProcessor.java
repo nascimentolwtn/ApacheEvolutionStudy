@@ -13,7 +13,7 @@ public class VersionEvolutionDetectorStandAlonePostProcessor {
 
 		System.out.println("Starting...");
 		
-		final String pathToLook = "G:\\version_reprocess";
+		final String pathToLook = "C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\evolutions\\output";
 		final String outputPath = pathToLook + File.separator + "output";
 		new File(outputPath).mkdirs();
 		List<File> arquivos = org.repodriller.util.FileUtils.getAllFilesInPath(pathToLook);

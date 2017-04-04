@@ -45,6 +45,7 @@ public class VersionEvolutionDetectorPostProcessor {
 	public void processLine(final PersistenceMechanism writer, final String line, final CommitLineType commitLineType) {
 		try {
 			final CommitLine currentCommit = CommitLine.parseCommitLine(line, commitLineType);
+			keepCurrentCommitFilePathAsOriginalPath(currentCommit);
 			final MavenProject currentProject = startProject(currentCommit);
 
 			final MavenDependency mavenDependencyByArtifactId = findPreviousVersionAndSetVersionChanged(currentCommit);
@@ -62,6 +63,10 @@ public class VersionEvolutionDetectorPostProcessor {
 		} catch (NonParseableCommitLineException e) {
 			// Silenced in order to remove if(removeHeader) check
 		}
+	}
+
+	private void keepCurrentCommitFilePathAsOriginalPath(final CommitLine currentCommit) {
+		currentCommit.setFile(currentCommit.getFile().replace("C:\\", "E:\\"));
 	}
 
 	private MavenDependency findPreviousVersionAndSetVersionChanged(final CommitLine currentCommit) {
