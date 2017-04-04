@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -61,7 +62,7 @@ public class LibraryCacheProvider {
 					ois.close();
 				} catch (IOException | ClassNotFoundException e) {
 					e.printStackTrace();
-					return null;
+					return new Library(groupId, artifactId, new HashSet<>());
 				}
 			} else {
 				library = new Library(groupId, artifactId, getAllVersions(groupId, artifactId));
