@@ -3,10 +3,9 @@ package br.inpe.cap.evolution.maven;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.DATE_VERSION;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.INPUT;
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class CommitLine {
 
@@ -70,10 +69,10 @@ public class CommitLine {
 	}
 
 	private static String[] validateAndTokenizeLine(String line) throws NonParseableCommitLineException {
-		if(INPUT_HEADER.equals(line) || OUTPUT_HEADER.equals(line) || WRONG_OUTPUT_HEADER.equals(line) || OUTPUT_DATESEARCH_HEADER.equals(line) || INVISIBLE_CHAR0_OUTPUT_HEADER.equals(line)) {
+		if(isLineAnyKindOfHeader(line)) {
 			throw new NonParseableCommitLineException("Should not parse the CSV header.");
 		}
-		if(StringUtils.isEmpty(line)) {
+		if(isEmpty(line)) {
 			throw new NonParseableCommitLineException("CSV line is empty or null.");
 		}
 		line = validateCommitMessage(line);
@@ -85,6 +84,15 @@ public class CommitLine {
 			throw new NonParseableCommitLineException("Line cannot be parsed:\n"+line);
 		}
 		return tokens;
+	}
+
+	private static boolean isLineAnyKindOfHeader(final String line) {
+		return INPUT_HEADER.equals(line) ||
+		   OUTPUT_HEADER.equals(line) ||
+		   WRONG_OUTPUT_HEADER.equals(line) ||
+		   OUTPUT_DATESEARCH_HEADER.equals(line) ||
+		   INVISIBLE_CHAR0_OUTPUT_HEADER.equals(line) ||
+		   (line != null && line.startsWith("\""));
 	}
 
 	private static String validateCommitMessage(String line) {
