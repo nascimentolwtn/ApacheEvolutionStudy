@@ -50,7 +50,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	
 	public static void main(final String[] args) throws Exception {
 		System.setProperty("git.maxfiles", "2000");
-		System.setProperty("logfilename", FILE_PREFIX + "_swagger-codegen");
+		System.setProperty("logfilename", FILE_PREFIX + "_nokogiri");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);
