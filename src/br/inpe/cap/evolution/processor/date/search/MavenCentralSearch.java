@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpGet;
@@ -36,13 +37,16 @@ public class MavenCentralSearch {
 
 	static synchronized Set<Version> getAllVersions(String groupId, String artifactId){
 		Set<Version> versions = new TreeSet<Version>();
-		JSONArray itensJSON = getJsonArrayResponseWithRest(groupId, artifactId);
 
-		for (int i = 0; i < itensJSON.length(); i++) {
-			final JSONObject libJSON = itensJSON.getJSONObject(i);
-			final String version = libJSON.getString("v");
-			final long date = libJSON.getLong("timestamp");
-			versions.add(new Version(date, version));
+		if(!(StringUtils.isEmpty(groupId) || StringUtils.isEmpty(artifactId))) {
+			JSONArray itensJSON = getJsonArrayResponseWithRest(groupId, artifactId);
+	
+			for (int i = 0; i < itensJSON.length(); i++) {
+				final JSONObject libJSON = itensJSON.getJSONObject(i);
+				final String version = libJSON.getString("v");
+				final long date = libJSON.getLong("timestamp");
+				versions.add(new Version(date, version));
+			}
 		}
 		
 		return versions;

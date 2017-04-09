@@ -110,6 +110,25 @@ public class MavenCentralSearchPostProcessorTest {
 		assertFalse(parsedOutputCommitLine.isUsingNewestVersion());
 	}
 	
+	@Test
+	public void leituraDeCommitSemArtifactID() throws IOException {
+		postProcessor.processCsvLines(csvOutput, listCsvLines);
+		List<String> outputLines = FileUtils.readLines(fileOutput);
+		CommitLine parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(26), DATE_VERSION);
+		assertEquals("org.openrdf.sesame", parsedOutputCommitLine.getGroupId());
+		assertEquals("", parsedOutputCommitLine.getArtifactId());
+		assertEquals(DATE_NOT_FOUND, parsedOutputCommitLine.getVersionReleaseDate());
+		assertEquals(VERSION_NOT_FOUND, parsedOutputCommitLine.getNewerVersionOnCommitDate());
+		assertFalse(parsedOutputCommitLine.isUsingNewestVersion());
+		
+		parsedOutputCommitLine = CommitLine.parseCommitLine(outputLines.get(59), DATE_VERSION);
+		assertEquals("org.openrdf.sesame", parsedOutputCommitLine.getGroupId());
+		assertEquals("sesame-sail-api", parsedOutputCommitLine.getArtifactId());
+		assertEquals("29/01/2014 22:59:57", parsedOutputCommitLine.getVersionReleaseDate());
+		assertEquals("2.8.3", parsedOutputCommitLine.getNewerVersionOnCommitDate());
+		assertFalse(parsedOutputCommitLine.isUsingNewestVersion());
+	}
+
 	@After
 	public void clearTempFiles() throws IOException {
 		// Arquivo "temporário" deveria ser deletado.
