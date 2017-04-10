@@ -38,7 +38,7 @@ public class MavenCentralSearch {
 	static synchronized Set<Version> getAllVersions(String groupId, String artifactId){
 		Set<Version> versions = new TreeSet<Version>();
 
-		if(!(StringUtils.isEmpty(groupId) || StringUtils.isEmpty(artifactId))) {
+		if(!hasInvalidRequestChar(groupId, artifactId)) {
 			JSONArray itensJSON = getJsonArrayResponseWithRest(groupId, artifactId);
 	
 			for (int i = 0; i < itensJSON.length(); i++) {
@@ -50,6 +50,13 @@ public class MavenCentralSearch {
 		}
 		
 		return versions;
+	}
+
+	private static boolean hasInvalidRequestChar(String groupId, String artifactId) {
+		return (StringUtils.isEmpty(groupId) ||
+				StringUtils.isEmpty(artifactId) ||
+				groupId.contains("?") ||
+				artifactId.contains("?"));
 	}
 
 	static synchronized String montaRequest(String groupId, String artifactId) {

@@ -94,6 +94,9 @@ public class MavenCentralSearchTest {
 	public void testaInvalidRequest() {
 		Set<Version> versions = MavenCentralSearch.getLibrary("${groupId}", "hibernate-core").getVersions();
 		assertEquals(0, versions.size());
+
+		versions = MavenCentralSearch.getLibrary("??", "??").getVersions();
+		assertEquals(0, versions.size());
 	}
 
 	@Test

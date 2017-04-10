@@ -48,7 +48,7 @@ public class LibraryCacheProvider {
 	}
 
 	public synchronized Library get(String groupId, String artifactId) {
-		String key = groupId + "_" + artifactId;
+		String key = createKey(groupId, artifactId);
 		Library library = this.libraryCache.get(key);
 		if(library == null) {
 			
@@ -74,6 +74,18 @@ public class LibraryCacheProvider {
 		}
 		
 		return library;
+	}
+
+	private String createKey(String groupId, String artifactId) {
+		String key = groupId + "_" + artifactId;
+		key = removeInvalidFilenameChar(key);
+		return key;
+	}
+
+	private String removeInvalidFilenameChar(String key) {
+		String newKey = key.replace("?", "");
+		newKey = newKey.replace("\\", "");
+		return newKey;
 	}
 
 }
