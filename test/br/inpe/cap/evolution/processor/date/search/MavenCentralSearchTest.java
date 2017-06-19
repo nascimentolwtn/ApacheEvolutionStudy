@@ -97,6 +97,9 @@ public class MavenCentralSearchTest {
 
 		versions = MavenCentralSearch.getLibrary("??andbackslash/", "lib??and\\slash").getVersions();
 		assertEquals(0, versions.size());
+
+		versions = MavenCentralSearch.getLibrary("groupId", "cifrao_${").getVersions();
+		assertEquals(0, versions.size());
 	}
 
 	@Test
