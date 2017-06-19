@@ -38,7 +38,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + "all_dependency_detector" + File.separator;
 	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + "evolutions";
 	
-	private static final String FILE_PREFIX = "all_dependency_detector_next10-12-HOME";
+	private static final String FILE_PREFIX = "all_dependency_detector_druid-io";
 
 	private static final File GITHUB_URLS_FILE = new File(FOUNTAIN_PATH+"stars-maven_one.urls");
 	private static final File GITHUB_DONE_FILE = new File(STUDY_LOG_PATH+"done-github_" + FILE_PREFIX + ".txt");
@@ -50,7 +50,7 @@ public class AllDependencyVersionsEvolutionStudy implements Study {
 	
 	public static void main(final String[] args) throws Exception {
 		System.setProperty("git.maxfiles", "2000");
-		System.setProperty("logfilename", FILE_PREFIX + "_nokogiri");
+		System.setProperty("logfilename", FILE_PREFIX + "_druid-io");
 		log = Logger.getLogger(RepositoryMining.class);
 		AllDependenciesEvolutionVisitor.setLogger(log);
 		Thread.currentThread().setName(FILE_PREFIX);
