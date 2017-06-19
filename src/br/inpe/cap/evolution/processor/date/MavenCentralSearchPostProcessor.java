@@ -2,7 +2,7 @@ package br.inpe.cap.evolution.processor.date;
 
 import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.repodriller.persistence.PersistenceMechanism;
 
@@ -13,11 +13,11 @@ import br.inpe.cap.evolution.processor.date.search.MavenCentralSearch;
 
 public class MavenCentralSearchPostProcessor {
 	
-	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines) {
+	public void processCsvLines(final PersistenceMechanism writer, final Stream<String> listCsvLines) {
 		processCsvLines(writer, listCsvLines, OUTPUT);
 	}
 
-	public void processCsvLines(final PersistenceMechanism writer, final List<String> listCsvLines, final CommitLineType commitLineType) {
+	public void processCsvLines(final PersistenceMechanism writer, final Stream<String> listCsvLines, final CommitLineType commitLineType) {
 		writeCsvHeader(writer);
 		listCsvLines.forEach((line) -> processLine(writer, line, commitLineType));
 	}

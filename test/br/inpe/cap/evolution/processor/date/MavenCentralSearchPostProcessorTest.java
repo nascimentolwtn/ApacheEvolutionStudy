@@ -10,7 +10,11 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -30,7 +34,7 @@ public class MavenCentralSearchPostProcessorTest {
 			"resources"	+ File.separator +
 			"output"	+ File.separator;
 	private MavenCentralSearchPostProcessor postProcessor = new MavenCentralSearchPostProcessor();
-	private List<String> listCsvLines;
+	private Stream<String> listCsvLines;
 	private String outputFileName;
 	private CSVFile csvOutput;
 	private File fileOutput;
@@ -45,7 +49,8 @@ public class MavenCentralSearchPostProcessorTest {
 	
 	@Before
 	public void setUpFiles() throws IOException, URISyntaxException {
-		listCsvLines = FileUtils.readLines(new File(Resources.getResource("all-dependency-reprocess-'blueprints'.csv").toURI()));
+		Path path = Paths.get(Resources.getResource("all-dependency-reprocess-'blueprints'.csv").toURI());
+		listCsvLines = Files.lines(path);
 		outputFileName = RESOURCE_OUTPUT_DIRECTORY + "test-maven-search-'reprocess-blueprints'.csv";
 		csvOutput = new CSVFile(outputFileName, false);
 		fileOutput = new File(outputFileName);
