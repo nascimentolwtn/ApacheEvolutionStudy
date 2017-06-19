@@ -95,7 +95,7 @@ public class MavenCentralSearchTest {
 		Set<Version> versions = MavenCentralSearch.getLibrary("${groupId}", "hibernate-core").getVersions();
 		assertEquals(0, versions.size());
 
-		versions = MavenCentralSearch.getLibrary("??", "??").getVersions();
+		versions = MavenCentralSearch.getLibrary("??andbackslash/", "lib??and\\slash").getVersions();
 		assertEquals(0, versions.size());
 	}
 

@@ -33,18 +33,14 @@ public class LibraryCacheProvider {
 		this.updateLibraryOnDisk = updateLibraryOnDisk;
 	}
 
-	private void updateDiskCache(String key, Library library) {
-		try {
-			File tempFile = new File(TEMP_DIRECTORY + key);
-			tempFile.createNewFile();
-			FileOutputStream fos = new FileOutputStream(tempFile);
-			BufferedOutputStream bos = new BufferedOutputStream(fos);
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(library);
-			oos.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private void updateDiskCache(String key, Library library) throws IOException {
+		File tempFile = new File(TEMP_DIRECTORY + key);
+		tempFile.createNewFile();
+		FileOutputStream fos = new FileOutputStream(tempFile);
+		BufferedOutputStream bos = new BufferedOutputStream(fos);
+		ObjectOutputStream oos = new ObjectOutputStream(bos);
+		oos.writeObject(library);
+		oos.close();
 	}
 
 	public synchronized Library get(String groupId, String artifactId) {
@@ -52,21 +48,21 @@ public class LibraryCacheProvider {
 		Library library = this.libraryCache.get(key);
 		if(library == null) {
 			
-			File tempFile = new File(TEMP_DIRECTORY + key);
-			if(tempFile.exists() && !updateLibraryOnDisk) {
-				try {
+			try {
+				File tempFile = new File(TEMP_DIRECTORY + key);
+				if(tempFile.exists() && !updateLibraryOnDisk) {
 					FileInputStream fis = new FileInputStream(tempFile);
 					BufferedInputStream bis = new BufferedInputStream(fis);
 					ObjectInputStream ois = new ObjectInputStream(bis);
 					library = (Library) ois.readObject();
 					ois.close();
-				} catch (IOException | ClassNotFoundException e) {
-					e.printStackTrace();
-					return new Library(groupId, artifactId, new HashSet<>());
+				} else {
+					library = new Library(groupId, artifactId, getAllVersions(groupId, artifactId));
+					this.updateDiskCache(key, library);
 				}
-			} else {
-				library = new Library(groupId, artifactId, getAllVersions(groupId, artifactId));
-				this.updateDiskCache(key, library);
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+				return new Library(groupId, artifactId, new HashSet<>());
 			}
 			
 			this.libraryCache.put(key, library);
@@ -81,11 +77,18 @@ public class LibraryCacheProvider {
 		key = removeInvalidFilenameChar(key);
 		return key;
 	}
-
+	
 	private String removeInvalidFilenameChar(String key) {
-		String newKey = key.replace("?", "");
-		newKey = newKey.replace("\\", "");
-		return newKey;
+		return key
+				.replace("/", "")
+				.replace("\\", "")
+				.replace(":", "")
+				.replace("*", "")
+				.replace("?", "")
+				.replace("<", "")
+				.replace(">", "")
+				.replace("|", "")
+				;
 	}
 
 }
