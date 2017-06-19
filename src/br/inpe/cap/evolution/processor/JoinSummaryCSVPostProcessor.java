@@ -7,15 +7,16 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import br.inpe.cap.evolution.maven.CommitLine;
 
 public class JoinSummaryCSVPostProcessor {
 	
 	private static final String APACHE_FILE_PREFIX = "all_dependency_detector";
-	private static final String STUDY_LOG_PATH = "C:\\Users\\LuizWagner\\Desktop\\evolutions_joined";
-	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "evolutions";
-	private static final File OUTPUT = new File(EVOLUTION_LOG_PATH + "_joined.csv");
+	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + APACHE_FILE_PREFIX;
+	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "next_runs";
+	private static final File OUTPUT = new File("C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\next_runs_joined.csv");
 
 	private boolean processCsvWithHeader = false;
 	
@@ -34,7 +35,7 @@ public class JoinSummaryCSVPostProcessor {
 	public void process(String evolutionLogPath, File output, String header) throws Exception {
 		
 		File evolutions = new File(evolutionLogPath);
-		Iterator<File> iterateFiles = FileUtils.iterateFiles(evolutions, FileFileFilter.FILE, null);
+		Iterator<File> iterateFiles = FileUtils.iterateFiles(evolutions, FileFileFilter.FILE, TrueFileFilter.INSTANCE);
 
 		if(processCsvWithHeader) FileUtils.write(output, header+"\n");
 
@@ -45,11 +46,14 @@ public class JoinSummaryCSVPostProcessor {
 						List<String> lines = FileUtils.readLines(f);
 						CommitLine.removeHeader(lines);
 						FileUtils.writeLines(output, lines, true);
+						lines = null;
 					} else {
 						FileUtils.writeStringToFile(output, FileUtils.readFileToString(f), true);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
+				} finally {
+					System.gc();
 				}
 			});
 	}
