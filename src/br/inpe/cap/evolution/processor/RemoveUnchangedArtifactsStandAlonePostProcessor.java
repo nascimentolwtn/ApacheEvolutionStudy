@@ -16,8 +16,8 @@ public class RemoveUnchangedArtifactsStandAlonePostProcessor {
 
 		System.out.println("Starting...");
 		
-		final File pathToLook = new File("C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\unchanged");
-		final String outputPath = pathToLook + File.separator + "output";
+		final File pathToLook = new File("C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\maven_search\\maven_search-first35");
+		final String outputPath = pathToLook + File.separator + "output_without-initials";
 		new File(outputPath).mkdirs();
 		Collection<File> arquivos = FileUtils.listFiles(pathToLook, null, false);
 		

@@ -1,6 +1,6 @@
 package br.inpe.cap.evolution.processor;
 
-import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.OUTPUT;
+import static br.inpe.cap.evolution.maven.CommitLine.CommitLineType.DATE_VERSION;
 
 import java.util.stream.Stream;
 
@@ -24,7 +24,7 @@ public class RemoveUnchangedArtifactsPostProcessor {
 
 	public void processLine(final PersistenceMechanism writer, final String line) {
 		try {
-			final CommitLine currentCommit = CommitLine.parseCommitLine(line, OUTPUT);
+			final CommitLine currentCommit = CommitLine.parseCommitLine(line, DATE_VERSION);
 			
 			if(this.keepInitialVersions && CommitLine.INITIAL_VERSION.equals(currentCommit.getPreviousVersion()) || currentCommit.versionHasChanged()) {
 				writeCsvLine(writer, currentCommit);
@@ -36,11 +36,11 @@ public class RemoveUnchangedArtifactsPostProcessor {
 	}
 
 	public void writeCsvHeader(final PersistenceMechanism writer) {
-		final String[] header = CommitLine.OUTPUT_HEADER.split(",");
+		final String[] header = CommitLine.OUTPUT_DATESEARCH_HEADER.split(",");
 		writer.write(header[0], header[1], header[2], header[3],
 					 header[4], header[5], header[6], header[7],
 					 header[8], header[9], header[10],header[11],
-					 header[12],header[13]);
+					 header[12],header[13],header[14],header[15],header[16]);
 	}
 	
 	private void writeCsvLine(final PersistenceMechanism writer, final CommitLine commitLine) {
@@ -58,6 +58,9 @@ public class RemoveUnchangedArtifactsPostProcessor {
 			commitLine.getPreviousVersion(),
 			commitLine.versionHasChanged(),
 			commitLine.versionHasEverChanged(),
+			commitLine.getVersionReleaseDate(),
+			commitLine.getNewerVersionOnCommitDate(),
+			commitLine.isUsingNewestVersion(),
 			commitLine.getMessage()
 		);
 		

@@ -19,11 +19,12 @@ public class MavenCentralSearchStandAlonePostProcessor {
 		System.out.println("Starting...");
 		long inicio = System.currentTimeMillis();
 		
+		final File nextRuns = new File("C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\maven_search");
 		final File pathToLook = new File("C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\maven_search");
-		final String outputPath = pathToLook + File.separator + "output";
+		final String outputPath = pathToLook + File.separator + "output_mavensearch";
 		pathToLook.mkdirs();
 		new File(outputPath).mkdirs();
-		Collection<File> arquivos = FileUtils.listFiles(pathToLook, null, false);
+		Collection<File> arquivos = FileUtils.listFiles(nextRuns, null, false);
 		
 		arquivos.parallelStream().forEach((csvInput) -> {
 			

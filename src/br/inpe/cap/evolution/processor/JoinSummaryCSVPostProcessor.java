@@ -13,16 +13,16 @@ import br.inpe.cap.evolution.maven.CommitLine;
 
 public class JoinSummaryCSVPostProcessor {
 	
-	private static final String APACHE_FILE_PREFIX = "all_dependency_detector";
-	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + APACHE_FILE_PREFIX;
-	private static final String EVOLUTION_LOG_PATH = STUDY_LOG_PATH + File.separator + "next_runs";
-	private static final File OUTPUT = new File("C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\next_runs_joined.csv");
+//	private static final String APACHE_FILE_PREFIX = "all_dependency_detector";
+//	private static final String STUDY_LOG_PATH = "." + File.separator + "study" + File.separator + APACHE_FILE_PREFIX;
+	private static final String EVOLUTION_LOG_PATH = "C:\\Users\\LuizWagner\\Desktop\\evolutions_joined\\maven_search";
+	private static final File OUTPUT = new File(EVOLUTION_LOG_PATH + File.separator + "mavensearch_joined.csv");
 
 	private boolean processCsvWithHeader = false;
 	
 	public static void main(String[] args) throws Exception {
 		System.out.println("Starting...");
-		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, OUTPUT, CommitLine.OUTPUT_HEADER);
+		new JoinSummaryCSVPostProcessor(true).process(EVOLUTION_LOG_PATH, OUTPUT, CommitLine.OUTPUT_DATESEARCH_HEADER);
 		System.out.println("Finish!");
 	}
 
@@ -59,7 +59,7 @@ public class JoinSummaryCSVPostProcessor {
 	}
 
 	public void process(String evolutionLogPath, File file) throws Exception {
-		process(evolutionLogPath, file, CommitLine.OUTPUT_HEADER);
+		process(evolutionLogPath, file, CommitLine.OUTPUT_DATESEARCH_HEADER);
 	}
 
 }
