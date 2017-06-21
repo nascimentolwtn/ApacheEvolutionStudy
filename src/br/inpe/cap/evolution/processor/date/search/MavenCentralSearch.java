@@ -36,11 +36,28 @@ public class MavenCentralSearch {
 		return libraryCacheProvider.get(groupId, artifactId);
 	}
 
-	static synchronized Set<Version> getAllVersions(String groupId, String artifactId){
+	static synchronized Set<Version> getAllVersions(String groupId, String artifactId) {
 		Set<Version> versions = new TreeSet<Version>();
 
 		if(!(hasInvalidRequestChar(groupId) || hasInvalidRequestChar(artifactId))) {
-			JSONArray itensJSON = getJsonArrayResponseWithRest(groupId, artifactId);
+			JSONArray itensJSON = null;
+			
+			int retries = 0;
+			do {
+				try {
+					itensJSON = getJsonArrayResponseWithRest(groupId, artifactId);
+				} catch (JSONException e) {
+					retries++;
+					System.err.println(e.getMessage());
+					System.out.println("retrying " + groupId + "/" + artifactId);
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+				}
+				
+			} while (itensJSON == null && (retries > 0 && retries < 5));
 	
 			for (int i = 0; i < itensJSON.length(); i++) {
 				final JSONObject libJSON = itensJSON.getJSONObject(i);
@@ -65,12 +82,13 @@ public class MavenCentralSearch {
 				"&rows=200&wt=json&core=gav";
 	}
 
-	static synchronized JSONArray getJsonArrayResponseWithRest(String groupId, String artifactId) {
+	static synchronized JSONArray getJsonArrayResponseWithRest(String groupId, String artifactId) throws JSONException {
 		
+		final String request = montaRequest(groupId, artifactId);
 		final DefaultHttpClient httpclient = new DefaultHttpClient();
 		try {
 			final HttpGet getRequest = new HttpGet();
-			getRequest.setURI(new URI(montaRequest(groupId, artifactId)));
+			getRequest.setURI(new URI(request));
 			getRequest.addHeader("accept", "application/json");
 			
 			final HttpEntity entity = httpclient.execute(target, getRequest).getEntity();
@@ -79,7 +97,8 @@ public class MavenCentralSearch {
 			
 			return (JSONArray) myResponse.get("docs");
 
-		} catch (IOException | URISyntaxException | JSONException e) {
+		} catch (IOException | URISyntaxException e) {
+			System.out.println(request);
 			System.err.println(e.getMessage());
 			return new JSONArray();
 		} finally {
