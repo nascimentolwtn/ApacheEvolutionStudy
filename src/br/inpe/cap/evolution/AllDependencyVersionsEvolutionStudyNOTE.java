@@ -67,6 +67,7 @@ public class AllDependencyVersionsEvolutionStudyNOTE implements Study {
 		System.out.println("Finish!");
 	}
 	
+	@Override
 	public void execute() {
 		try {
 			
@@ -136,6 +137,8 @@ public class AllDependencyVersionsEvolutionStudyNOTE implements Study {
 	
 	private static void checkRequiredLogFilesAndDirectories() throws IOException {
 		if(!CONTINUE_COMMIT_FILE.exists()) {
+			new File(STUDY_LOG_PATH).mkdir();
+			new File(STUDY_LOG_PATH + FILE_PREFIX).mkdir();
 			CONTINUE_COMMIT_FILE.createNewFile();
 		}
 		properties.load(new FileInputStream(CONTINUE_COMMIT_FILE));
