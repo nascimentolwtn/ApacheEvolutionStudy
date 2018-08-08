@@ -1,9 +1,9 @@
 package br.inpe.cap.evolution.persistence;
 
+import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
+
 import br.inpe.cap.evolution.maven.CommitLine;
-import net.sf.esfinge.querybuilder.neo4j.oomapper.annotations.Id;
-import net.sf.esfinge.querybuilder.neo4j.oomapper.annotations.Indexed;
-import net.sf.esfinge.querybuilder.neo4j.oomapper.annotations.NodeEntity;
 
 @NodeEntity
 public class PersistedCommitLine {
@@ -11,7 +11,6 @@ public class PersistedCommitLine {
 	@Id
 	private Integer id;
 	
-	@Indexed
 	private String hash;
 
 	public static PersistedCommitLine create(CommitLine commitLine) {
