@@ -8,3 +8,5 @@ This project depends on the 1.2.2-SNAPSHOT version of RepoDriller. Thus, you mus
 ```
 	mvn clean install -DskipTests
 ```
+
+that's it
